@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { charms, tierChances, type Tier } from '../data/charms';
+import {
+  charms,
+  getCharmIconPath,
+  tierChances,
+  type Tier,
+} from '../data/charms';
 import {
   creatures,
   dataDate,
@@ -280,6 +285,13 @@ export default function CharmOptimizer() {
                         setTier(charm.id, event.target.checked ? 2 : null)
                       }
                     />
+                    <img
+                      className={styles.charmIcon}
+                      src={getCharmIconPath(charm.id)}
+                      width="32"
+                      height="32"
+                      alt=""
+                    />
                     {charm.name}
                   </label>
                   <div role="group" aria-label={`Tier de ${charm.name}`}>
@@ -427,7 +439,14 @@ export default function CharmOptimizer() {
 
                   {assignment ? (
                     <p className={styles.pick}>
-                      <strong>
+                      <strong className={styles.pickName}>
+                        <img
+                          className={styles.charmIcon}
+                          src={getCharmIconPath(assignment.charm.id)}
+                          width="32"
+                          height="32"
+                          alt=""
+                        />
                         {assignment.charm.name} T{assignment.tier}
                       </strong>
                       <span>
