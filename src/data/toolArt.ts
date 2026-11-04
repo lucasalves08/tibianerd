@@ -34,27 +34,6 @@ export const toolArt: Record<string, PixelArt> = {
       '................',
     ],
   },
-  party: {
-    palette: { a: '#5cc8ff', c: '#ffd166' },
-    rows: [
-      '................',
-      '...aa......cc...',
-      '..aaaa....cccc..',
-      '..aaaa....cccc..',
-      '...aa......cc...',
-      '..aaaa....cccc..',
-      '.aaaaaa..cccccc.',
-      '.aaaaaa..cccccc.',
-      '.aaaaaa..cccccc.',
-      '..aaaa....cccc..',
-      '..a..a....c..c..',
-      '..a..a....c..c..',
-      '..a..a....c..c..',
-      '.aa..aa..cc..cc.',
-      '................',
-      '................',
-    ],
-  },
   monsters: {
     palette: { w: '#eef2f5', s: '#a9b6c2', k: '#131a24' },
     rows: [
