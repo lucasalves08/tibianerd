@@ -3,6 +3,7 @@ import { creatures, elements, type Element } from '../data/creatures';
 import {
   huntCities,
   huntDataDate,
+  tibiaRouteDate,
   hunts,
   huntVocations,
   type Hunt,
@@ -18,7 +19,6 @@ import styles from './HuntFinder.module.css';
 
 const STORAGE_KEY = 'tibianerd:hunts';
 const PAGE_SIZE = 30;
-const WIKI_URL = 'https://tibia.fandom.com/wiki/';
 
 const elementNames: Record<Element, string> = {
   physical: 'Físico',
@@ -34,9 +34,6 @@ const creaturesByName = new Map(
   creatures.map((creature) => [fold(creature.name), creature]),
 );
 
-const formatRating = (rating: number | null) =>
-  rating === null ? 'sem nota' : `${rating} de 5`;
-
 function HuntCard({
   hunt,
   vocation,
@@ -49,10 +46,7 @@ function HuntCard({
   return (
     <li className={styles.card}>
       <h2 className={styles.name}>
-        <a
-          href={`${WIKI_URL}${encodeURIComponent(hunt.name.replaceAll(' ', '_'))}`}
-          rel="noopener"
-        >
+        <a href={hunt.pageUrl} rel="noopener">
           {hunt.name}
         </a>
       </h2>
@@ -60,10 +54,6 @@ function HuntCard({
         {[hunt.city, formatLevel(getMinimumLevel(hunt, vocation))]
           .filter(Boolean)
           .join(' · ')}
-      </p>
-      <p>
-        Exp: {formatRating(hunt.experienceRating)} · Loot:{' '}
-        {formatRating(hunt.lootRating)}
       </p>
       {bestElements.length > 0 && (
         <p>
@@ -75,6 +65,13 @@ function HuntCard({
       )}
       {hunt.creatureNames.length > 0 && (
         <p className={styles.muted}>{hunt.creatureNames.join(', ')}</p>
+      )}
+      {hunt.guideUrl && (
+        <p>
+          <a href={hunt.guideUrl} rel="noopener">
+            Ver guia no Tibia Route
+          </a>
+        </p>
       )}
     </li>
   );
@@ -244,8 +241,12 @@ export default function HuntFinder() {
         , com dados da{' '}
         <a href="https://tibia.fandom.com/wiki/Hunting_Places" rel="noopener">
           TibiaWiki
-        </a>
-        .
+        </a>{' '}
+        e do{' '}
+        <a href="https://tibiaroute.com/br/hunting-places" rel="noopener">
+          Tibia Route
+        </a>{' '}
+        ({tibiaRouteDate.split('-').reverse().join('/')}).
       </p>
     </div>
   );

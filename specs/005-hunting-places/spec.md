@@ -19,7 +19,7 @@ A player filters by city, name or the damage type that works best on the creatur
 **Acceptance Scenarios**:
 
 1. **Given** a level 967 Paladin, **When** the list appears, **Then** it shows spots with a minimum level up to 967, with the highest first.
-2. **Given** a spot, **When** it appears, **Then** it shows city, minimum level, experience and loot ratings, creatures and the best damage type.
+2. **Given** a spot, **When** it appears, **Then** it shows city, minimum level, creatures and the best damage type.
 3. **Given** the player picks fire, **When** the list updates, **Then** every spot has fire as a best damage type.
 
 ## Requirements
@@ -28,6 +28,7 @@ A player filters by city, name or the damage type that works best on the creatur
 - **FR-002**: Users MUST be able to filter by city, name and best damage type.
 - **FR-003**: The tool MUST calculate the best damage type from the average resistances of the spot's creatures.
 - **FR-004**: Each spot MUST link to its TibiaWiki page.
+- **FR-006**: A spot with a Tibia Route guide MUST link to it.
 - **FR-005**: The tool MUST state that data covers Tibia Global, with source and review date.
 
 ## Success Criteria
@@ -37,7 +38,9 @@ A player filters by city, name or the damage type that works best on the creatur
 
 ## Assumptions
 
-- Data comes from TibiaWiki under CC-BY-SA, not from other fan sites.
+- Data comes from TibiaWiki under CC-BY-SA.
+- Tibia Route adds levels, creature lists and guide links, credited on the page and kept in their own file so they can be removed.
+- Experience and profit stay out until players feed them with their own hunts.
 - Knight levels also serve Monks, because TibiaWiki has no separate Monk field.
 - Sorcerers and Druids share the mage level.
 - The wiki level is a minimum recommendation, not a rule of the game.
