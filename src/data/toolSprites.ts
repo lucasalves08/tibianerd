@@ -17,7 +17,7 @@ export const toolSprites: Record<string, ToolSprite> = {
   charms: { file: 'major-charms.webp' },
   monsters: animated('dragon'),
   bestiary: animated('bonelord'),
-  exercise: { file: 'slash.webp' },
+  exercise: { file: 'exercise-sword.webp' },
   imbuements: { file: 'vampirism.webp' },
   'hunting-places': animated('cyclops'),
 };
