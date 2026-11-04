@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './AccountPanel.module.css';
 
 const AUTH_URL = '/api/auth';
+const REQUEST_TIMEOUT_MS = 8000;
 
 interface Session {
   user: { name: string };
@@ -12,6 +13,7 @@ const postAuth = (path: string, body: object = {}) =>
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 
 export default function AccountPanel() {
@@ -20,7 +22,10 @@ export default function AccountPanel() {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    fetch(`${AUTH_URL}/get-session`)
+    // A stuck request must not hide the login button.
+    fetch(`${AUTH_URL}/get-session`, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
       .then((response) => (response.ok ? response.json() : null))
       .then(setSession)
       .catch(() => setHasError(true))
