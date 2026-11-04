@@ -39,12 +39,28 @@ const isHome = pathname === '/';
   }
   <a class="account" href="/conta/" data-account-link>Entrar</a>
   <script is:inline>
-    // Shows the saved name without asking the server on every page.
+    // Shows the saved account without asking the server on every page.
     try {
       const name = localStorage.getItem('tibianerd:account');
+      const image = localStorage.getItem('tibianerd:account-image');
+      const link = document.querySelector('[data-account-link]');
 
       if (name) {
-        document.querySelector('[data-account-link]').textContent = name;
+        link.textContent = name;
+      }
+
+      if (name && image) {
+        const photo = new Image(36, 36);
+
+        photo.alt = '';
+        photo.src = image;
+        photo.onerror = () => {
+          link.textContent = name;
+          delete link.dataset.avatar;
+        };
+        link.setAttribute('aria-label', `Sua conta: ${name}`);
+        link.dataset.avatar = '';
+        link.replaceChildren(photo);
       }
     } catch {}
   </script>
@@ -101,6 +117,22 @@ const isHome = pathname === '/';
   .account:hover {
     background: var(--color-accent);
     color: var(--color-on-accent);
+  }
+
+  .account[data-avatar] {
+    justify-content: center;
+    inline-size: var(--tap-target);
+    padding: 0;
+    border: 0;
+  }
+
+  .account[data-avatar]:hover {
+    background: transparent;
+  }
+
+  .account :global(img) {
+    border: 2px solid var(--color-accent);
+    border-radius: 50%;
   }
 
   .menu-button {

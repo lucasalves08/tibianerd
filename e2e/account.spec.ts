@@ -16,6 +16,21 @@ test('links the privacy page in the footer', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('shows the player photo in the header', async ({ page }) => {
+  await page.route('**/api/auth/get-session', (route) =>
+    route.fulfill({
+      json: { user: { name: 'lucas', image: '/favicon.svg' } },
+    }),
+  );
+  await page.goto('/conta/');
+  await expect(page.getByText('Conectado como')).toBeVisible();
+  await page.goto('/');
+
+  const link = page.getByRole('link', { name: 'Sua conta: lucas' });
+
+  await expect(link.locator('img')).toBeVisible();
+});
+
 test('offers Discord login to visitors', async ({ page }) => {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: null }),
