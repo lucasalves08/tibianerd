@@ -1,12 +1,23 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { tools } from '../data/tools';
 import { searchTools } from '../domain/searchTools';
 import styles from './ToolSearch.module.css';
 
 export default function ToolSearch() {
   const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const results = searchTools(tools, query);
+
+  // Keeps text typed before hydration, which React would otherwise not see.
+  useEffect(() => {
+    const typedValue = inputRef.current?.value;
+
+    if (typedValue) {
+      setQuery(typedValue);
+    }
+  }, []);
+
   const countLabel =
     results.length === 1
       ? '1 ferramenta encontrada'
@@ -18,6 +29,7 @@ export default function ToolSearch() {
         Buscar ferramenta
       </label>
       <input
+        ref={inputRef}
         id={inputId}
         className={styles.input}
         type="search"
