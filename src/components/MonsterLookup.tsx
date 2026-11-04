@@ -7,7 +7,7 @@ import CreatureResistances from './CreatureResistances';
 import styles from './MonsterLookup.module.css';
 
 const MAX_RESULTS = 12;
-const URL_PARAM = 'criatura';
+const URL_PARAM = 'creature';
 
 const formatNumber = (value: number) => value.toLocaleString('pt-BR');
 
@@ -37,7 +37,7 @@ function CreatureDetails({ creature }: { creature: Creature }) {
       <p className={styles.muted}>
         Overpower e Overflux ignoram resistências e podem render mais em
         criaturas com pouca vida. Compare no{' '}
-        <a href="/ferramentas/charms">otimizador de charms</a>.
+        <a href="/tools/charms">otimizador de charms</a>.
       </p>
     </article>
   );
