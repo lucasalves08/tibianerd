@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Privacidade | TibiaNerd"
+  description="Quais dados o TibiaNerd guarda, para quê e como excluir sua conta."
+>
+  <article>
+    <h1>Privacidade</h1>
+    <p>
+      As ferramentas funcionam sem conta. Só guardamos dados de quem entra com o
+      Discord.
+    </p>
+
+    <h2>O que guardamos</h2>
+    <ul>
+      <li>Seu ID, nome de usuário e avatar do Discord.</li>
+      <li>
+        Sua sessão: um cookie para manter você conectado, com endereço IP e
+        navegador.
+      </li>
+      <li>Os personagens e anúncios que você cadastrar.</li>
+    </ul>
+    <p>
+      Não pedimos seu e-mail ao Discord. O que você salva nas ferramentas sem
+      conta fica só no seu navegador.
+    </p>
+
+    <h2>Para que usamos</h2>
+    <p>
+      Para identificar sua conta e mostrar seus personagens e anúncios. Não
+      vendemos esses dados.
+    </p>
+
+    <h2>Onde ficam</h2>
+    <p>O site e o banco de dados ficam na Cloudflare.</p>
+
+    <h2>Como excluir</h2>
+    <p>
+      Em <a href="/conta/">Sua conta</a>, use Excluir conta. Isso apaga sua conta
+      e os dados ligados a ela.
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  article {
+    display: grid;
+    gap: var(--space-3);
+    max-inline-size: 42rem;
+  }
+
+  h1 {
+    font-size: var(--text-title);
+  }
+
+  h2 {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-lg);
+  }
+
+  ul {
+    margin: 0;
+    padding-inline-start: var(--space-6);
+  }
+</style>
