@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/ferramentas/hunting-places');
+  await page.goto('/tools/hunting-places');
   await page.waitForLoadState('networkidle');
 });
 

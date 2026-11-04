@@ -22,7 +22,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
     keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
-    href: '/ferramentas/charms',
+    href: '/tools/charms',
   },
   {
     id: 'monsters',
@@ -58,6 +58,6 @@ export const tools: Tool[] = [
     name: 'Hunting places',
     description: 'Encontre spots por vocação, nível e tipo de dano.',
     keywords: ['hunt', 'spot', 'respawn', 'caça', 'vocação', 'nível'],
-    href: '/ferramentas/hunting-places',
+    href: '/tools/hunting-places',
   },
 ];
