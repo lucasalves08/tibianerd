@@ -22,7 +22,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
     keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
-    href: '/ferramentas/charms',
+    href: '/tools/charms',
   },
   {
     id: 'monsters',
@@ -37,7 +37,7 @@ export const tools: Tool[] = [
     name: 'Bestiary',
     description: 'Marque seu progresso e veja o que falta para ganhar pontos.',
     keywords: ['bestiário', 'charm points', 'pontos', 'kills'],
-    href: '/ferramentas/bestiary',
+    href: '/tools/bestiary',
   },
   {
     id: 'exercise',
