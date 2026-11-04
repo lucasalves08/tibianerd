@@ -11,6 +11,7 @@ import {
   type KillCounts,
 } from '../domain/bestiaryProgress';
 import { fold } from '../domain/searchTools';
+import CreatureIcon from './CreatureIcon';
 import styles from './BestiaryTracker.module.css';
 
 const STORAGE_KEY = 'tibianerd:bestiary';
@@ -35,7 +36,10 @@ function EntryRow({
   return (
     <li className={styles.entry} data-complete={isComplete || undefined}>
       <div>
-        <h2 className={styles.name}>{entry.name}</h2>
+        <h2 className={styles.name}>
+          <CreatureIcon name={entry.name} size={32} />
+          {entry.name}
+        </h2>
         <p className={styles.muted}>
           {entry.creatureClass} · {entry.difficulty}
           {entry.isVeryRare && ' · Very Rare'} · {charmPoints} pontos

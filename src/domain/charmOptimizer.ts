@@ -83,6 +83,20 @@ function getScore(
   );
 }
 
+export function getBestElementalCharms(
+  charms: Charm[],
+  creature: Creature,
+): Charm[] {
+  const elemental = charms.filter((charm) => charm.element);
+  const best = Math.max(
+    ...elemental.map((charm) => creature.modifiers[charm.element!]),
+  );
+
+  return best > 0
+    ? elemental.filter((charm) => creature.modifiers[charm.element!] === best)
+    : [];
+}
+
 function countBits(value: number): number {
   return value.toString(2).replaceAll('0', '').length;
 }

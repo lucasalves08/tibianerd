@@ -30,6 +30,7 @@ export const tools: Tool[] = [
     name: 'Consulta de monstros',
     description: 'HP, resistências e melhor charm de cada criatura.',
     keywords: ['monstro', 'criatura', 'creature', 'resistência', 'hp'],
+    href: '/tools/monsters',
   },
   {
     id: 'bestiary',

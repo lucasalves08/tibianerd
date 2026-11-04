@@ -93,8 +93,7 @@ textarea.input {
 
 .charmList,
 .results,
-.creatures,
-.resistances {
+.creatures {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -219,6 +218,9 @@ textarea.input {
 }
 
 .creatureName {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
@@ -237,29 +239,6 @@ textarea.input {
   inline-size: 6rem;
   font-size: 0.875rem;
   font-weight: 700;
-}
-
-.resistances {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.resistance {
-  padding-inline: var(--space-2);
-  background: var(--color-surface);
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-}
-
-.resistance[data-weak] {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-weight: 700;
-}
-
-.resistance[data-immune] {
-  text-decoration: line-through;
 }
 
 .pick {
@@ -313,4 +292,10 @@ textarea.input {
   .layout {
     grid-template-columns: 24rem minmax(0, 1fr);
   }
+}
+
+.resultName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
