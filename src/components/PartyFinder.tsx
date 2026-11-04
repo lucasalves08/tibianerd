@@ -53,7 +53,9 @@ export default function PartyFinder() {
 
       if (response.ok) {
         const list = (await response.json()) as Character[];
-        const available = list.filter(({ world }) => world === LAUNCH_WORLD);
+        const available = list.filter(
+          ({ server, world }) => server === 'rubinot' && world === LAUNCH_WORLD,
+        );
 
         setIsSignedIn(true);
         setCharacters(available);

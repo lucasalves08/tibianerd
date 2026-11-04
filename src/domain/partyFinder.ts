@@ -19,7 +19,7 @@ export interface PartyAdView extends PartyAd {
 }
 
 export interface PartySeeker {
-  world: RubinotWorld;
+  world: string;
   level: number;
 }
 

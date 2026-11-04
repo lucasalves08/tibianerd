@@ -41,7 +41,9 @@ export const publishAd = async (
   note: string,
 ): Promise<boolean> => {
   const character = await db
-    .prepare('SELECT world, level FROM characters WHERE id = ? AND user_id = ?')
+    .prepare(
+      "SELECT world, level FROM characters WHERE id = ? AND user_id = ? AND server = 'rubinot'",
+    )
     .bind(characterId, userId)
     .first<{ world: string; level: number }>();
 

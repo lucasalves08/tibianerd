@@ -50,17 +50,16 @@ const isHome = pathname === '/';
       }
 
       if (name && image) {
-        const photo = new Image(36, 36);
+        const photo = new Image(32, 32);
+        const label = document.createElement('span');
 
+        label.textContent = name;
         photo.alt = '';
         photo.src = image;
-        photo.onerror = () => {
-          link.textContent = name;
-          delete link.dataset.avatar;
-        };
+        photo.onerror = () => photo.remove();
         link.setAttribute('aria-label', `Sua conta: ${name}`);
         link.dataset.avatar = '';
-        link.replaceChildren(photo);
+        link.replaceChildren(photo, label);
       }
     } catch {}
   </script>
@@ -120,19 +119,28 @@ const isHome = pathname === '/';
   }
 
   .account[data-avatar] {
-    justify-content: center;
-    inline-size: var(--tap-target);
-    padding: 0;
-    border: 0;
+    gap: var(--space-2);
+    padding-inline: var(--space-1) var(--space-2);
+    border-color: var(--color-line);
+    border-radius: 999px;
+    color: var(--color-text);
   }
 
   .account[data-avatar]:hover {
+    border-color: var(--color-accent);
     background: transparent;
+    color: var(--color-text);
   }
 
   .account :global(img) {
-    border: 2px solid var(--color-accent);
+    flex: none;
     border-radius: 50%;
+  }
+
+  .account :global(span) {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .menu-button {
@@ -199,6 +207,10 @@ const isHome = pathname === '/';
 
     .logo {
       margin-inline-end: auto;
+    }
+
+    .account {
+      max-inline-size: 7rem;
     }
 
     .menu-button {

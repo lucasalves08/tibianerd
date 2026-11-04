@@ -52,6 +52,7 @@ A player reports an abusive ad, and the maintainer can remove it.
 - RubinOT comes first, with its 16 worlds listed on rubinot.com.br on 2026-11-04.
 - The launch focuses on Vesperia, the maintainer's world, so the list does not start empty.
 - Ads last 6 hours, a product choice that can change with real use.
-- Characters are not verified in the first version.
+- Characters are not verified in the first version, but they must exist: the server fetches them by name.
+- Character data comes from TibiaData for Tibia and from the public character search of RubinOT, only when a signed-in player asks.
 - The 2/3 level rule comes from Tibia Global and MUST be confirmed on RubinOT before launch.
 - RubinOT has a free in-game Huntfinder with solo, duo and party filters, so hunt suggestions are not the core of this feature.

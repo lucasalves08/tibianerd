@@ -1,17 +1,30 @@
-import type { Character, CharacterInput } from '../domain/characters';
+import type { Character, CharacterInfo } from '../domain/characters';
 import { db } from './db';
+
+const CHARACTER_COLUMNS = 'id, server, name, world, vocation, level, guild';
 
 // Every query filters by the owner, so nobody reaches another player's data.
 export const listCharacters = async (userId: string): Promise<Character[]> => {
   const { results } = await db
     .prepare(
-      'SELECT id, name, world, vocation, level FROM characters WHERE user_id = ? ORDER BY created_at',
+      `SELECT ${CHARACTER_COLUMNS} FROM characters WHERE user_id = ? ORDER BY created_at`,
     )
     .bind(userId)
     .all<Character>();
 
   return results;
 };
+
+export const findCharacter = (
+  userId: string,
+  id: string,
+): Promise<Character | null> =>
+  db
+    .prepare(
+      `SELECT ${CHARACTER_COLUMNS} FROM characters WHERE id = ? AND user_id = ?`,
+    )
+    .bind(id, userId)
+    .first<Character>();
 
 export const countCharacters = async (userId: string): Promise<number> => {
   const row = await db
@@ -24,31 +37,32 @@ export const countCharacters = async (userId: string): Promise<number> => {
 
 export const createCharacter = async (
   userId: string,
-  { name, world, vocation, level }: CharacterInput,
+  info: CharacterInfo,
 ): Promise<Character> => {
+  const { server, name, world, vocation, level, guild } = info;
   const id = crypto.randomUUID();
 
   await db
     .prepare(
-      'INSERT INTO characters (id, user_id, name, world, vocation, level, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO characters (id, user_id, server, name, world, vocation, level, guild, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
-    .bind(id, userId, name, world, vocation, level, Date.now())
+    .bind(id, userId, server, name, world, vocation, level, guild, Date.now())
     .run();
 
-  return { id, name, world, vocation, level };
+  return { id, ...info };
 };
 
-export const updateCharacterLevel = async (
+export const updateCharacter = async (
   userId: string,
   id: string,
-  level: number,
-): Promise<boolean> => {
-  const { meta } = await db
-    .prepare('UPDATE characters SET level = ? WHERE id = ? AND user_id = ?')
-    .bind(level, id, userId)
+  { world, vocation, level, guild }: CharacterInfo,
+): Promise<void> => {
+  await db
+    .prepare(
+      'UPDATE characters SET world = ?, vocation = ?, level = ?, guild = ? WHERE id = ? AND user_id = ?',
+    )
+    .bind(world, vocation, level, guild, id, userId)
     .run();
-
-  return meta.changes > 0;
 };
 
 export const deleteCharacter = async (
