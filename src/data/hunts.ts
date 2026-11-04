@@ -1,4 +1,6 @@
+import { fold } from '../domain/fold';
 import huntData from './hunts.json';
+import tibiaRouteData from './tibiaRouteHunts.json';
 
 export const huntVocations = [
   { id: 'knight', name: 'Knight', levelIndex: 0 },
@@ -19,6 +21,10 @@ export interface Hunt {
   creatureNames: string[];
   /** Estimated spawns, in the same order as creatureNames. */
   creatureSpawns: number[];
+  /** Page with details: TibiaWiki by default. */
+  pageUrl: string;
+  /** Guide on Tibia Route, when the place has one. */
+  guideUrl: string | null;
 }
 
 type HuntRow = [
@@ -33,9 +39,16 @@ type HuntRow = [
   number[],
 ];
 
-export const huntDataDate = huntData.fetchedAt;
+type TibiaRouteRow = [string, string, (number | null)[], string[]];
 
-export const hunts: Hunt[] = (huntData.hunts as HuntRow[]).map(
+const WIKI_URL = 'https://tibia.fandom.com/wiki/';
+
+export const huntDataDate = huntData.fetchedAt;
+export const tibiaRouteDate = tibiaRouteData.fetchedAt;
+
+const placeKey = (name: string) => fold(name).replace(/[^a-z0-9]/g, '');
+
+const wikiHunts: Hunt[] = (huntData.hunts as HuntRow[]).map(
   ([
     name,
     city,
@@ -54,8 +67,43 @@ export const hunts: Hunt[] = (huntData.hunts as HuntRow[]).map(
     lootRating: loot,
     creatureNames,
     creatureSpawns,
+    pageUrl: `${WIKI_URL}${encodeURIComponent(name.replaceAll(' ', '_'))}`,
+    guideUrl: null,
   }),
 );
+
+const routeRows = new Map(
+  (tibiaRouteData.hunts as TibiaRouteRow[]).map((row) => [placeKey(row[0]), row]),
+);
+const wikiKeys = new Set(wikiHunts.map(({ name }) => placeKey(name)));
+
+// TibiaWiki stays the base. Tibia Route fills its gaps and adds other places.
+export const hunts: Hunt[] = [
+  ...wikiHunts.map((hunt) => {
+    const row = routeRows.get(placeKey(hunt.name));
+
+    return row
+      ? {
+          ...hunt,
+          levels: hunt.levels.map((level, index) => level ?? row[2][index] ?? null),
+          guideUrl: row[1],
+        }
+      : hunt;
+  }),
+  ...[...routeRows]
+    .filter(([key]) => !wikiKeys.has(key))
+    .map(([, [name, url, levels, creatureNames]]) => ({
+      name,
+      city: '',
+      levels,
+      experienceRating: null,
+      lootRating: null,
+      creatureNames,
+      creatureSpawns: [],
+      pageUrl: url,
+      guideUrl: url,
+    })),
+];
 
 export const huntCities = [
   ...new Set(hunts.map(({ city }) => city).filter(Boolean)),

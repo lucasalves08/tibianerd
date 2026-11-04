@@ -33,6 +33,8 @@ const makeHunt = (name: string, levels: (number | null)[], city = 'Thais'): Hunt
   city,
   levels,
   creatureSpawns: [],
+  pageUrl: '',
+  guideUrl: null,
   experienceRating: 3,
   lootRating: 3,
   creatureNames: ['Ice Beast', 'Fire Beast'],
@@ -60,6 +62,14 @@ describe('hunt data', () => {
       city: 'Yalahar',
       levels: [40, 35, 35],
     });
+  });
+
+  it('adds the levels and guides of Tibia Route', () => {
+    const walls = realHunts.find(({ name }) => name === 'Azzilon Walls');
+
+    expect(walls?.levels).toEqual([700, null, null]);
+    expect(walls?.guideUrl).toContain('tibiaroute.com');
+    expect(new Set(realHunts.map(({ name }) => name)).size).toBe(realHunts.length);
   });
 });
 

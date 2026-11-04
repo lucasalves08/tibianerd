@@ -174,7 +174,16 @@ async function fetchHunts(titles, spawns) {
     }
   }
 
-  return hunts.sort(([a], [b]) => a.localeCompare(b));
+  // Sub-pages can repeat a name, so the entry with levels wins.
+  const byName = new Map();
+
+  for (const hunt of hunts) {
+    if (!byName.has(hunt[0]) || hunt.slice(2, 5).some((level) => level !== null)) {
+      byName.set(hunt[0], hunt);
+    }
+  }
+
+  return [...byName.values()].sort(([a], [b]) => a.localeCompare(b));
 }
 
 const titles = await listHuntTitles();
