@@ -6,7 +6,8 @@ import react from '@astrojs/react';
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
-  prefetch: { prefetchAll: true },
+  prefetch: { prefetchAll: true, defaultStrategy: 'viewport' },
+  experimental: { clientPrerender: true },
   fonts: [
     {
       provider: fontProviders.fontsource(),
