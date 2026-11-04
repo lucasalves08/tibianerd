@@ -7,6 +7,7 @@ import {
 } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
 import {
+  getExpectedDamagePerHit,
   optimizeCharms,
   type HuntCreature,
   type OwnedCharm,
@@ -181,14 +182,6 @@ export default function CharmOptimizer() {
 
   const needsCharacter =
     !state.level || !state.hitPoints || !state.mana;
-  const totalKills = hunt.reduce((sum, { kills }) => sum + kills, 0);
-  const expectedDamage = hunt.reduce((sum, { creature, kills }) => {
-    const assignment = assignments.find(
-      (item) => item.creature.name === creature.name,
-    );
-
-    return sum + (assignment?.damagePerHit ?? 0) * kills;
-  }, 0);
 
   return (
     <div className={styles.layout}>
@@ -383,7 +376,7 @@ export default function CharmOptimizer() {
                 Dano extra esperado por golpe
               </p>
               <p className={styles.summaryValue}>
-                {formatNumber(totalKills ? expectedDamage / totalKills : 0)}
+                {formatNumber(getExpectedDamagePerHit(hunt, assignments))}
               </p>
             </div>
             {unused.length > 0 && (

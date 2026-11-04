@@ -97,6 +97,27 @@ export function getBestElementalCharms(
     : [];
 }
 
+// Weighs by hit points as well as kills, since tougher creatures take more hits.
+export function getExpectedDamagePerHit(
+  hunt: HuntCreature[],
+  assignments: Assignment[],
+): number {
+  let totalWeight = 0;
+  let totalDamage = 0;
+
+  for (const { creature, kills } of hunt) {
+    const assignment = assignments.find(
+      (item) => item.creature.name === creature.name,
+    );
+    const weight = creature.hitPoints * kills;
+
+    totalWeight += weight;
+    totalDamage += (assignment?.damagePerHit ?? 0) * weight;
+  }
+
+  return totalWeight > 0 ? totalDamage / totalWeight : 0;
+}
+
 function countBits(value: number): number {
   return value.toString(2).replaceAll('0', '').length;
 }

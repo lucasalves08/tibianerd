@@ -4,6 +4,7 @@ import type { Creature, Element } from '../data/creatures';
 import {
   getBestElementalCharms,
   getDamagePerProc,
+  getExpectedDamagePerHit,
   optimizeCharms,
   type Character,
   type OwnedCharm,
@@ -65,6 +66,30 @@ describe('getDamagePerProc', () => {
         character,
       ),
     ).toBeCloseTo(80);
+  });
+});
+
+describe('getExpectedDamagePerHit', () => {
+  it('weighs creatures by hit points and kills', () => {
+    const big = makeCreature('big', 3000, {});
+    const small = makeCreature('small', 1000, {});
+    const hunt = [
+      { creature: big, kills: 1 },
+      { creature: small, kills: 1 },
+    ];
+    const assignments = own(['wound', 'freeze']).map((owned, index) => ({
+      ...owned,
+      creature: hunt[index]!.creature,
+      damagePerProc: 0,
+      damagePerHit: index === 0 ? 100 : 20,
+      isLevelCapped: false,
+    }));
+
+    expect(getExpectedDamagePerHit(hunt, assignments)).toBe(80);
+  });
+
+  it('returns zero for an empty hunt', () => {
+    expect(getExpectedDamagePerHit([], [])).toBe(0);
   });
 });
 
