@@ -13,6 +13,7 @@ import {
 } from '../domain/charmOptimizer';
 import { parseHuntLog } from '../domain/parseHuntLog';
 import { fold } from '../domain/searchTools';
+import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';
 
@@ -342,7 +343,10 @@ export default function CharmOptimizer() {
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => addCreature(creature)}
                 >
-                  <span>{creature.name}</span>
+                  <span className={styles.resultName}>
+                    <CreatureIcon name={creature.name} size={32} />
+                    {creature.name}
+                  </span>
                   <span>{formatNumber(creature.hitPoints)} HP</span>
                 </button>
               </li>
@@ -379,7 +383,10 @@ export default function CharmOptimizer() {
                 <li key={creature.name} className={styles.creature}>
                   <div className={styles.creatureHeader}>
                     <div>
-                      <h3 className={styles.creatureName}>{creature.name}</h3>
+                      <h3 className={styles.creatureName}>
+                        <CreatureIcon name={creature.name} />
+                        {creature.name}
+                      </h3>
                       <p className={styles.muted}>
                         {formatNumber(creature.hitPoints)} HP
                       </p>

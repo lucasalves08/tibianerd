@@ -3,6 +3,7 @@ import { charms } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
 import { getBestElementalCharms } from '../domain/charmOptimizer';
 import { fold } from '../domain/searchTools';
+import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './MonsterLookup.module.css';
 
@@ -21,7 +22,10 @@ function CreatureDetails({ creature }: { creature: Creature }) {
 
   return (
     <article className={styles.details}>
-      <h2 className={styles.name}>{creature.name}</h2>
+      <h2 className={styles.name}>
+        <CreatureIcon name={creature.name} />
+        {creature.name}
+      </h2>
       <p className={styles.hitPoints}>
         {formatNumber(creature.hitPoints)} HP
       </p>
@@ -98,7 +102,10 @@ export default function MonsterLookup() {
                 type="button"
                 onClick={() => selectCreature(creature)}
               >
-                <span>{creature.name}</span>
+                <span className={styles.resultName}>
+                  <CreatureIcon name={creature.name} size={32} />
+                  {creature.name}
+                </span>
                 <span>{formatNumber(creature.hitPoints)} HP</span>
               </button>
             </li>
