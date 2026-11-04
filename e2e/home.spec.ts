@@ -26,6 +26,16 @@ test('shows a card for every tool', async ({ page }) => {
   await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(5);
 });
 
+test('marks the unfinished tools as under construction', async ({ page }) => {
+  await expect(page.getByText('Em construção')).toHaveCount(4);
+
+  await page.goto('/tools/exercise');
+  await expect(page.getByText('Em construção:')).toBeVisible();
+
+  await page.goto('/tools/charms');
+  await expect(page.getByText('Em construção:')).toBeHidden();
+});
+
 test('opens a tool from its card', async ({ page }) => {
   await page.getByRole('link', { name: 'Hunting places' }).click();
 

@@ -14,6 +14,7 @@ const categoryNames = Object.fromEntries(
         <div class="banner">
           <ToolImage toolId={tool.id} />
         </div>
+        {tool.isUnderConstruction && <p class="badge">Em construção</p>}
         <div class="body">
           <p class="category">{categoryNames[tool.category]}</p>
           <h2>
@@ -90,6 +91,19 @@ const categoryNames = Object.fromEntries(
     inline-size: 128px;
     block-size: 128px;
     image-rendering: pixelated;
+  }
+
+  .badge {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-end: var(--space-2);
+    padding: 0.125rem var(--space-2);
+    border: 1px solid rgb(255 225 77 / 0.5);
+    border-radius: var(--radius-small);
+    background: var(--color-background);
+    color: rgb(255 225 77);
+    font-size: var(--text-xs);
+    font-weight: 700;
   }
 
   .body {

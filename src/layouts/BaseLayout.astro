@@ -2,6 +2,7 @@
 import { Font } from 'astro:assets';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import { tools } from '../data/tools';
 import '../styles/global.css';
 
 interface Props {
@@ -10,6 +11,10 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const isUnderConstruction = tools.some(
+  ({ href, isUnderConstruction }) =>
+    isUnderConstruction && Astro.url.pathname.startsWith(href),
+);
 ---
 
 <!doctype html>
@@ -29,6 +34,14 @@ const { title, description } = Astro.props;
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <Header />
     <main id="main-content">
+      {
+        isUnderConstruction && (
+          <p class="construction">
+            <strong>Em construção:</strong> esta ferramenta ainda está em
+            revisão e os valores podem mudar.
+          </p>
+        )
+      }
       <slot />
     </main>
     <Footer />
@@ -42,6 +55,15 @@ const { title, description } = Astro.props;
     max-inline-size: var(--page-max);
     margin-inline: auto;
     padding: var(--space-8) var(--page-gutter) var(--space-12);
+  }
+
+  .construction {
+    margin-block-end: var(--space-6);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid rgb(255 225 77 / 0.35);
+    border-radius: var(--radius-small);
+    background: rgb(255 225 77 / 0.07);
+    font-size: var(--text-sm);
   }
 
   .skip-link {

@@ -13,6 +13,7 @@ export interface Tool {
   shortName: string;
   description: string;
   href: string;
+  isUnderConstruction?: boolean;
 }
 
 export const tools: Tool[] = [
@@ -21,7 +22,7 @@ export const tools: Tool[] = [
     category: 'hunt',
     name: 'Charms',
     shortName: 'Charms',
-    description: 'O que usar em cada monstro e o que comprar com seus pontos.',
+    description: 'O melhor charm para cada criatura da sua caçada.',
     href: '/tools/charms',
   },
   {
@@ -31,6 +32,7 @@ export const tools: Tool[] = [
     shortName: 'Monstros',
     description: 'HP, resistências, melhor charm e Charm Points de cada criatura.',
     href: '/tools/monsters',
+    isUnderConstruction: true,
   },
   {
     id: 'exercise',
@@ -39,6 +41,7 @@ export const tools: Tool[] = [
     shortName: 'Exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
     href: '/tools/exercise',
+    isUnderConstruction: true,
   },
   {
     id: 'imbuements',
@@ -47,6 +50,7 @@ export const tools: Tool[] = [
     shortName: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
     href: '/tools/imbuements',
+    isUnderConstruction: true,
   },
   {
     id: 'hunting-places',
@@ -55,5 +59,6 @@ export const tools: Tool[] = [
     shortName: 'Hunting places',
     description: 'Encontre spots por vocação, nível e tipo de dano.',
     href: '/tools/hunting-places',
+    isUnderConstruction: true,
   },
 ];
