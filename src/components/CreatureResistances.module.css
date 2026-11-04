@@ -1,0 +1,25 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  padding-inline: var(--space-2);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.item[data-weak] {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+}
+
+.item[data-immune] {
+  text-decoration: line-through;
+}
