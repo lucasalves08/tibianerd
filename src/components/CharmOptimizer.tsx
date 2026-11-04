@@ -358,29 +358,28 @@ export default function CharmOptimizer() {
               return (
                 <li key={creature.name} className={styles.creature}>
                   <div className={styles.creatureHeader}>
-                    <CreatureIcon name={creature.name} />
+                    <div className={styles.creatureSide}>
+                      <CreatureIcon name={creature.name} />
+                      <label className={styles.kills}>
+                        Mortes
+                        <input
+                          className={styles.input}
+                          type="number"
+                          inputMode="numeric"
+                          min="1"
+                          value={kills || ''}
+                          onChange={(event) =>
+                            setKills(creature.name, Number(event.target.value))
+                          }
+                        />
+                      </label>
+                    </div>
                     <div className={styles.creatureInfo}>
-                      <h3 className={styles.creatureName}>{creature.name}</h3>
-                      <div className={styles.creatureMeta}>
+                      <div className={styles.creatureTitle}>
+                        <h3 className={styles.creatureName}>{creature.name}</h3>
                         <span className={styles.muted}>
                           {formatNumber(creature.hitPoints)} HP
                         </span>
-                        <label className={styles.kills}>
-                          Mortes
-                          <input
-                            className={styles.input}
-                            type="number"
-                            inputMode="numeric"
-                            min="1"
-                            value={kills || ''}
-                            onChange={(event) =>
-                              setKills(
-                                creature.name,
-                                Number(event.target.value),
-                              )
-                            }
-                          />
-                        </label>
                       </div>
                       <CreatureResistances creature={creature} />
                     </div>
@@ -456,8 +455,7 @@ export default function CharmOptimizer() {
           Considera a resistência, os HP e as mortes de cada criatura. Dano
           elemental é 5% dos HP da criatura, limitado a 2× o seu nível antes da
           resistência. Valores do Tibia Global, conferidos em{' '}
-          {dataDate.split('-').reverse().join('/')}. O RubinOT pode ter
-          diferenças.
+          {dataDate.split('-').reverse().join('/')}.
         </p>
       </section>
     </div>

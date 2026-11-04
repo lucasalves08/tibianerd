@@ -38,8 +38,8 @@
 
 .fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .field {
@@ -264,7 +264,8 @@ textarea.input {
 
 .creatures {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-4);
+  padding-block-start: var(--space-2);
 }
 
 .creature {
@@ -280,15 +281,29 @@ textarea.input {
 .creatureHeader {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   min-inline-size: 0;
-  padding-inline-end: var(--space-6);
+}
+
+.creatureSide {
+  display: grid;
+  flex: none;
+  justify-items: center;
+  gap: var(--space-1);
+  inline-size: 5rem;
 }
 
 .creatureInfo {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   min-inline-size: 0;
+}
+
+.creatureTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
 }
 
 .creatureName {
@@ -301,24 +316,19 @@ textarea.input {
   font-size: 0.875rem;
 }
 
-.creatureMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-}
-
 .kills {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+  display: grid;
+  gap: 0.125rem;
+  inline-size: 100%;
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .kills .input {
-  inline-size: 5.5rem;
   min-block-size: 2.25rem;
+  padding-inline: var(--space-1);
+  text-align: center;
 }
 
 .pick {
@@ -374,21 +384,28 @@ textarea.input {
 
 .remove {
   position: absolute;
-  inset-block-start: var(--space-1);
-  inset-inline-end: var(--space-1);
-  inline-size: var(--tap-target);
-  block-size: var(--tap-target);
+  inset-block-start: calc(-1 * var(--space-2));
+  inset-inline-start: calc(-1 * var(--space-2));
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   border: 0;
-  border-radius: var(--radius-small);
-  background: transparent;
-  color: var(--color-muted);
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: #ffffff;
   font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
 }
 
 .remove:hover {
-  background: var(--color-line);
-  color: var(--color-text);
+  background: var(--color-danger-strong);
+}
+
+.remove:focus-visible {
+  outline-color: var(--color-text);
 }
 
 .footnote {
@@ -410,7 +427,8 @@ textarea.input {
 }
 
 @media (pointer: coarse) {
-  .tier {
+  .tier,
+  .remove {
     inline-size: var(--tap-target);
     block-size: var(--tap-target);
   }
