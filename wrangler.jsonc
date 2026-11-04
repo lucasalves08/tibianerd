@@ -2,7 +2,14 @@
   "name": "tibianerd",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
-  "previews": {},
+  "previews": {
+    "kv_namespaces": [
+      {
+        "binding": "SESSION",
+        "id": "ace2447729c544ea8420691adc952065"
+      }
+    ]
+  },
   "vars": {
     "BETTER_AUTH_URL": "https://tibianerd.lucas-alves0828.workers.dev",
     "DISCORD_CLIENT_ID": "1567601351704445018"
