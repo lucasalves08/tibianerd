@@ -22,7 +22,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
     keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
-    href: '/ferramentas/charms',
+    href: '/tools/charms',
   },
   {
     id: 'monsters',
