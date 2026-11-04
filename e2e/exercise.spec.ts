@@ -52,9 +52,7 @@ test('explains an invalid target after leaving the field', async ({ page }) => {
 test('limits skills by vocation', async ({ page }) => {
   await page.getByLabel('Vocação').selectOption('Sorcerer');
 
-  await expect(page.getByLabel('Skill', { exact: true })).toHaveText(
-    'Magic level',
-  );
+  await expect(page.getByRole('combobox').nth(1)).toHaveValue('sorcerer-magic');
 });
 
 test('remembers the values after reloading', async ({ page }) => {
