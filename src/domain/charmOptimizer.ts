@@ -43,7 +43,7 @@ function isCapped(creature: Creature, level: number): boolean {
 }
 
 // Overpower and Overflux scale with the character, before the creature's cap.
-export function getNeutralDamage(charmId: string, character: Character): number {
+function getNeutralDamage(charmId: string, character: Character): number {
   return charmId === 'overpower'
     ? character.hitPoints * OVERPOWER_DAMAGE
     : character.mana * OVERFLUX_DAMAGE;

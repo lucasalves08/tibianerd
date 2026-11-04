@@ -7,7 +7,6 @@ import {
 } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
 import {
-  getNeutralDamage,
   optimizeCharms,
   type HuntCreature,
   type OwnedCharm,
@@ -204,21 +203,9 @@ export default function CharmOptimizer() {
               onChange={(mana) => update({ mana })}
             />
           </div>
-          {state.hitPoints && state.mana ? (
-            <p className={styles.hint}>
-              Por ativação: Overpower{' '}
-              {formatNumber(getNeutralDamage('overpower', state))} e Overflux{' '}
-              {formatNumber(getNeutralDamage('overflux', state))}, até 8% do HP
-              da criatura. Eles entram quando superam o dano elemental.
-            </p>
-          ) : (
+          {!(state.hitPoints && state.mana) && (
             <p className={styles.notice}>
-              Sem vida e mana, Overpower e Overflux ficam fora da conta.
-            </p>
-          )}
-          {!state.level && (
-            <p className={styles.hint}>
-              O nível limita o dano elemental em criaturas com muita vida.
+              Sem vida e mana, não conseguimos calcular Overpower e Overflux.
             </p>
           )}
         </section>
@@ -469,7 +456,9 @@ export default function CharmOptimizer() {
         <p className={styles.footnote}>
           Considera a resistência, os HP e as mortes de cada criatura. Dano
           elemental é 5% dos HP da criatura, limitado a 2× o seu nível antes da
-          resistência. Valores do Tibia Global, conferidos em{' '}
+          resistência. Overpower causa 5% da sua vida e Overflux 2,5% da sua
+          mana, ambos limitados a 8% do HP da criatura. Valores do Tibia Global,
+          conferidos em{' '}
           {dataDate.split('-').reverse().join('/')}.
         </p>
       </section>

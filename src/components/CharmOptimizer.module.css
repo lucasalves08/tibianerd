@@ -234,11 +234,6 @@ textarea.input {
   text-align: center;
 }
 
-.hint {
-  color: var(--color-muted);
-  font-size: 0.8125rem;
-}
-
 .unused {
   display: flex;
   flex-wrap: wrap;

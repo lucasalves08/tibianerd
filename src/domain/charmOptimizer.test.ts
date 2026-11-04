@@ -4,7 +4,6 @@ import type { Creature, Element } from '../data/creatures';
 import {
   getBestElementalCharms,
   getDamagePerProc,
-  getNeutralDamage,
   optimizeCharms,
   type Character,
   type OwnedCharm,
@@ -55,6 +54,13 @@ describe('getDamagePerProc', () => {
     ).toBeCloseTo(1200);
   });
 
+  it('uses 5% of life for Overpower and 2.5% of mana for Overflux', () => {
+    const big = makeCreature('big', 100000, {});
+
+    expect(getDamagePerProc(getCharm('overpower'), big, character)).toBeCloseTo(425);
+    expect(getDamagePerProc(getCharm('overflux'), big, character)).toBeCloseTo(80);
+  });
+
   it('ignores resistances and caps neutral charms at 8% of the creature', () => {
     const creature = makeCreature('tiny', 1000, { physical: 0 });
 
@@ -66,15 +72,6 @@ describe('getDamagePerProc', () => {
         character,
       ),
     ).toBeCloseTo(80);
-  });
-});
-
-describe('getNeutralDamage', () => {
-  it('uses 5% of life for Overpower and 2.5% of mana for Overflux', () => {
-    const player = { level: 967, hitPoints: 9653, mana: 14970 };
-
-    expect(getNeutralDamage('overpower', player)).toBeCloseTo(482.65);
-    expect(getNeutralDamage('overflux', player)).toBeCloseTo(374.25);
   });
 });
 
