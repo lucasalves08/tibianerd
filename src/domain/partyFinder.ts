@@ -2,8 +2,17 @@ import type { VocationId } from './characterStats';
 import type { GameServerId } from './characters';
 import { getShareRange } from './partyShare';
 
+export const adPurposes = [
+  { id: 'hunt', name: 'Hunt' },
+  { id: 'boss', name: 'Boss' },
+] as const;
+
+export type AdPurpose = (typeof adPurposes)[number]['id'];
+
 export interface PartyAd {
   id: string;
+  purpose: AdPurpose;
+  boss: string | null;
   server: GameServerId;
   world: string;
   vocation: VocationId;
@@ -28,6 +37,7 @@ export interface PartySeeker {
 const HOUR_IN_MS = 60 * 60 * 1000;
 
 export const MAX_NOTE_LENGTH = 140;
+export const MAX_BOSS_LENGTH = 60;
 
 /** Product choice, not a game rule: a hunt plan rarely lasts longer. */
 export const AD_LIFETIME_MS = 6 * HOUR_IN_MS;
@@ -40,9 +50,22 @@ export const cleanAdNote = (note: unknown): string =>
     ? note.replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE_LENGTH)
     : '';
 
+export const isAdPurpose = (purpose: unknown): purpose is AdPurpose =>
+  adPurposes.some(({ id }) => id === purpose);
+
+export const cleanBossName = (boss: unknown): string | null => {
+  const clean =
+    typeof boss === 'string'
+      ? boss.replace(/\s+/g, ' ').trim().slice(0, MAX_BOSS_LENGTH)
+      : '';
+
+  return clean || null;
+};
+
 export const isAdActive = ({ expiresAt }: PartyAd, now: number): boolean =>
   expiresAt > now;
 
+// A boss needs help, not shared experience, so its ads ignore the level range.
 // Newest first, since a recent ad is more likely to get an answer.
 export const findCompatibleAds = <Ad extends PartyAd>(
   ads: Ad[],
@@ -57,8 +80,7 @@ export const findCompatibleAds = <Ad extends PartyAd>(
         isAdActive(ad, now) &&
         ad.server === server &&
         ad.world === world &&
-        ad.level >= lowest &&
-        ad.level <= highest,
+        (ad.purpose === 'boss' || (ad.level >= lowest && ad.level <= highest)),
     )
     .sort((first, second) => second.createdAt - first.createdAt);
 };

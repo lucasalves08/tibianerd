@@ -31,6 +31,10 @@ A player reports an abusive ad, and the maintainer can remove it.
 3. **Given** an ad past its time, **When** the list appears, **Then** the ad is gone.
 4. **Given** a player deletes their account, **When** the deletion ends, **Then** their characters and ads are gone.
 
+### User Story 5 - Find help for a boss (Priority: P2)
+
+A player publishes an ad for a boss, and anyone on the same world sees it at any level.
+
 ## Requirements
 
 - **FR-001**: Login MUST use Discord and MUST NOT be needed by any other tool.
@@ -40,6 +44,7 @@ A player reports an abusive ad, and the maintainer can remove it.
 - **FR-005**: The list MUST filter by world, level and vocation.
 - **FR-006**: Users MUST be able to report an ad, and each user MUST have an ad limit.
 - **FR-007**: Users MUST be able to delete their account and data.
+- **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST name the boss.
 - **FR-008**: The site MUST publish a privacy page before login goes live.
 
 ## Success Criteria
@@ -48,6 +53,8 @@ A player reports an abusive ad, and the maintainer can remove it.
 - **SC-002**: The page works at 375 px with no horizontal scrolling.
 
 ## Assumptions
+
+- Boss names come from TibiaWiki, and players can type others, since RubinOT can differ.
 
 - Every world of Tibia and RubinOT is open, and data from each stays apart. The maintainer plays on Vesperia, so that list is seeded first.
 - Ads last 6 hours, a product choice that can change with real use.

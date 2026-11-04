@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   AD_LIFETIME_MS,
   cleanAdNote,
+  cleanBossName,
   findCompatibleAds,
   getAdExpiry,
   isAdActive,
+  isAdPurpose,
   MAX_NOTE_LENGTH,
   type PartyAd,
 } from './partyFinder';
@@ -13,6 +15,8 @@ const NOW = 1_000_000;
 
 const makeAd = (id: string, changes: Partial<PartyAd> = {}): PartyAd => ({
   id,
+  purpose: 'hunt',
+  boss: null,
   server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
@@ -32,6 +36,21 @@ describe('cleanAdNote', () => {
 
   it('ignores what is not text', () => {
     expect(cleanAdNote(42)).toBe('');
+  });
+});
+
+describe('cleanBossName', () => {
+  it('cleans the name and refuses an empty one', () => {
+    expect(cleanBossName('  Ferumbras  ')).toBe('Ferumbras');
+    expect(cleanBossName('   ')).toBeNull();
+    expect(cleanBossName(42)).toBeNull();
+  });
+});
+
+describe('isAdPurpose', () => {
+  it('accepts only hunt and boss', () => {
+    expect(isAdPurpose('boss')).toBe(true);
+    expect(isAdPurpose('quest')).toBe(false);
   });
 });
 
@@ -59,6 +78,15 @@ describe('findCompatibleAds', () => {
       'highest',
       'lowest',
     ]);
+  });
+
+  it('ignores the level range for boss ads, but not the world', () => {
+    const ads = [
+      makeAd('near', { purpose: 'boss', level: 100 }),
+      makeAd('away', { purpose: 'boss', level: 100, world: 'Solarian' }),
+    ];
+
+    expect(ids(findCompatibleAds(ads, seeker, NOW))).toEqual(['near']);
   });
 
   it('never mixes worlds', () => {

@@ -1,4 +1,8 @@
-import { getAdExpiry, type PartyAdView } from '../domain/partyFinder';
+import {
+  getAdExpiry,
+  type AdPurpose,
+  type PartyAdView,
+} from '../domain/partyFinder';
 import { db } from './db';
 
 const MAX_LISTED_ADS = 200;
@@ -12,7 +16,7 @@ interface AdRow extends Omit<PartyAdView, 'isMine'> {
 export const listAds = async (userId: string | null): Promise<PartyAdView[]> => {
   const { results } = await db
     .prepare(
-      `SELECT a.id, c.server, a.world, c.vocation, a.level, a.note,
+      `SELECT a.id, a.purpose, a.boss, c.server, a.world, c.vocation, a.level, a.note,
         a.created_at AS createdAt, a.expires_at AS expiresAt,
         c.name AS characterName, u.name AS discord,
         c.user_id = ?1 AS isMine
@@ -33,8 +37,17 @@ export const listAds = async (userId: string | null): Promise<PartyAdView[]> => 
 // One ad per player keeps the list honest: a new ad replaces the old one.
 export const publishAd = async (
   userId: string,
-  characterId: string,
-  note: string,
+  {
+    characterId,
+    note,
+    purpose,
+    boss,
+  }: {
+    characterId: string;
+    note: string;
+    purpose: AdPurpose;
+    boss: string | null;
+  },
 ): Promise<boolean> => {
   const character = await db
     .prepare('SELECT world, level FROM characters WHERE id = ? AND user_id = ?')
@@ -55,7 +68,7 @@ export const publishAd = async (
     .run();
   await db
     .prepare(
-      'INSERT INTO party_ads (id, character_id, world, level, note, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO party_ads (id, character_id, world, level, note, purpose, boss, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
     .bind(
       crypto.randomUUID(),
@@ -63,6 +76,8 @@ export const publishAd = async (
       character.world,
       character.level,
       note,
+      purpose,
+      boss,
       now,
       getAdExpiry(now),
     )
