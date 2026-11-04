@@ -1,6 +1,9 @@
 ---
+import ToolImage from '../components/ToolImage';
 import ToolSearch from '../components/ToolSearch';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const heroToolIds = ['monsters', 'bestiary', 'hunting-places'];
 ---
 
 <BaseLayout
@@ -8,8 +11,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   description="Calculadoras, charms, bestiário e hunts para Tibia. Abra e use, sem cadastro."
 >
   <section class="hero">
-    <h1>Deixa que o nerd faz a conta.</h1>
-    <p>Ferramentas para Tibia, sem cadastro.</p>
+    <div>
+      <h1>Deixa que o nerd faz a conta.</h1>
+      <p>Ferramentas para Tibia, sem cadastro.</p>
+    </div>
+    <div class="sprites">
+      {heroToolIds.map((toolId) => <ToolImage toolId={toolId} />)}
+    </div>
   </section>
 
   <ToolSearch client:load />
@@ -17,16 +25,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <style>
   .hero {
-    margin-block-end: var(--space-8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    margin-block-end: var(--space-6);
+    padding: var(--space-6);
+    border: 2px solid var(--color-line);
+    background:
+      var(--floor-tiles) 0 0 / var(--grid-size) var(--grid-size),
+      linear-gradient(120deg, #24305e, var(--color-surface));
   }
 
   h1 {
-    max-inline-size: 14ch;
-    font-size: clamp(2.75rem, 11vw, 5rem);
+    font-size: clamp(1.75rem, 6vw, 3rem);
   }
 
   p {
-    margin-block-start: var(--space-4);
+    margin-block-start: var(--space-2);
     font-size: 1.125rem;
+  }
+
+  .sprites {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .sprites {
+      display: flex;
+      flex: none;
+      gap: var(--space-3);
+    }
+
+    .sprites :global(img) {
+      image-rendering: pixelated;
+    }
   }
 </style>

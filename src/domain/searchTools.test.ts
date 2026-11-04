@@ -5,12 +5,14 @@ import { highlightMatches, searchTools } from './searchTools';
 const tools: Tool[] = [
   {
     id: 'charms',
+    category: 'hunt',
     name: 'Charms',
     description: 'Melhor distribuição',
     keywords: ['otimizador'],
   },
   {
     id: 'monsters',
+    category: 'reference',
     name: 'Consulta de monstros',
     description: 'Resistências',
     keywords: ['criatura'],

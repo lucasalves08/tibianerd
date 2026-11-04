@@ -12,14 +12,14 @@
   padding-inline: var(--space-4);
   border: 0;
   border-radius: 0;
-  background: var(--color-paper);
+  background: var(--color-surface);
   /* Stepped corners, like a window from an old game. */
   box-shadow:
-    0 calc(-1 * var(--pixel)) 0 var(--color-ink),
-    0 var(--pixel) 0 var(--color-ink),
-    calc(-1 * var(--pixel)) 0 0 var(--color-ink),
-    var(--pixel) 0 0 var(--color-ink);
-  color: var(--color-ink);
+    0 calc(-1 * var(--pixel)) 0 var(--color-line),
+    0 var(--pixel) 0 var(--color-line),
+    calc(-1 * var(--pixel)) 0 0 var(--color-line),
+    var(--pixel) 0 0 var(--color-line);
+  color: var(--color-text);
   font-size: 1.25rem;
 }
 
@@ -29,41 +29,135 @@
 }
 
 .input:focus-visible {
-  outline: 3px solid var(--color-pen);
+  outline: 3px solid var(--color-accent);
   outline-offset: calc(var(--pixel) + 2px);
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-6);
+}
+
+.filter {
+  min-block-size: var(--tap-target);
+  padding-inline: var(--space-4);
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.filter:hover {
+  border-color: var(--color-accent);
+}
+
+.filter[aria-pressed='true'] {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.filterCount {
+  font-weight: 400;
+}
+
 .status {
-  margin-block: var(--space-4) var(--space-3);
+  margin-block: var(--space-4) var(--space-6);
   color: var(--color-muted);
   font-size: 0.875rem;
 }
 
-.sheet {
-  container-type: inline-size;
-  background: var(--color-paper);
-  border-inline-start: 2px solid var(--color-pen);
+.sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: var(--space-8) var(--space-6);
 }
 
-.list {
+.category {
+  container-type: inline-size;
+}
+
+.categoryName {
+  margin-block-end: var(--space-4);
+  font-size: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.row {
+.card {
+  --banner-top: #63202e;
+  --banner-bottom: #2b1420;
+
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.card[data-category='character'] {
+  --banner-top: #174a78;
+  --banner-bottom: #14233f;
+}
+
+.card[data-category='reference'] {
+  --banner-top: #47308a;
+  --banner-bottom: #1e1a42;
+}
+
+.banner {
+  position: relative;
+  display: grid;
+  place-items: center;
+  background:
+    var(--floor-tiles) 0 0 / var(--grid-size) var(--grid-size),
+    linear-gradient(var(--banner-top), var(--banner-bottom));
+}
+
+/* The Fankit asks for integer scaling, so this size stays fixed. */
+.sprite {
+  inline-size: 128px;
+  block-size: 128px;
+  image-rendering: pixelated;
+}
+
+.badge {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  padding-inline: var(--space-2);
+  background: rgb(0 0 0 / 0.55);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.body {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-4);
-  border-block-end: 1px solid var(--color-grid);
+  padding: var(--space-3);
 }
 
 .name {
-  font-size: 1.375rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .description {
   color: var(--color-muted);
+  font-size: 0.875rem;
 }
 
 .description mark,
@@ -73,19 +167,21 @@
 
 .empty {
   padding: var(--space-6) var(--space-4);
-  border-block-end: 1px solid var(--color-grid);
+  border: 2px solid var(--color-line);
+  background: var(--color-surface);
 }
 
-.note {
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-muted);
-  font-size: 0.875rem;
-}
+@container (min-width: 38rem) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--space-4);
+  }
 
-@container (min-width: 40rem) {
-  .row {
-    grid-template-columns: 17rem 1fr;
-    gap: var(--space-6);
-    align-items: baseline;
+  .name {
+    font-size: 1.25rem;
+  }
+
+  .description {
+    font-size: 1rem;
   }
 }

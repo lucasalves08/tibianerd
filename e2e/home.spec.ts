@@ -40,6 +40,17 @@ test('highlights the search term in the results', async ({ page }) => {
   await expect(page.locator('mark')).toHaveText(['gold', 'token']);
 });
 
+test('filters tools by category', async ({ page }) => {
+  await page.getByRole('button', { name: 'Personagem' }).click();
+
+  await expect(page.getByRole('status')).toHaveText('2 ferramentas encontradas');
+  await expect(page.getByRole('heading', { name: 'Bestiary' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Charms' })).toBeHidden();
+
+  await page.getByRole('button', { name: 'Todas' }).click();
+  await expect(page.getByRole('status')).toHaveText('6 ferramentas encontradas');
+});
+
 test('applies a search typed before hydration', async ({ page }) => {
   await page.route('**/_astro/**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -78,6 +89,8 @@ test('shows the fan site notice with spacing intact', async ({ page }) => {
 
   await expect(footer).toContainText('site de fãs, sem vínculo com a CipSoft');
   await expect(footer).toContainText('O Tibia é feito pela CipSoft');
-  await expect(footer.getByRole('link', { name: 'Tibia' })).toBeVisible();
+  await expect(
+    footer.getByRole('link', { name: 'Tibia', exact: true }),
+  ).toBeVisible();
   await expect(footer.getByRole('link', { name: 'CipSoft' })).toBeVisible();
 });
