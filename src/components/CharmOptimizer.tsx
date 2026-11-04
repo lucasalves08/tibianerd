@@ -210,7 +210,10 @@ export default function CharmOptimizer() {
           )}
         </section>
 
-        <section className={styles.panel} aria-labelledby="charms-title">
+        <section
+          className={`${styles.panel} ${styles.charmsPanel}`}
+          aria-labelledby="charms-title"
+        >
           <h2 id="charms-title" className={styles.panelTitle}>
             Seus charms
           </h2>
@@ -390,7 +393,9 @@ export default function CharmOptimizer() {
                           {formatNumber(creature.hitPoints)} HP
                         </span>
                       </div>
-                      <CreatureResistances creature={creature} />
+                      <div className={styles.creatureResistances}>
+                        <CreatureResistances creature={creature} />
+                      </div>
                     </div>
                   </div>
 

@@ -391,6 +391,12 @@ textarea.input {
   cursor: pointer;
 }
 
+.remove::after {
+  content: '';
+  position: absolute;
+  inset: -0.5rem;
+}
+
 .remove:hover {
   background: var(--color-danger-strong);
 }
@@ -402,6 +408,44 @@ textarea.input {
 .footnote {
   color: var(--color-muted);
   font-size: var(--text-sm);
+}
+
+/* On small screens, the results come before the long list of charms. */
+@media (max-width: 59.99rem) {
+  .sidebar {
+    display: contents;
+  }
+
+  .charmsPanel {
+    order: 1;
+  }
+}
+
+/* Resistances take the full card width when the sprite leaves little room. */
+@media (max-width: 43.99rem) {
+  .creatureHeader {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 4.5rem;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .creatureSide,
+  .creatureInfo {
+    display: contents;
+  }
+
+  .creatureTitle {
+    grid-area: 1 / 2;
+  }
+
+  .kills {
+    grid-area: 1 / 3;
+  }
+
+  .creatureResistances {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (min-width: 44rem) {
@@ -418,10 +462,14 @@ textarea.input {
 }
 
 @media (pointer: coarse) {
-  .tier,
-  .remove {
+  .tier {
     inline-size: var(--tap-target);
     block-size: var(--tap-target);
+  }
+
+  .button,
+  .kills .input {
+    min-block-size: var(--tap-target);
   }
 
   .charmName {
