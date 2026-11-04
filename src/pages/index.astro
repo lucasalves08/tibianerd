@@ -1,16 +1,32 @@
 ---
+import ToolSearch from '../components/ToolSearch';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout
+  title="TibiaNerd: ferramentas para Tibia"
+  description="Calculadoras, charms, bestiário e hunts para Tibia. Abra e use, sem cadastro."
+>
+  <section class="hero">
+    <h1>Deixa que o nerd faz a conta.</h1>
+    <p>Ferramentas para Tibia. Abra e use, sem cadastro.</p>
+  </section>
+
+  <ToolSearch client:load />
+</BaseLayout>
+
+<style>
+  .hero {
+    margin-block-end: var(--space-8);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 7vw, 3.25rem);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    color: var(--color-muted);
+    font-size: 1.125rem;
+  }
+</style>
