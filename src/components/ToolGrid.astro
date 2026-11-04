@@ -10,7 +10,7 @@ const categoryNames = Object.fromEntries(
 <ul>
   {
     tools.map((tool) => (
-      <li data-category={tool.category}>
+      <li data-tool={tool.id}>
         <div class="banner">
           <ToolImage toolId={tool.id} />
         </div>
@@ -37,9 +37,6 @@ const categoryNames = Object.fromEntries(
   }
 
   li {
-    --banner-top: #5e1f2e;
-    --banner-bottom: #24121b;
-
     position: relative;
     display: flex;
     flex-direction: column;
@@ -52,18 +49,28 @@ const categoryNames = Object.fromEntries(
       transform 150ms;
   }
 
-  li[data-category='character'] {
-    --banner-top: #174a78;
-    --banner-bottom: #101d33;
+  li[data-tool='charms'] {
+    --tool-color: var(--color-fire);
   }
 
-  li[data-category='reference'] {
-    --banner-top: #47308a;
-    --banner-bottom: #1a1638;
+  li[data-tool='monsters'] {
+    --tool-color: var(--color-earth);
+  }
+
+  li[data-tool='exercise'] {
+    --tool-color: var(--color-ice);
+  }
+
+  li[data-tool='imbuements'] {
+    --tool-color: var(--color-energy);
+  }
+
+  li[data-tool='hunting-places'] {
+    --tool-color: var(--color-holy);
   }
 
   li:hover {
-    border-color: var(--color-accent);
+    border-color: var(--tool-color);
     transform: translateY(-2px);
   }
 
@@ -72,7 +79,10 @@ const categoryNames = Object.fromEntries(
     place-items: center;
     background:
       var(--floor-tiles) 0 0 / var(--grid-size) var(--grid-size),
-      linear-gradient(var(--banner-top), var(--banner-bottom));
+      linear-gradient(
+        color-mix(in srgb, var(--tool-color) 38%, var(--color-background)),
+        color-mix(in srgb, var(--tool-color) 12%, var(--color-background))
+      );
   }
 
   .banner :global(img),
@@ -89,7 +99,7 @@ const categoryNames = Object.fromEntries(
   }
 
   .category {
-    color: var(--color-muted);
+    color: var(--tool-color);
     font-size: var(--text-xs);
     font-weight: 700;
     letter-spacing: 0.08em;

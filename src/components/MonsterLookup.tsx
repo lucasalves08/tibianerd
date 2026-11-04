@@ -63,8 +63,8 @@ function CreatureDetails({ creature }: { creature: Creature }) {
         <h3 className={styles.pickTitle}>Melhor charm elemental</h3>
         {best.length > 0 ? (
           <ul className={styles.pickList}>
-            {best.map(({ id, name }) => (
-              <li key={id}>
+            {best.map(({ id, name, element }) => (
+              <li key={id} data-element={element}>
                 <img
                   className={styles.charmIcon}
                   src={getCharmIconPath(id)}

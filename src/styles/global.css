@@ -27,16 +27,16 @@
   :root {
     color-scheme: dark;
 
-    --color-background: #0c0e14;
-    --color-surface: #141720;
-    --color-raised: #1b1f2b;
+    --color-background: #0d1220;
+    --color-surface: #151c2f;
+    --color-raised: #1c2540;
     --color-line: rgb(255 255 255 / 0.1);
     --color-text: #f1f3f8;
     --color-muted: #a3abbd;
     --color-accent: #5cc8ff;
-    --color-on-accent: #0c0e14;
+    --color-on-accent: #0d1220;
     --color-marker: #ffe14d;
-    --color-on-marker: #0c0e14;
+    --color-on-marker: #0d1220;
     --color-danger: #d63a2f;
     --color-danger-strong: #f04438;
 
@@ -47,6 +47,8 @@
     --color-ice: #72d4ff;
     --color-death: #e0717f;
     --color-holy: #ffd95e;
+    --color-overpower: #ff7a7a;
+    --color-overflux: #6f9dff;
 
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
@@ -114,6 +116,42 @@
     letter-spacing: -0.01em;
     line-height: 1.2;
     text-wrap: balance;
+  }
+
+  [data-element='physical'] {
+    --element-color: var(--color-physical);
+  }
+
+  [data-element='earth'] {
+    --element-color: var(--color-earth);
+  }
+
+  [data-element='fire'] {
+    --element-color: var(--color-fire);
+  }
+
+  [data-element='energy'] {
+    --element-color: var(--color-energy);
+  }
+
+  [data-element='ice'] {
+    --element-color: var(--color-ice);
+  }
+
+  [data-element='death'] {
+    --element-color: var(--color-death);
+  }
+
+  [data-element='holy'] {
+    --element-color: var(--color-holy);
+  }
+
+  [data-element='overpower'] {
+    --element-color: var(--color-overpower);
+  }
+
+  [data-element='overflux'] {
+    --element-color: var(--color-overflux);
   }
 
   a {

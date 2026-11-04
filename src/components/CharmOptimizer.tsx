@@ -391,7 +391,10 @@ export default function CharmOptimizer() {
                   </div>
 
                   {assignment ? (
-                    <div className={styles.pick}>
+                    <div
+                      className={styles.pick}
+                      data-element={assignment.charm.element ?? assignment.charm.id}
+                    >
                       <img
                         className={styles.pickIcon}
                         src={getCharmIconPath(assignment.charm.id)}

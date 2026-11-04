@@ -32,34 +32,6 @@
   white-space: nowrap;
 }
 
-.item[data-element='physical'] {
-  --element-color: var(--color-physical);
-}
-
-.item[data-element='earth'] {
-  --element-color: var(--color-earth);
-}
-
-.item[data-element='fire'] {
-  --element-color: var(--color-fire);
-}
-
-.item[data-element='energy'] {
-  --element-color: var(--color-energy);
-}
-
-.item[data-element='ice'] {
-  --element-color: var(--color-ice);
-}
-
-.item[data-element='death'] {
-  --element-color: var(--color-death);
-}
-
-.item[data-element='holy'] {
-  --element-color: var(--color-holy);
-}
-
 .item[data-weak] {
   border-color: var(--element-color);
   color: var(--color-text);
