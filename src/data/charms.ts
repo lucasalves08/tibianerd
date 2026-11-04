@@ -10,6 +10,10 @@ export interface Charm {
   element?: Element;
 }
 
+export function getCharmIconPath(id: string): string {
+  return `/icons/charms/${id}.webp`;
+}
+
 export const charms: Charm[] = [
   { id: 'wound', name: 'Wound', element: 'physical' },
   { id: 'enflame', name: 'Enflame', element: 'fire' },

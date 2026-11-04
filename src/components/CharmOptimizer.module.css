@@ -116,6 +116,17 @@ textarea.input {
   font-weight: 700;
 }
 
+.charmIcon {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.pickName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .charmName input {
   inline-size: 1.25rem;
   block-size: 1.25rem;
@@ -150,7 +161,9 @@ textarea.input {
 }
 
 .results {
+  max-block-size: 20rem;
   border: 2px solid var(--color-line);
+  overflow-y: auto;
 }
 
 .result {
