@@ -12,6 +12,7 @@ export interface Tool {
   name: string;
   description: string;
   keywords: string[];
+  href?: string;
 }
 
 export const tools: Tool[] = [
@@ -21,6 +22,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
     keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
+    href: '/ferramentas/charms',
   },
   {
     id: 'monsters',

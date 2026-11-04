@@ -1,0 +1,31 @@
+---
+import CharmOptimizer from '../../components/CharmOptimizer';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Otimizador de charms para Tibia | TibiaNerd"
+  description="Descubra o melhor charm para cada criatura da sua caçada, considerando resistências, HP, mortes e o seu nível."
+>
+  <section class="intro">
+    <h1>Otimizador de charms</h1>
+    <p>Informe seus charms e veja o melhor para cada criatura da caçada.</p>
+  </section>
+
+  <CharmOptimizer client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 3rem);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: 1.125rem;
+  }
+</style>

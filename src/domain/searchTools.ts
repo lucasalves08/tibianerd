@@ -5,7 +5,7 @@ export interface TextPart {
   match: boolean;
 }
 
-function fold(text: string): string {
+export function fold(text: string): string {
   return text
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')

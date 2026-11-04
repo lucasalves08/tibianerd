@@ -111,11 +111,19 @@ export default function ToolSearch() {
                   >
                     <div className={styles.banner}>
                       <ToolImage className={styles.sprite} toolId={tool.id} />
-                      <span className={styles.badge}>Em breve</span>
+                      {!tool.href && (
+                        <span className={styles.badge}>Em breve</span>
+                      )}
                     </div>
                     <div className={styles.body}>
                       <h3 className={styles.name}>
-                        <Highlighted text={tool.name} query={query} />
+                        {tool.href ? (
+                          <a className={styles.link} href={tool.href}>
+                            <Highlighted text={tool.name} query={query} />
+                          </a>
+                        ) : (
+                          <Highlighted text={tool.name} query={query} />
+                        )}
                       </h3>
                       <p className={styles.description}>
                         <Highlighted text={tool.description} query={query} />

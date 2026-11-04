@@ -98,10 +98,26 @@
   --banner-top: #63202e;
   --banner-bottom: #2b1420;
 
+  position: relative;
   display: flex;
   flex-direction: column;
   border: 2px solid var(--color-line);
   background: var(--color-surface);
+}
+
+.card:has(.link):hover {
+  border-color: var(--color-accent);
+}
+
+/* Makes the whole card clickable while the link stays on the name. */
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.link {
+  color: inherit;
 }
 
 .card[data-category='character'] {
