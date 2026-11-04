@@ -4,7 +4,7 @@ test('reaches the login from the home page', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Entrar' }).click();
 
-  await expect(page).toHaveURL(/\/conta\/$/);
+  await expect(page).toHaveURL(/\/account\/$/);
 });
 
 test('links the privacy page in the footer', async ({ page }) => {
@@ -22,7 +22,7 @@ test('shows the player photo in the header', async ({ page }) => {
       json: { user: { name: 'lucas', image: '/favicon.svg' } },
     }),
   );
-  await page.goto('/conta/');
+  await page.goto('/account/');
   await expect(page.getByText('Conectado como')).toBeVisible();
   await page.goto('/');
 
@@ -40,6 +40,8 @@ test('adds and lists characters', async ({ page }) => {
     vocation: 'paladin',
     level: 967,
     guild: null,
+    outfit: null,
+    sex: 'male',
   };
 
   await page.route('**/api/auth/get-session', (route) =>
@@ -58,20 +60,20 @@ test('adds and lists characters', async ({ page }) => {
 
     return route.fulfill({ json: characters });
   });
-  await page.goto('/conta/');
+  await page.goto('/account/');
 
   await page.getByLabel('Nome do personagem').fill('Lucas Teste');
   await page.getByRole('button', { name: 'Adicionar personagem' }).click();
 
   await expect(page.getByRole('listitem').getByText('Lucas Teste')).toBeVisible();
-  await expect(page.getByRole('listitem').getByText('RubinOT, Vesperia')).toBeVisible();
+  await expect(page.getByRole('listitem').getByText('RubinOT · Vesperia')).toBeVisible();
 });
 
 test('offers Discord login to visitors', async ({ page }) => {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: null }),
   );
-  await page.goto('/conta/');
+  await page.goto('/account/');
 
   await expect(
     page.getByRole('button', { name: 'Entrar com Discord' }),
@@ -82,7 +84,7 @@ test('keeps the login button when the session never answers', async ({
   page,
 }) => {
   await page.route('**/api/auth/get-session', () => {});
-  await page.goto('/conta/');
+  await page.goto('/account/');
 
   await expect(
     page.getByRole('button', { name: 'Entrar com Discord' }),
@@ -93,7 +95,7 @@ test('shows the signed in player', async ({ page }) => {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: { user: { name: 'lucas' } } }),
   );
-  await page.goto('/conta/');
+  await page.goto('/account/');
 
   await expect(page.getByText('Conectado como')).toContainText('lucas');
   await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();

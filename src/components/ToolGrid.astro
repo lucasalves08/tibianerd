@@ -115,6 +115,20 @@ const categoryNames = Object.fromEntries(
     font-weight: 700;
   }
 
+  .banner :global(.sprite-group) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: 128px;
+  }
+
+  .banner :global(.sprite-group .vocation-walk) {
+    flex: none;
+    scale: 1.7;
+    translate: -20px -20px;
+    animation: vocation-walk 800ms steps(8) infinite;
+  }
+
   .body {
     display: grid;
     gap: var(--space-1);

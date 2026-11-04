@@ -113,6 +113,32 @@
   }
 }
 
+/* Sprite sheet of 8 frames. Each page decides when it walks. */
+.vocation-walk {
+  display: block;
+  inline-size: 64px;
+  block-size: 64px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  /* The character sits in the bottom right of its 64px frame. */
+  translate: -12px -12px;
+}
+
+@keyframes vocation-walk {
+  to {
+    background-position: -512px 0;
+  }
+}
+
+/* Replaces the native arrow, which sticks to the edge of the field. */
+select {
+  appearance: none;
+  padding-inline-end: 2.5rem !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%239aa6bd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-position: right 0.875rem center !important;
+  background-repeat: no-repeat !important;
+}
+
 @layer base {
   /* Astro removes this attribute once a tool is ready. */
   astro-island[ssr] {

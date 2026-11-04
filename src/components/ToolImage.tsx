@@ -1,5 +1,5 @@
 import { toolArt } from '../data/toolArt';
-import { SPRITE_SIZE, toolSprites } from '../data/toolSprites';
+import { SPRITE_SIZE, toolSpriteGroups, toolSprites } from '../data/toolSprites';
 import PixelSprite from './PixelSprite';
 
 export default function ToolImage({
@@ -9,6 +9,22 @@ export default function ToolImage({
   toolId: string;
   className?: string;
 }) {
+  const group = toolSpriteGroups[toolId];
+
+  if (group) {
+    return (
+      <span className="sprite-group">
+        {group.map((file) => (
+          <span
+            key={file}
+            className="vocation-walk"
+            style={{ backgroundImage: `url(/sprites/${file})` }}
+          />
+        ))}
+      </span>
+    );
+  }
+
   const sprite = toolSprites[toolId];
 
   if (!sprite) {

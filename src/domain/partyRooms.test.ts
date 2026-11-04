@@ -4,6 +4,7 @@ import {
   getDiscordIdTime,
   getDiscordProfile,
   getNextRoomCheck,
+  getRoomMessage,
   ROOM_IDLE_MS,
 } from './partyRooms';
 
@@ -44,6 +45,30 @@ describe('getDiscordProfile', () => {
     const name = 'a'.repeat(40);
 
     expect(getDiscordProfile({ ...character, name }).nick).toHaveLength(32);
+  });
+});
+
+describe('getRoomMessage', () => {
+  it('sums up the group', () => {
+    expect(
+      getRoomMessage({
+        purpose: 'boss',
+        note: 'Rotação GT',
+        world: 'Vesperia',
+        vocations: ['paladin', 'druid', 'paladin'],
+      }),
+    ).toBe('Boss · Rotação GT · RP, ED · Vesperia');
+  });
+
+  it('skips an empty note', () => {
+    expect(
+      getRoomMessage({
+        purpose: 'hunt',
+        note: '',
+        world: 'Vesperia',
+        vocations: ['knight'],
+      }),
+    ).toBe('Hunt · EK · Vesperia');
   });
 });
 

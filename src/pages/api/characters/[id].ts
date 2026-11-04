@@ -29,9 +29,9 @@ export const PATCH: APIRoute = async ({ params, request }) => {
       return errorResponse('not-found', 404);
     }
 
-    await updateCharacter(userId, character.id, info);
+    const syncedAt = await updateCharacter(userId, character.id, info);
 
-    return Response.json({ ...character, ...info });
+    return Response.json({ ...character, ...info, syncedAt });
   } catch {
     return errorResponse('unavailable', 502);
   }

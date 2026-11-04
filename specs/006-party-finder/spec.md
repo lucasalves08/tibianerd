@@ -44,7 +44,7 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **FR-005**: The list MUST filter by world, level and vocation.
 - **FR-006**: Users MUST be able to report an ad, and each user MUST have an ad limit.
 - **FR-007**: Users MUST be able to delete their account and data.
-- **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST name the boss.
+- **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST carry a message, since players name bosses and rotations in their own words.
 - **FR-010**: Players MUST ask to join an ad, and the Discord of each side MUST stay hidden until the owner accepts.
 - **FR-011**: After an accepted request, either side MUST be able to open a private Discord room for the party, once both are in the TibiaNerd server.
 - **FR-008**: The site MUST publish a privacy page before login goes live.
@@ -59,15 +59,15 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - Party rooms are private voice channels, which also have text chat, in the Parties category. A room is deleted after 7 days without messages or voice.
 - The server keeps at most 50 rooms. At the limit, the room unused for longest gives way, and a room with people in voice never does.
 - Opening a room sets each member's nickname to the character name and adds roles for the server, vocation and world.
+- The first message of a room sums up the group: goal, note, vocations and world.
 - Rooms are reviewed when a new room is created, since the site has no scheduled job yet.
 
-- Boss names come from TibiaWiki, and players can type others, since RubinOT can differ.
 
 - Every world of Tibia and RubinOT is open, and data from each stays apart. The maintainer plays on Vesperia, so that list is seeded first.
-- Ads last 6 hours, a product choice that can change with real use.
+- Ads last 12 hours, a product choice that can change with real use.
 - A character must exist, since the server fetches it by name. Owners prove it with a code in the character comment, and only verified characters change a Discord nickname or roles.
 - A verified character cannot be registered by another account, and unverified copies are removed.
 - Verified players can apply their character to the Discord server without a party.
 - Character data comes from TibiaData for Tibia and from the public character search of RubinOT, only when a signed-in player asks.
-- The 2/3 level rule comes from Tibia Global and MUST be confirmed on RubinOT before launch.
+- The 2/3 level rule comes from Tibia Global, and the maintainer confirmed RubinOT uses the same rule.
 - RubinOT has a free in-game Huntfinder with solo, duo and party filters, so hunt suggestions are not the core of this feature.

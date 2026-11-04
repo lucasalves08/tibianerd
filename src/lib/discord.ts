@@ -71,10 +71,10 @@ const welcomeMessage = () => `**Boas-vindas ao TibiaNerd!**
 Aqui você encontra gente para caçar no Tibia e no RubinOT.
 
 **Como começar**
-1. Entre em ${env.BETTER_AUTH_URL}/conta/ com o Discord.
+1. Entre em ${env.BETTER_AUTH_URL}/account/ com o Discord.
 2. Cadastre e verifique seu personagem.
 3. Use **Usar no Discord** para receber seu nome e seus cargos.
-4. Procure party em ${env.BETTER_AUTH_URL}/tools/party/
+4. Procure grupo em ${env.BETTER_AUTH_URL}/tools/party/
 
 **Regras**
 - Respeite todo mundo.

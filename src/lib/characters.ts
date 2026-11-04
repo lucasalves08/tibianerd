@@ -5,8 +5,9 @@ import {
 } from '../domain/characters';
 import { db } from './db';
 
-const CHARACTER_COLUMNS = `id, server, name, world, vocation, level, guild,
-  verified_at IS NOT NULL AS isVerified, verification_code AS verificationCode`;
+const CHARACTER_COLUMNS = `id, server, name, world, vocation, level, guild, outfit, sex,
+  verified_at IS NOT NULL AS isVerified, verification_code AS verificationCode,
+  synced_at AS syncedAt`;
 const CODE_BYTES = 3;
 
 type CharacterRow = Omit<Character, 'isVerified'> & { isVerified: number };
@@ -117,30 +118,54 @@ export const createCharacter = async (
   userId: string,
   info: CharacterInfo,
 ): Promise<Character> => {
-  const { server, name, world, vocation, level, guild } = info;
+  const { server, name, world, vocation, level, guild, outfit, sex } = info;
   const id = crypto.randomUUID();
+  const now = Date.now();
 
   await db
     .prepare(
-      'INSERT INTO characters (id, user_id, server, name, world, vocation, level, guild, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO characters (id, user_id, server, name, world, vocation, level, guild, outfit, sex, created_at, synced_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     )
-    .bind(id, userId, server, name, world, vocation, level, guild, Date.now())
+    .bind(
+      id,
+      userId,
+      server,
+      name,
+      world,
+      vocation,
+      level,
+      guild,
+      outfit,
+      sex,
+      now,
+      now,
+    )
     .run();
 
-  return { id, ...info, isVerified: false, verificationCode: null };
+  return {
+    id,
+    ...info,
+    isVerified: false,
+    verificationCode: null,
+    syncedAt: now,
+  };
 };
 
 export const updateCharacter = async (
   userId: string,
   id: string,
-  { world, vocation, level, guild }: CharacterInfo,
-): Promise<void> => {
+  { world, vocation, level, guild, outfit, sex }: CharacterInfo,
+): Promise<number> => {
+  const now = Date.now();
+
   await db
     .prepare(
-      'UPDATE characters SET world = ?, vocation = ?, level = ?, guild = ? WHERE id = ? AND user_id = ?',
+      'UPDATE characters SET world = ?, vocation = ?, level = ?, guild = ?, outfit = ?, sex = ?, synced_at = ? WHERE id = ? AND user_id = ?',
     )
-    .bind(world, vocation, level, guild, id, userId)
+    .bind(world, vocation, level, guild, outfit, sex, now, id, userId)
     .run();
+
+  return now;
 };
 
 export const deleteCharacter = async (

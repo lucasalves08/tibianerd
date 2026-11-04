@@ -13,6 +13,16 @@ const animated = (name: string): ToolSprite => ({
 // Creatures come from the official Tibia Fankit and icons from TibiaWiki. Both
 // are copyrighted by CipSoft. Removing an entry brings back the original
 // drawing from toolArt, in case CipSoft objects.
+export const toolSpriteGroups: Record<string, string[]> = {
+  party: [
+    'vocations/knight-male.png',
+    'vocations/paladin-male.png',
+    'vocations/sorcerer-male.png',
+    'vocations/druid-male.png',
+    'vocations/monk-male.png',
+  ],
+};
+
 export const toolSprites: Record<string, ToolSprite> = {
   charms: { file: 'major-charms.webp' },
   monsters: animated('dragon'),

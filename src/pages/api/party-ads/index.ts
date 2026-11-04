@@ -1,9 +1,5 @@
 import type { APIRoute } from 'astro';
-import {
-  cleanAdNote,
-  cleanBossName,
-  isAdPurpose,
-} from '../../../domain/partyFinder';
+import { cleanAdNote, isAdPurpose } from '../../../domain/partyFinder';
 import { listAds, publishAd } from '../../../lib/partyAds';
 import { errorResponse, getUserId } from '../../../lib/session';
 
@@ -23,24 +19,22 @@ export const POST: APIRoute = async ({ request }) => {
     characterId?: unknown;
     note?: unknown;
     purpose?: unknown;
-    boss?: unknown;
   } | null;
   const purpose = body?.purpose;
-  const boss = purpose === 'boss' ? cleanBossName(body?.boss) : null;
+  const note = cleanAdNote(body?.note);
 
   if (
     typeof body?.characterId !== 'string' ||
     !isAdPurpose(purpose) ||
-    (purpose === 'boss' && !boss)
+    (purpose === 'boss' && !note)
   ) {
     return errorResponse('invalid', 400);
   }
 
   const isPublished = await publishAd(userId, {
     characterId: body.characterId,
-    note: cleanAdNote(body.note),
+    note,
     purpose,
-    boss,
   });
 
   return isPublished

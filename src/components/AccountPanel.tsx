@@ -119,30 +119,15 @@ export default function AccountPanel() {
                 <img
                   className={styles.photo}
                   src={session.user.image}
-                  width="48"
-                  height="48"
+                  width="56"
+                  height="56"
                   alt=""
                 />
               )}
-              <p>
-                Conectado como <strong>{session.user.name}</strong>.
-              </p>
-            </div>
-            <div className={styles.actions}>
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => void leave('sign-out')}
-              >
-                Sair
-              </button>
-              <button
-                className={styles.danger}
-                type="button"
-                onClick={deleteAccount}
-              >
-                Excluir conta
-              </button>
+              <div>
+                <p className={styles.name}>{session.user.name}</p>
+                <p className={styles.muted}>Conectado com o Discord</p>
+              </div>
             </div>
           </>
         ) : (
@@ -167,6 +152,27 @@ export default function AccountPanel() {
         )}
       </section>
       {session && <CharacterManager />}
+      {session && (
+        <details className={styles.options}>
+          <summary>Opções da conta</summary>
+          <div className={styles.actions}>
+            <button
+              className={styles.quiet}
+              type="button"
+              onClick={() => void leave('sign-out')}
+            >
+              Sair da conta
+            </button>
+            <button
+              className={styles.danger}
+              type="button"
+              onClick={deleteAccount}
+            >
+              Excluir conta e dados
+            </button>
+          </div>
+        </details>
+      )}
     </div>
   );
 }

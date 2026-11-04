@@ -51,6 +51,26 @@ export const getDiscordProfile = ({
   roles: [serverRoles[server], vocationRoles[vocation], world],
 });
 
+export const getRoomMessage = ({
+  purpose,
+  note,
+  world,
+  vocations,
+}: {
+  purpose: 'hunt' | 'boss';
+  note: string;
+  world: string;
+  vocations: VocationId[];
+}): string =>
+  [
+    purpose === 'boss' ? 'Boss' : 'Hunt',
+    note,
+    [...new Set(vocations.map((vocation) => vocationRoles[vocation]))].join(', '),
+    world,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
 /** Discord ids carry the moment they were created. */
 export const getDiscordIdTime = (id: string): number =>
   Number((BigInt(id) >> TIMESTAMP_SHIFT) + DISCORD_EPOCH_MS);

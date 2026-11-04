@@ -3,7 +3,6 @@ import {
   AD_LIFETIME_MS,
   canJoinAd,
   cleanAdNote,
-  cleanBossName,
   findCompatibleAds,
   getAdExpiry,
   isAdActive,
@@ -18,7 +17,6 @@ const NOW = 1_000_000;
 const makeAd = (id: string, changes: Partial<PartyAd> = {}): PartyAd => ({
   id,
   purpose: 'hunt',
-  boss: null,
   server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
@@ -38,14 +36,6 @@ describe('cleanAdNote', () => {
 
   it('ignores what is not text', () => {
     expect(cleanAdNote(42)).toBe('');
-  });
-});
-
-describe('cleanBossName', () => {
-  it('cleans the name and refuses an empty one', () => {
-    expect(cleanBossName('  Ferumbras  ')).toBe('Ferumbras');
-    expect(cleanBossName('   ')).toBeNull();
-    expect(cleanBossName(42)).toBeNull();
   });
 });
 

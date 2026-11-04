@@ -1,12 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { DISCORD_INVITE_URL } from '../data/discord';
-import { vocations } from '../domain/characterStats';
 import {
   gameServers,
   type Character,
   type CharacterInfo,
   type GameServerId,
 } from '../domain/characters';
+import PlayerCard from './PlayerCard';
+import Segmented from './Segmented';
 import styles from './CharacterManager.module.css';
 
 const API_URL = '/api/characters';
@@ -31,20 +32,16 @@ const errorFrom = async (response: Response) => {
   return errorMessages[data.error ?? ''] ?? DEFAULT_ERROR;
 };
 
-const vocationName = (id: string) =>
-  vocations.find((vocation) => vocation.id === id)?.name ?? id;
+const formatSync = (time: number) =>
+  new Date(time).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
 const serverName = (id: string) =>
   gameServers.find((server) => server.id === id)?.name ?? id;
-
-const describe = ({ server, vocation, level, world, guild }: CharacterInfo) =>
-  [
-    `${vocationName(vocation)} nível ${level.toLocaleString('pt-BR')}`,
-    `${serverName(server)}, ${world}`,
-    guild,
-  ]
-    .filter(Boolean)
-    .join(' · ');
 
 export default function CharacterManager() {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -255,6 +252,7 @@ export default function CharacterManager() {
   };
 
   return (
+    <>
     <section className={styles.panel} aria-labelledby="characters-title">
       <h2 id="characters-title" className={styles.title}>
         Seus personagens
@@ -269,125 +267,109 @@ export default function CharacterManager() {
       ) : (
         <ul className={styles.list}>
           {characters.map((character) => (
-            <li key={character.id} className={styles.character}>
-              <div className={styles.info}>
-                <strong>
-                  {character.name}
-                  {character.isVerified && (
-                    <span className={styles.verified}> ✓ Verificado</span>
-                  )}
-                </strong>
-                <span className={styles.muted}>{describe(character)}</span>
-              </div>
-              <button
-                className={styles.remove}
-                type="button"
-                aria-label={`Remover ${character.name}`}
-                onClick={() => void removeCharacter(character)}
+            <li key={character.id}>
+              <PlayerCard
+                character={character}
+                isVerified={character.isVerified}
               >
-                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-                  <path
-                    d="M2 2 10 10M10 2 2 10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-              <div className={styles.actions}>
-                <button
-                  className={styles.textButton}
-                  type="button"
-                  aria-label={`Atualizar ${character.name}`}
-                  onClick={() => void refreshCharacter(character)}
-                >
-                  Atualizar
-                </button>
-                {character.isVerified ? (
-                  <button
-                    className={styles.textButton}
-                    type="button"
-                    aria-label={`Usar ${character.name} no Discord`}
-                    onClick={() => void useOnDiscord(character)}
-                  >
-                    Usar no Discord
-                  </button>
-                ) : (
-                  !character.verificationCode && (
-                    <button
-                      className={styles.textButton}
-                      type="button"
-                      aria-label={`Verificar ${character.name}`}
-                      onClick={() => void startVerification(character)}
-                    >
-                      Verificar
-                    </button>
-                  )
-                )}
-              </div>
-              {character.verificationCode && (
-                <div className={styles.verification}>
-                  <p>
-                    Coloque <strong>{character.verificationCode}</strong> no
-                    comentário do personagem, na sua conta do{' '}
-                    {serverName(character.server)}, e confirme.
+                {character.syncedAt && (
+                  <p className={styles.synced}>
+                    Última sincronização: {formatSync(character.syncedAt)}
                   </p>
-                  <button
-                    className={styles.button}
-                    type="button"
-                    onClick={() => void confirmVerification(character)}
-                  >
-                    Já coloquei o código
-                  </button>
+                )}
+                <div className={styles.cardFooter}>
+                  {character.isVerified ? (
+                    <button
+                      className={styles.action}
+                      type="button"
+                      aria-label={`Usar ${character.name} no Discord`}
+                      onClick={() => void useOnDiscord(character)}
+                    >
+                      Usar no Discord
+                    </button>
+                  ) : (
+                    !character.verificationCode && (
+                      <button
+                        className={styles.action}
+                        type="button"
+                        aria-label={`Verificar ${character.name}`}
+                        onClick={() => void startVerification(character)}
+                      >
+                        Verificar personagem
+                      </button>
+                    )
+                  )}
+                  <div className={styles.icons}>
+                      <button
+                        className={styles.icon}
+                        type="button"
+                        title="Atualizar dados"
+                        aria-label={`Atualizar ${character.name}`}
+                        onClick={() => void refreshCharacter(character)}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        className={styles.iconDanger}
+                        type="button"
+                        title="Remover personagem"
+                        aria-label={`Remover ${character.name}`}
+                        onClick={() => void removeCharacter(character)}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                 </div>
-              )}
+                {character.verificationCode && (
+                  <div className={styles.verification}>
+                    <p className={styles.verificationTitle}>
+                      Mostre que o personagem é seu
+                    </p>
+                    <ol className={styles.steps}>
+                      <li>
+                        Copie o código{' '}
+                        <code className={styles.code}>
+                          {character.verificationCode}
+                        </code>
+                      </li>
+                      <li>
+                        No site do {serverName(character.server)}, cole no
+                        comentário do personagem.
+                      </li>
+                      <li>Volte aqui e confirme. Depois pode apagar o código.</li>
+                    </ol>
+                    <button
+                      className={styles.primary}
+                      type="button"
+                      onClick={() => void confirmVerification(character)}
+                    >
+                      Já coloquei o código
+                    </button>
+                  </div>
+                )}
+              </PlayerCard>
             </li>
           ))}
         </ul>
       )}
-
-      <form className={styles.form} onSubmit={(event) => void addCharacter(event)}>
-        <fieldset className={styles.servers}>
-          <legend className={styles.legend}>Onde você joga?</legend>
-          {gameServers.map(({ id, name: label }) => (
-            <label key={id} className={styles.server}>
-              <input
-                type="radio"
-                name="server"
-                checked={server === id}
-                onChange={() => setServer(id)}
-              />
-              {label}
-            </label>
-          ))}
-        </fieldset>
-        <label className={styles.field}>
-          Nome do personagem
-          <input
-            className={styles.input}
-            autoComplete="off"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </label>
-
-        {isSearching && (
-          <p className={styles.muted} role="status">
-            Buscando personagem…
-          </p>
-        )}
-
-        {found && (
-          <div className={styles.found}>
-            <strong>{found.name}</strong>
-            <span className={styles.muted}>{describe(found)}</span>
-          </div>
-        )}
-
-        <button className={styles.button} type="submit" disabled={!found}>
-          Adicionar personagem
-        </button>
-      </form>
 
       {notice && (
         <p className={styles.notice} role="status">
@@ -408,5 +390,44 @@ export default function CharacterManager() {
         </a>
       </p>
     </section>
+
+    <section className={styles.panel} aria-labelledby="add-character-title">
+      <h2 id="add-character-title" className={styles.title}>
+        Adicionar personagem
+      </h2>
+      <form className={styles.form} onSubmit={(event) => void addCharacter(event)}>
+        <Segmented
+          label="Onde você joga?"
+          name="server"
+          options={gameServers}
+          value={server}
+          onChange={setServer}
+        />
+        <label className={styles.field}>
+          Nome do personagem
+          <input
+            className={styles.input}
+            autoComplete="off"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+        </label>
+
+        {isSearching && (
+          <p className={styles.muted} role="status">
+            Buscando personagem…
+          </p>
+        )}
+
+        {found && (
+          <PlayerCard character={found} />
+        )}
+
+        <button className={styles.primary} type="submit" disabled={!found}>
+          Adicionar personagem
+        </button>
+      </form>
+    </section>
+    </>
   );
 }

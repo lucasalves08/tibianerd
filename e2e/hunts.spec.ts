@@ -22,15 +22,15 @@ test('shows spots up to the player level', async ({ page }) => {
 
   await expect(count).not.toHaveText(before ?? '');
 
-  await page.getByLabel('Buscar spot').fill('alchemist quarter');
+  await page.getByLabel('Buscar lugar').fill('alchemist quarter');
 
   await expect(page.getByRole('link', { name: 'Alchemist Quarter' })).toBeVisible();
 });
 
 test('finds a spot by name', async ({ page }) => {
-  await page.getByLabel('Buscar spot').fill('alchemist quarter');
+  await page.getByLabel('Buscar lugar').fill('alchemist quarter');
 
-  await expect(page.getByRole('status')).toHaveText('1 spot encontrado');
+  await expect(page.getByRole('status')).toHaveText('1 lugar encontrado');
   await expect(page.getByText('Melhor dano:')).toBeVisible();
 });
 

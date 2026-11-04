@@ -17,9 +17,10 @@ interface AdRow extends Omit<PartyAdView, 'isMine' | 'isVerified'> {
 export const listAds = async (userId: string | null): Promise<PartyAdView[]> => {
   const { results } = await db
     .prepare(
-      `SELECT a.id, a.purpose, a.boss, c.server, a.world, c.vocation, a.level, a.note,
+      `SELECT a.id, a.purpose, c.server, a.world, c.vocation, a.level, a.note,
         a.created_at AS createdAt, a.expires_at AS expiresAt,
-        c.name AS characterName, c.verified_at IS NOT NULL AS isVerified,
+        c.name AS characterName, c.outfit, c.sex,
+        c.verified_at IS NOT NULL AS isVerified,
         c.user_id = ?1 AS isMine
       FROM party_ads a
       JOIN characters c ON c.id = a.character_id
@@ -45,12 +46,10 @@ export const publishAd = async (
     characterId,
     note,
     purpose,
-    boss,
   }: {
     characterId: string;
     note: string;
     purpose: AdPurpose;
-    boss: string | null;
   },
 ): Promise<boolean> => {
   const character = await db
@@ -72,7 +71,7 @@ export const publishAd = async (
     .run();
   await db
     .prepare(
-      'INSERT INTO party_ads (id, character_id, world, level, note, purpose, boss, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO party_ads (id, character_id, world, level, note, purpose, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
     )
     .bind(
       crypto.randomUUID(),
@@ -81,7 +80,6 @@ export const publishAd = async (
       character.level,
       note,
       purpose,
-      boss,
       now,
       getAdExpiry(now),
     )
