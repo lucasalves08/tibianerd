@@ -5,6 +5,7 @@ import { writeFile } from 'node:fs/promises';
 
 const API_URL = 'https://tibia.fandom.com/api.php';
 const OUTPUT_PATH = 'src/data/creatures.json';
+const BESTIARY_OUTPUT_PATH = 'src/data/bestiary.json';
 const BATCH_SIZE = 50;
 const REQUEST_DELAY_MS = 300;
 const ELEMENTS = ['physical', 'earth', 'fire', 'energy', 'ice', 'death', 'holy'];
@@ -48,9 +49,27 @@ async function listCreatureTitles() {
 }
 
 function readField(wikitext, field) {
-  const match = wikitext.match(new RegExp(`^\\|\\s*${field}\\s*=\\s*(.*)$`, 'mi'));
+  const match = wikitext.match(new RegExp(`^\\|\\s*${field}\\s*=[ \\t]*(.*)$`, 'mi'));
 
   return match?.[1].trim() ?? '';
+}
+
+function parseBestiaryEntry(title, wikitext) {
+  const isBoss = readField(wikitext, 'isboss').toLowerCase() === 'yes';
+  const creatureClass = readField(wikitext, 'bestiaryclass');
+  const difficulty = readField(wikitext, 'bestiarylevel');
+  const occurrence = readField(wikitext, 'occurrence');
+
+  if (isBoss || !creatureClass || !difficulty) {
+    return null;
+  }
+
+  return [
+    readField(wikitext, 'name') || title,
+    creatureClass,
+    difficulty,
+    occurrence === 'Very Rare' ? 1 : 0,
+  ];
 }
 
 function parseCreature(title, wikitext) {
@@ -75,6 +94,7 @@ function parseCreature(title, wikitext) {
 
 async function fetchCreatures(titles) {
   const creatures = [];
+  const bestiary = [];
 
   for (let start = 0; start < titles.length; start += BATCH_SIZE) {
     const data = await queryWiki({
@@ -89,27 +109,51 @@ async function fetchCreatures(titles) {
       const wikitext = page.revisions?.[0].slots.main['*'] ?? '';
       const creature = parseCreature(page.title, wikitext);
 
+      const entry = parseBestiaryEntry(page.title, wikitext);
+
       if (creature) {
         creatures.push(creature);
+      }
+
+      if (entry) {
+        bestiary.push(entry);
       }
     }
   }
 
-  return creatures.sort(([a], [b]) => a.localeCompare(b));
+  const byName = ([a], [b]) => a.localeCompare(b);
+
+  return {
+    creatures: creatures.sort(byName),
+    bestiary: bestiary.sort(byName),
+  };
 }
 
 const titles = await listCreatureTitles();
-const creatures = await fetchCreatures(titles);
+const { creatures, bestiary } = await fetchCreatures(titles);
+const fetchedAt = new Date().toISOString().slice(0, 10);
+
+await writeFile(
+  BESTIARY_OUTPUT_PATH,
+  `${JSON.stringify({
+    source: 'https://tibia.fandom.com',
+    license: 'CC-BY-SA',
+    fetchedAt,
+    entries: bestiary,
+  })}\n`,
+);
 
 await writeFile(
   OUTPUT_PATH,
   `${JSON.stringify({
     source: 'https://tibia.fandom.com',
     license: 'CC-BY-SA',
-    fetchedAt: new Date().toISOString().slice(0, 10),
+    fetchedAt,
     elements: ELEMENTS,
     creatures,
   })}\n`,
 );
 
-console.log(`${creatures.length} of ${titles.length} pages saved`);
+console.log(
+  `${creatures.length} creatures and ${bestiary.length} Bestiary entries saved from ${titles.length} pages`,
+);
