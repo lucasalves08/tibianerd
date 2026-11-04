@@ -10,11 +10,11 @@ describe('toolSprites', () => {
     expect(ids).toEqual(expect.arrayContaining(Object.keys(toolSprites)));
   });
 
-  it.each(Object.values(toolSprites))(
-    'has an animated and a still version of %s',
-    (sprite) => {
-      expect(existsSync(`public/sprites/${sprite}.gif`)).toBe(true);
-      expect(existsSync(`public/sprites/${sprite}.png`)).toBe(true);
-    },
-  );
+  it.each(Object.values(toolSprites))('has the files of $file', (sprite) => {
+    const files = [sprite.file, sprite.stillFile ?? sprite.file];
+
+    for (const file of files) {
+      expect(existsSync(`public/sprites/${file}`)).toBe(true);
+    }
+  });
 });

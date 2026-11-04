@@ -17,13 +17,15 @@ export default function ToolImage({
 
   return (
     <picture>
-      <source
-        srcSet={`/sprites/${sprite}.png`}
-        media="(prefers-reduced-motion: reduce)"
-      />
+      {sprite.stillFile && (
+        <source
+          srcSet={`/sprites/${sprite.stillFile}`}
+          media="(prefers-reduced-motion: reduce)"
+        />
+      )}
       <img
         className={className}
-        src={`/sprites/${sprite}.gif`}
+        src={`/sprites/${sprite.file}`}
         width={SPRITE_SIZE}
         height={SPRITE_SIZE}
         alt=""

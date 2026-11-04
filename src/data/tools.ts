@@ -44,6 +44,7 @@ export const tools: Tool[] = [
     name: 'Calculadora de exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
     keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
+    href: '/tools/exercise',
   },
   {
     id: 'imbuements',
