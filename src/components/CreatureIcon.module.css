@@ -2,6 +2,8 @@
   flex: none;
 }
 
+/* Sprites are not all square, so they keep their shape inside the slot. */
 .image {
   image-rendering: pixelated;
+  object-fit: contain;
 }

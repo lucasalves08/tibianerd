@@ -7,6 +7,7 @@
 .sidebar {
   display: grid;
   gap: var(--space-4);
+  min-inline-size: 0;
 }
 
 .panel {
@@ -14,7 +15,8 @@
   gap: var(--space-4);
   min-inline-size: 0;
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
@@ -27,32 +29,73 @@
 }
 
 .panelTitle {
-  font-size: 1.375rem;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.charmsToggle {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+  min-block-size: var(--tap-target);
+  margin-block: calc(-1 * var(--space-2));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.charmsCount {
+  margin-inline-start: auto;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.charmsToggle svg {
+  flex: none;
+  transition: rotate 150ms;
+}
+
+.charmsToggle[aria-expanded='true'] svg {
+  rotate: 180deg;
 }
 
 .fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .field {
   display: grid;
   gap: var(--space-1);
-  font-size: 0.875rem;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
 .input {
   inline-size: 100%;
-  min-block-size: var(--tap-target);
+  min-block-size: 2.5rem;
   padding-inline: var(--space-3);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-background);
   color: var(--color-text);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--text-md);
   font-weight: 400;
 }
 
@@ -62,16 +105,18 @@ textarea.input {
 }
 
 .input:focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 0;
 }
 
 .button {
-  min-block-size: var(--tap-target);
-  padding-inline: var(--space-4);
-  border: 2px solid var(--color-accent);
+  min-block-size: 2.25rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-small);
   background: transparent;
   color: var(--color-accent);
+  font-size: var(--text-sm);
   font-weight: 700;
   cursor: pointer;
 }
@@ -99,12 +144,17 @@ textarea.input {
   list-style: none;
 }
 
+.charmList {
+  display: grid;
+  gap: var(--space-1);
+  margin-block: calc(-1 * var(--space-1));
+}
+
 .charm {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding-block: var(--space-1);
 }
 
 .charmName {
@@ -112,7 +162,9 @@ textarea.input {
   flex: 1;
   align-items: center;
   gap: var(--space-2);
-  min-block-size: var(--tap-target);
+  min-inline-size: 0;
+  min-block-size: 2.5rem;
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
@@ -121,75 +173,106 @@ textarea.input {
   image-rendering: pixelated;
 }
 
-.pickName {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+.charm[data-off] .charmName {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.charm[data-off] .charmIcon {
+  filter: grayscale(1);
+  opacity: 0.4;
 }
 
 .charmName input {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  flex: none;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
   accent-color: var(--color-accent);
 }
 
+.tiers {
+  display: flex;
+  flex: none;
+  gap: 0.125rem;
+}
+
 .tier {
-  inline-size: var(--tap-target);
-  block-size: var(--tap-target);
-  border: 2px solid var(--color-line);
-  background: var(--color-background);
-  color: var(--color-text);
+  inline-size: 2.25rem;
+  block-size: 2rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
   cursor: pointer;
 }
 
-.tier + .tier {
-  margin-inline-start: -2px;
-}
-
 .tier[aria-pressed='true'] {
-  position: relative;
   border-color: var(--color-accent);
   background: var(--color-accent);
   color: var(--color-on-accent);
-  font-weight: 700;
 }
 
 .tier:disabled {
-  color: var(--color-muted);
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.45;
+}
+
+.search {
+  position: relative;
+  scroll-margin-block-start: 5rem;
 }
 
 .results {
-  max-block-size: 20rem;
-  border: 2px solid var(--color-line);
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline: 0;
+  z-index: 1;
+  max-block-size: 22rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.5);
   overflow-y: auto;
 }
 
 .result {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   inline-size: 100%;
   min-block-size: var(--tap-target);
   padding-inline: var(--space-3);
   border: 0;
-  background: var(--color-background);
+  background: transparent;
   color: var(--color-text);
   text-align: start;
   cursor: pointer;
-  align-items: center;
 }
 
 .result:hover {
   background: var(--color-line);
 }
 
+.resultName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.resultHitPoints {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
 .notice {
-  padding: var(--space-3);
-  border-inline-start: var(--pixel) solid var(--color-marker);
-  background: var(--color-background);
-  font-size: 0.875rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgb(255 225 77 / 0.35);
+  border-radius: var(--radius-small);
+  background: rgb(255 225 77 / 0.07);
+  font-size: var(--text-sm);
 }
 
 .empty {
@@ -198,99 +281,261 @@ textarea.input {
   text-align: center;
 }
 
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-block: var(--space-8);
+  color: var(--color-muted);
+  animation: loading-appear 1ms 150ms backwards;
+}
+
+.loading::before {
+  content: '';
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: 2px solid var(--color-line);
+  border-block-start-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.unused {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
 .creatures {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  padding-block-start: var(--space-2);
 }
 
 .creature {
+  position: relative;
   display: grid;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: 2px solid var(--color-line);
-  background: var(--color-background);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-raised);
 }
 
 .creatureHeader {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.creatureSide {
+  display: grid;
+  flex: none;
+  justify-items: center;
+  gap: var(--space-1);
+  inline-size: 5rem;
+}
+
+.creatureInfo {
+  display: grid;
   gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.creatureTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3);
 }
 
 .creatureName {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: var(--text-lg);
   line-height: 1.2;
 }
 
 .muted {
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .kills {
   display: grid;
-  flex: none;
-  gap: var(--space-1);
-  inline-size: 6rem;
-  font-size: 0.875rem;
-  font-weight: 700;
+  gap: 0.125rem;
+  inline-size: 100%;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.kills .input {
+  min-block-size: 2.25rem;
+  padding-inline: var(--space-1);
+  text-align: center;
 }
 
 .pick {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-3);
   padding: var(--space-3);
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--element-color);
+  border-radius: var(--radius-small);
+  background: color-mix(in srgb, var(--element-color) 12%, var(--color-background));
 }
 
-.pick strong {
-  font-size: 1.125rem;
+.pickIcon {
+  grid-row: span 3;
+  inline-size: 3rem;
+  block-size: 3rem;
+  image-rendering: pixelated;
+}
+
+.pickName {
+  color: var(--element-color);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pickDamage {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.pickDamage small {
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.pickDetail {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
 }
 
 .noPick {
+  align-self: center;
   color: var(--color-muted);
+  text-align: center;
 }
 
 .remove {
-  justify-self: start;
-  min-block-size: var(--tap-target);
-  padding: 0;
+  position: absolute;
+  inset-block-start: calc(-1 * var(--space-2));
+  inset-inline-start: calc(-1 * var(--space-2));
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   border: 0;
-  background: none;
-  color: var(--color-accent);
-  text-decoration: underline;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: #ffffff;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
 }
 
-.summary {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  border: 2px solid var(--color-line);
+.remove::after {
+  content: '';
+  position: absolute;
+  inset: -0.5rem;
 }
 
-.summary strong {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 600;
+.remove:hover {
+  background: var(--color-danger-strong);
+}
+
+.remove:focus-visible {
+  outline-color: var(--color-text);
 }
 
 .footnote {
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
+}
+
+/* On small screens, the long list of charms stays closed until needed. */
+@media (max-width: 59.99rem) {
+  .charmsLabel {
+    display: none;
+  }
+
+  .charmsToggle {
+    display: flex;
+  }
+
+  .charmList[data-collapsed] {
+    display: none;
+  }
+}
+
+/* Resistances take the full card width when the sprite leaves little room. */
+@media (max-width: 43.99rem) {
+  .creatureHeader {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 4.5rem;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .creatureSide,
+  .creatureInfo {
+    display: contents;
+  }
+
+  .creatureTitle {
+    grid-area: 1 / 2;
+  }
+
+  .kills {
+    grid-area: 1 / 3;
+  }
+
+  .creatureResistances {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 44rem) {
+  .creature {
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    align-items: center;
+  }
 }
 
 @media (min-width: 60rem) {
   .layout {
-    grid-template-columns: 24rem minmax(0, 1fr);
+    grid-template-columns: 21rem minmax(0, 1fr);
+  }
+}
+
+@media (pointer: coarse) {
+  .tier {
+    inline-size: var(--tap-target);
+    block-size: var(--tap-target);
+  }
+
+  .button,
+  .input,
+  .kills .input {
+    min-block-size: var(--tap-target);
+  }
+
+  .charmName {
+    min-block-size: var(--tap-target);
   }
 }
 

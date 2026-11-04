@@ -55,33 +55,6 @@ export const toolArt: Record<string, PixelArt> = {
       '................',
     ],
   },
-  bestiary: {
-    palette: {
-      p: '#f4e9cf',
-      s: '#cbb98f',
-      k: '#6b5a3a',
-      r: '#c0392b',
-      d: '#7d1f17',
-    },
-    rows: [
-      '................',
-      '................',
-      '.rppppppsppppppr',
-      '.rpkkkkpspkkkkpr',
-      '.rppppppsppppppr',
-      '.rpkkkkpspkkkkpr',
-      '.rppppppsppppppr',
-      '.rpkkkppspkkkkpr',
-      '.rppppppsppppppr',
-      '.rpkkkkpspkkkppr',
-      '.rppppppsppppppr',
-      '.rrrrrrrdrrrrrrr',
-      '.ddddddddddddddd',
-      '................',
-      '................',
-      '................',
-    ],
-  },
   exercise: {
     palette: { l: '#dfe7ee', m: '#9fb0c0', g: '#ffd166', b: '#7a4a21' },
     rows: [

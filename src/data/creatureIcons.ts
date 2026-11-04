@@ -18,13 +18,16 @@ const classByName = new Map(
   bestiaryEntries.map(({ name, creatureClass }) => [name, creatureClass]),
 );
 
-// Sprites come from the Fankit and cover few creatures, so the Bestiary class
-// icon from TibiaWiki stands in for the others.
-export function getCreatureIcon(name: string): CreatureIconSource | undefined {
-  if (spriteNames.has(name)) {
+// Sprites come from TibiaWiki. A creature added by a data update can arrive
+// before its sprite, so the Bestiary class icon covers that gap.
+export function getCreatureIcon(
+  name: string,
+  sprites: Set<string> = spriteNames,
+): CreatureIconSource | undefined {
+  if (sprites.has(name)) {
     const base = `/sprites/creatures/${toSlug(name)}`;
 
-    return { file: `${base}.gif`, stillFile: `${base}.png` };
+    return { file: `${base}.webp`, stillFile: `${base}-still.webp` };
   }
 
   const creatureClass = classByName.get(name);

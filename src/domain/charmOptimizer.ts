@@ -6,6 +6,7 @@ const LEVEL_CAP_MULTIPLIER = 2;
 const OVERPOWER_DAMAGE = 0.05;
 const OVERFLUX_DAMAGE = 0.025;
 const NEUTRAL_CAP = 0.08;
+const TIE_TOLERANCE = 1e-9;
 
 export interface Character {
   level: number;
@@ -26,7 +27,6 @@ export interface OwnedCharm {
 export interface Assignment extends OwnedCharm {
   creature: Creature;
   damagePerProc: number;
-  damagePerHit: number;
   isLevelCapped: boolean;
 }
 
@@ -42,12 +42,19 @@ function isCapped(creature: Creature, level: number): boolean {
   );
 }
 
+// Overpower and Overflux scale with the character, before the creature's cap.
+function getNeutralDamage(charmId: string, character: Character): number {
+  return charmId === 'overpower'
+    ? character.hitPoints * OVERPOWER_DAMAGE
+    : character.mana * OVERFLUX_DAMAGE;
+}
+
 export function getDamagePerProc(
   charm: Charm,
   creature: Creature,
   character: Character,
 ): number {
-  const { level, hitPoints, mana } = character;
+  const { level } = character;
 
   if (charm.element) {
     const base = creature.hitPoints * ELEMENTAL_DAMAGE;
@@ -58,12 +65,10 @@ export function getDamagePerProc(
     return (capped * creature.modifiers[charm.element]) / 100;
   }
 
-  const damage =
-    charm.id === 'overpower'
-      ? hitPoints * OVERPOWER_DAMAGE
-      : mana * OVERFLUX_DAMAGE;
-
-  return Math.min(damage, creature.hitPoints * NEUTRAL_CAP);
+  return Math.min(
+    getNeutralDamage(charm.id, character),
+    creature.hitPoints * NEUTRAL_CAP,
+  );
 }
 
 // A creature with more hit points takes more hits to kill, so it gets more
@@ -103,6 +108,7 @@ function countBits(value: number): number {
 
 // Each charm goes to one creature and each creature takes one charm. There are
 // few charms, so trying every subset of them per creature is exact and fast.
+// On a tie, earlier creatures in the list take the earlier charms.
 export function optimizeCharms(
   hunt: HuntCreature[],
   owned: OwnedCharm[],
@@ -110,59 +116,56 @@ export function optimizeCharms(
   slots: number,
 ): OptimizedCharms {
   const maskCount = 1 << owned.length;
-  let best = new Float64Array(maskCount).fill(-1);
-  best[0] = 0;
+  const scores = hunt.map((huntCreature) =>
+    owned.map((ownedCharm) => getScore(huntCreature, ownedCharm, character)),
+  );
+  const canUse = (mask: number, charmIndex: number, score: number) =>
+    score > 0 &&
+    !(mask & (1 << charmIndex)) &&
+    countBits(mask) < slots;
 
-  const choices = hunt.map((huntCreature) => {
-    const next = best.slice();
-    const choice = new Int8Array(maskCount).fill(-1);
+  // best[index][mask]: the top score for creatures from index on, with mask used.
+  const best = Array.from(
+    { length: hunt.length + 1 },
+    () => new Float64Array(maskCount),
+  );
 
-    owned.forEach((ownedCharm, charmIndex) => {
-      const bit = 1 << charmIndex;
-      const score = getScore(huntCreature, ownedCharm, character);
+  for (let index = hunt.length - 1; index >= 0; index -= 1) {
+    for (let mask = 0; mask < maskCount; mask += 1) {
+      let top = best[index + 1]![mask]!;
 
-      if (score <= 0) {
-        return;
-      }
-
-      for (let mask = 0; mask < maskCount; mask += 1) {
-        if (best[mask]! < 0 || mask & bit) {
-          continue;
+      scores[index]!.forEach((score, charmIndex) => {
+        if (canUse(mask, charmIndex, score)) {
+          top = Math.max(
+            top,
+            score + best[index + 1]![mask | (1 << charmIndex)]!,
+          );
         }
+      });
 
-        const total = best[mask]! + score;
-
-        if (total > next[mask | bit]!) {
-          next[mask | bit] = total;
-          choice[mask | bit] = charmIndex;
-        }
-      }
-    });
-
-    best = next;
-
-    return choice;
-  });
-
-  let mask = 0;
-
-  for (let candidate = 0; candidate < maskCount; candidate += 1) {
-    if (countBits(candidate) <= slots && best[candidate]! > best[mask]!) {
-      mask = candidate;
+      best[index]![mask] = top;
     }
   }
 
   const assignments: Assignment[] = [];
-  const usedMask = mask;
+  let mask = 0;
 
-  for (let index = hunt.length - 1; index >= 0; index -= 1) {
-    const charmIndex = choices[index]![mask]!;
+  hunt.forEach(({ creature }, index) => {
+    const target = best[index]![mask]!;
+    const charmIndex = scores[index]!.findIndex((score, candidate) => {
+      if (!canUse(mask, candidate, score)) {
+        return false;
+      }
+
+      const total = score + best[index + 1]![mask | (1 << candidate)]!;
+
+      return Math.abs(total - target) <= target * TIE_TOLERANCE;
+    });
 
     if (charmIndex < 0) {
-      continue;
+      return;
     }
 
-    const { creature } = hunt[index]!;
     const ownedCharm = owned[charmIndex]!;
     const damagePerProc = getDamagePerProc(
       ownedCharm.charm,
@@ -170,20 +173,19 @@ export function optimizeCharms(
       character,
     );
 
-    assignments.unshift({
+    assignments.push({
       ...ownedCharm,
       creature,
       damagePerProc,
-      damagePerHit: damagePerProc * tierChances[ownedCharm.tier - 1],
       isLevelCapped:
         Boolean(ownedCharm.charm.element) &&
         isCapped(creature, character.level),
     });
-    mask ^= 1 << charmIndex;
-  }
+    mask |= 1 << charmIndex;
+  });
 
   return {
     assignments,
-    unused: owned.filter((_, index) => !(usedMask & (1 << index))),
+    unused: owned.filter((_, index) => !(mask & (1 << index))),
   };
 }

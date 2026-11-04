@@ -27,15 +27,38 @@
   :root {
     color-scheme: dark;
 
-    --color-background: #0f1220;
-    --color-surface: #181c2e;
-    --color-line: #333a5c;
-    --color-text: #eef0fa;
-    --color-muted: #b0b7d1;
+    --color-background: #0d1220;
+    --color-surface: #151c2f;
+    --color-raised: #1c2540;
+    --color-line: rgb(255 255 255 / 0.1);
+    --color-text: #f1f3f8;
+    --color-muted: #a3abbd;
     --color-accent: #5cc8ff;
-    --color-on-accent: #0f1220;
+    --color-on-accent: #0d1220;
     --color-marker: #ffe14d;
-    --color-on-marker: #0f1220;
+    --color-on-marker: #0d1220;
+    --color-danger: #d63a2f;
+    --color-danger-strong: #f04438;
+
+    --color-physical: #d7dbe4;
+    --color-earth: #7ed36a;
+    --color-fire: #ff9248;
+    --color-energy: #c39bff;
+    --color-ice: #72d4ff;
+    --color-death: #e0717f;
+    --color-holy: #ffd95e;
+    --color-overpower: #ff7a7a;
+    --color-overflux: #6f9dff;
+
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-md: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.5rem;
+    --text-title: clamp(2rem, 6vw, 3rem);
+
+    --radius: 0.625rem;
+    --radius-small: 0.375rem;
 
     /* One tile per SQM, the square that makes up the map in the game. */
     --floor-tiles:
@@ -58,7 +81,58 @@
   }
 }
 
+/* Keeps the old page on screen until the new one paints, so nothing blinks. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+@keyframes loading-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes loading-slide {
+  from {
+    background-position: -40% 0;
+  }
+
+  to {
+    background-position: 140% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 @layer base {
+  /* Astro removes this attribute once a tool is ready. */
+  astro-island[ssr] {
+    pointer-events: none;
+  }
+
+  /* The delay keeps fast loads free of any flash. */
+  astro-island[ssr]::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 3;
+    block-size: 3px;
+    background: linear-gradient(var(--color-accent) 0 0) no-repeat;
+    background-size: 40% 100%;
+    animation:
+      loading-appear 1ms 150ms backwards,
+      loading-slide 1.2s linear 150ms infinite;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -71,19 +145,69 @@
     background: var(--color-background);
     color: var(--color-text);
     font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
     line-height: 1.5;
   }
 
   h1,
-  h2 {
+  h2,
+  h3 {
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
     text-wrap: balance;
+  }
+
+  [data-element='physical'] {
+    --element-color: var(--color-physical);
+  }
+
+  [data-element='earth'] {
+    --element-color: var(--color-earth);
+  }
+
+  [data-element='fire'] {
+    --element-color: var(--color-fire);
+  }
+
+  [data-element='energy'] {
+    --element-color: var(--color-energy);
+  }
+
+  [data-element='ice'] {
+    --element-color: var(--color-ice);
+  }
+
+  [data-element='death'] {
+    --element-color: var(--color-death);
+  }
+
+  [data-element='holy'] {
+    --element-color: var(--color-holy);
+  }
+
+  [data-element='overpower'] {
+    --element-color: var(--color-overpower);
+  }
+
+  [data-element='overflux'] {
+    --element-color: var(--color-overflux);
   }
 
   a {
     color: var(--color-accent);
+  }
+
+  /* Values here are large, so stepping by one with arrows does not help. */
+  input[type='number'] {
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
   }
 
   mark {
@@ -101,6 +225,7 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }

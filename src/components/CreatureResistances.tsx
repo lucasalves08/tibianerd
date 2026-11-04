@@ -13,8 +13,10 @@ const elementNames: Record<Element, string> = {
 
 export default function CreatureResistances({
   creature,
+  showNames = false,
 }: {
   creature: Creature;
+  showNames?: boolean;
 }) {
   return (
     <ul className={styles.list}>
@@ -25,10 +27,22 @@ export default function CreatureResistances({
           <li
             key={element}
             className={styles.item}
+            title={elementNames[element]}
+            data-element={element}
             data-weak={modifier > 100 || undefined}
             data-immune={modifier === 0 || undefined}
           >
-            {elementNames[element]} {modifier}%
+            <img
+              className={styles.icon}
+              src={`/icons/elements/${element}.webp`}
+              width="18"
+              height="18"
+              alt=""
+            />
+            <span className={showNames ? undefined : styles.hidden}>
+              {elementNames[element]}
+            </span>{' '}
+            {modifier}%
           </li>
         );
       })}

@@ -1,0 +1,143 @@
+---
+import { categories, tools } from '../data/tools';
+import ToolImage from './ToolImage';
+
+const categoryNames = Object.fromEntries(
+  categories.map(({ id, name }) => [id, name]),
+);
+---
+
+<ul>
+  {
+    tools.map((tool) => (
+      <li data-tool={tool.id}>
+        <div class="banner">
+          <ToolImage toolId={tool.id} />
+        </div>
+        {tool.isUnderConstruction && <p class="badge">Em construção</p>}
+        <div class="body">
+          <p class="category">{categoryNames[tool.category]}</p>
+          <h2>
+            <a href={tool.href}>{tool.name}</a>
+          </h2>
+          <p class="description">{tool.description}</p>
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    overflow: hidden;
+    transition:
+      border-color 150ms,
+      transform 150ms;
+  }
+
+  li[data-tool='charms'] {
+    --tool-color: var(--color-fire);
+  }
+
+  li[data-tool='monsters'] {
+    --tool-color: var(--color-earth);
+  }
+
+  li[data-tool='exercise'] {
+    --tool-color: var(--color-ice);
+  }
+
+  li[data-tool='imbuements'] {
+    --tool-color: var(--color-energy);
+  }
+
+  li[data-tool='hunting-places'] {
+    --tool-color: var(--color-holy);
+  }
+
+  li:hover {
+    border-color: var(--tool-color);
+    transform: translateY(-2px);
+  }
+
+  .banner {
+    display: grid;
+    place-items: center;
+    background:
+      var(--floor-tiles) 0 0 / var(--grid-size) var(--grid-size),
+      linear-gradient(
+        color-mix(in srgb, var(--tool-color) 38%, var(--color-background)),
+        color-mix(in srgb, var(--tool-color) 12%, var(--color-background))
+      );
+  }
+
+  .banner :global(img),
+  .banner :global(svg) {
+    inline-size: 128px;
+    block-size: 128px;
+    image-rendering: pixelated;
+  }
+
+  .badge {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-end: var(--space-2);
+    padding: 0.125rem var(--space-2);
+    border: 1px solid rgb(255 225 77 / 0.5);
+    border-radius: var(--radius-small);
+    background: var(--color-background);
+    color: rgb(255 225 77);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+  }
+
+  .category {
+    color: var(--tool-color);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: var(--text-lg);
+  }
+
+  /* Makes the whole card clickable while the link stays on the name. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .description {
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+</style>

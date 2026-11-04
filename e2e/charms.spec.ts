@@ -75,6 +75,39 @@ test('remembers the setup after reloading', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Dragon' })).toBeVisible();
 });
 
+test('keeps the charm list closed on phones until asked', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+
+  const wound = page.getByRole('checkbox', { name: 'Wound' });
+  await expect(wound).toBeHidden();
+
+  await page.getByRole('button', { name: /Seus charms/ }).click();
+
+  await expect(wound).toBeVisible();
+});
+
+test('shows a loading state until the tool is ready', async ({ page }) => {
+  let release = () => {};
+  const scriptsHeld = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+
+  await page.route(/\/_astro\/.*\.js/, async (route) => {
+    await scriptsHeld;
+    await route.continue();
+  });
+  await page.goto('/tools/charms', { waitUntil: 'commit' });
+
+  await expect(page.getByRole('status')).toHaveText('Carregando sua caçada…');
+
+  release();
+
+  await expect(page.getByRole('status')).toBeHidden();
+  await expect(page.getByText('Adicione as criaturas')).toBeVisible();
+});
+
 test('does not scroll horizontally', async ({ page }) => {
   await addCreature(page, 'Dragon');
 

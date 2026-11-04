@@ -54,6 +54,13 @@ describe('getDamagePerProc', () => {
     ).toBeCloseTo(1200);
   });
 
+  it('uses 5% of life for Overpower and 2.5% of mana for Overflux', () => {
+    const big = makeCreature('big', 100000, {});
+
+    expect(getDamagePerProc(getCharm('overpower'), big, character)).toBeCloseTo(425);
+    expect(getDamagePerProc(getCharm('overflux'), big, character)).toBeCloseTo(80);
+  });
+
   it('ignores resistances and caps neutral charms at 8% of the creature', () => {
     const creature = makeCreature('tiny', 1000, { physical: 0 });
 
@@ -157,6 +164,66 @@ describe('optimizeCharms', () => {
     ]);
   });
 
+  describe('on a tie', () => {
+    const inferniarchs = [
+      {
+        creature: makeCreature('Brinebrute', 32000, {
+          physical: 80,
+          earth: 110,
+          energy: 85,
+          ice: 90,
+          death: 110,
+        }),
+        kills: 1,
+      },
+      {
+        creature: makeCreature('Hellhunter', 11300, {
+          physical: 90,
+          earth: 115,
+          fire: 105,
+          energy: 85,
+          ice: 95,
+          death: 115,
+        }),
+        kills: 1,
+      },
+      {
+        creature: makeCreature('Spellreaper', 11800, {
+          physical: 90,
+          earth: 115,
+          fire: 105,
+          energy: 0,
+          ice: 90,
+          death: 115,
+        }),
+        kills: 1,
+      },
+    ];
+    const picks = (hunt: typeof inferniarchs) =>
+      optimizeCharms(
+        hunt,
+        own(charms.map(({ id }) => id).slice(0, 7), 2),
+        character,
+        6,
+      ).assignments.map(({ creature, charm }) => [creature.name, charm.id]);
+
+    it('gives the earlier charm to the earlier creature', () => {
+      expect(picks(inferniarchs)).toEqual([
+        ['Brinebrute', 'poison'],
+        ['Hellhunter', 'enflame'],
+        ['Spellreaper', 'curse'],
+      ]);
+    });
+
+    it('follows the order of the list', () => {
+      expect(picks([...inferniarchs].reverse())).toEqual([
+        ['Spellreaper', 'poison'],
+        ['Hellhunter', 'enflame'],
+        ['Brinebrute', 'curse'],
+      ]);
+    });
+  });
+
   it('uses each charm once and each creature once', () => {
     const { assignments, unused } = optimizeCharms(
       [
@@ -206,6 +273,6 @@ describe('optimizeCharms', () => {
     );
 
     expect(assignments[0]?.isLevelCapped).toBe(true);
-    expect(assignments[0]?.damagePerHit).toBeCloseTo(110);
+    expect(assignments[0]?.damagePerProc).toBeCloseTo(1000);
   });
 });

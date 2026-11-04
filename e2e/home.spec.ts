@@ -19,60 +19,50 @@ test('shows the home page without console errors', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Deixa que o nerd faz a conta.' }),
   ).toBeVisible();
-  await expect(page.getByRole('status')).toHaveText('6 ferramentas encontradas');
   expect(errors).toEqual([]);
 });
 
-test('filters tools while ignoring accents', async ({ page }) => {
-  await page.getByLabel('Buscar ferramenta').fill('resistencias');
-
-  await expect(page.getByRole('status')).toHaveText('1 ferramenta encontrada');
-  await expect(
-    page.getByRole('heading', { name: 'Consulta de monstros' }),
-  ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Imbuements' })).toBeHidden();
+test('shows a card for every tool', async ({ page }) => {
+  await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(5);
 });
 
-test('highlights the search term in the results', async ({ page }) => {
-  await page.getByLabel('Buscar ferramenta').fill('gold token');
+test('marks the unfinished tools as under construction', async ({ page }) => {
+  await expect(page.getByText('Em construção')).toHaveCount(4);
 
-  await expect(page.getByRole('status')).toHaveText('1 ferramenta encontrada');
-  await expect(page.locator('mark')).toHaveText(['gold', 'token']);
+  await page.goto('/tools/exercise');
+  await expect(page.getByText('Em construção:')).toBeVisible();
+
+  await page.goto('/tools/charms');
+  await expect(page.getByText('Em construção:')).toBeHidden();
 });
 
-test('filters tools by category', async ({ page }) => {
-  await page.getByRole('button', { name: 'Personagem' }).click();
+test('opens a tool from its card', async ({ page }) => {
+  await page.getByRole('link', { name: 'Hunting places' }).click();
 
-  await expect(page.getByRole('status')).toHaveText('2 ferramentas encontradas');
-  await expect(page.getByRole('heading', { name: 'Bestiary' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Charms' })).toBeHidden();
-
-  await page.getByRole('button', { name: 'Todas' }).click();
-  await expect(page.getByRole('status')).toHaveText('6 ferramentas encontradas');
+  await expect(page).toHaveURL(/\/tools\/hunting-places$/);
 });
 
-test('applies a search typed before hydration', async ({ page }) => {
-  await page.route('**/_astro/**', async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await route.continue();
-  });
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+test('only shows the tool menu inside a tool', async ({ page }) => {
+  await expect(page.getByRole('navigation')).toBeHidden();
 
-  await page.getByLabel('Buscar ferramenta').fill('resistencias');
+  await page.goto('/tools/charms');
 
-  await expect(page.getByRole('status')).toHaveText('1 ferramenta encontrada');
+  await expect(page.getByRole('navigation')).toBeVisible();
 });
 
-test('shows an empty state and recovers after clearing', async ({ page }) => {
-  const searchBox = page.getByLabel('Buscar ferramenta');
+test('opens the tool menu on phones', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
 
-  await searchBox.fill('rashid');
-  await expect(page.getByRole('status')).toHaveText('0 ferramentas encontradas');
-  await expect(page.getByText('Nenhuma ferramenta encontrada.')).toBeVisible();
+  await page.goto('/tools/charms');
+  await page.waitForLoadState('networkidle');
+  const link = page.getByRole('link', { name: 'Exercise' });
 
-  await searchBox.clear();
-  await expect(page.getByRole('status')).toHaveText('6 ferramentas encontradas');
-  await expect(page.getByText('Nenhuma ferramenta encontrada.')).toBeHidden();
+  await expect(link).toBeHidden();
+
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await link.click();
+
+  await expect(page).toHaveURL(/\/tools\/exercise$/);
 });
 
 test('does not scroll horizontally', async ({ page }) => {

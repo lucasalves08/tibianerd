@@ -7,14 +7,15 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
 .field {
   display: grid;
   gap: var(--space-1);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 700;
 }
 
@@ -22,12 +23,12 @@
   inline-size: 100%;
   min-block-size: var(--tap-target);
   padding-inline: var(--space-3);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-background);
   color: var(--color-text);
   font: inherit;
-  font-size: 1rem;
+  font-size: var(--text-md);
   font-weight: 400;
 }
 
@@ -50,12 +51,13 @@
   align-content: start;
   gap: var(--space-2);
   padding: var(--space-3);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
 .name {
-  font-size: 1.25rem;
+  font-size: var(--text-lg);
 }
 
 .name a {
@@ -65,12 +67,13 @@
 .muted,
 .footnote {
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .more {
   min-block-size: var(--tap-target);
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
   background: transparent;
   color: var(--color-accent);
   font-weight: 700;

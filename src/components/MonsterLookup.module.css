@@ -1,7 +1,7 @@
 .tool {
   display: grid;
   gap: var(--space-4);
-  max-inline-size: 44rem;
+  max-inline-size: 52rem;
 }
 
 .label {
@@ -13,12 +13,12 @@
   inline-size: 100%;
   min-block-size: 3.5rem;
   padding-inline: var(--space-4);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
-  font-size: 1.25rem;
+  font-size: var(--text-lg);
 }
 
 .input::placeholder {
@@ -34,7 +34,8 @@
 .results {
   margin: 0;
   padding: 0;
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   list-style: none;
 }
 
@@ -61,7 +62,8 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-background);
 }
 
@@ -73,7 +75,7 @@
 }
 
 .name {
-  font-size: 1.75rem;
+  font-size: var(--text-xl);
 }
 
 .hitPoints {
@@ -82,21 +84,64 @@
 
 .pick {
   padding: var(--space-3);
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
 }
 
 .pickTitle {
   font-family: var(--font-body);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .pick p {
-  font-size: 1.25rem;
+  font-size: var(--text-lg);
   font-weight: 700;
 }
 
 .muted,
 .footnote {
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
+}
+
+.pickList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pickList li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--element-color);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.charmIcon {
+  image-rendering: pixelated;
+}
+
+.bestiary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+}
+
+.bestiary dt {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.bestiary dd {
+  margin: 0;
+  font-weight: 700;
 }

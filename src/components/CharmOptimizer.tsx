@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   charms,
   getCharmIconPath,
@@ -12,27 +12,19 @@ import {
   type OwnedCharm,
 } from '../domain/charmOptimizer';
 import { parseHuntLog } from '../domain/parseHuntLog';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';
 
 const STORAGE_KEY = 'tibianerd:charms';
 const MAX_SEARCH_RESULTS = 60;
-const ALL_SLOTS = charms.length;
 const tiers: Tier[] = [1, 2, 3];
-
-const slotOptions = [
-  { value: 2, label: '2 (Free)' },
-  { value: 6, label: '6 (Premium)' },
-  { value: ALL_SLOTS, label: 'Todos (Charm Expansion)' },
-];
 
 interface SavedState {
   level: number;
   hitPoints: number;
   mana: number;
-  slots: number;
   charmTiers: Record<string, Tier | null>;
   hunt: { name: string; kills: number }[];
 }
@@ -41,13 +33,20 @@ const initialState: SavedState = {
   level: 0,
   hitPoints: 0,
   mana: 0,
-  slots: 6,
   charmTiers: Object.fromEntries(charms.map((charm) => [charm.id, 2])),
   hunt: [],
 };
 
+const LOG_EXAMPLE = `Session: 01:00h
+Killed Monsters:
+  251x darklight striker
+  160x walking pillar`;
+
 const formatNumber = (value: number) =>
   Math.round(value).toLocaleString('pt-BR');
+
+const formatChance = (tier: Tier) =>
+  `${Math.round(tierChances[tier - 1] * 100)}%`;
 
 const findCreature = (name: string): Creature | undefined =>
   creatures.find((creature) => fold(creature.name) === fold(name));
@@ -84,6 +83,8 @@ export default function CharmOptimizer() {
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
+  const [isCharmsOpen, setIsCharmsOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Browser storage can be missing or blocked, and the tool works without it.
   useEffect(() => {
@@ -128,7 +129,7 @@ export default function CharmOptimizer() {
   });
 
   const { assignments, unused } = useMemo(
-    () => optimizeCharms(hunt, owned, state, state.slots),
+    () => optimizeCharms(hunt, owned, state, charms.length),
     [state],
   );
 
@@ -179,16 +180,6 @@ export default function CharmOptimizer() {
     setLog('');
   };
 
-  const needsCharacter =
-    !state.level || !state.hitPoints || !state.mana;
-  const totalKills = hunt.reduce((sum, { kills }) => sum + kills, 0);
-  const expectedDamage = hunt.reduce((sum, { creature, kills }) => {
-    const assignment = assignments.find(
-      (item) => item.creature.name === creature.name,
-    );
-
-    return sum + (assignment?.damagePerHit ?? 0) * kills;
-  }, 0);
 
   return (
     <div className={styles.layout}>
@@ -213,35 +204,54 @@ export default function CharmOptimizer() {
               value={state.mana}
               onChange={(mana) => update({ mana })}
             />
-            <label className={styles.field}>
-              Espaços de charm
-              <select
-                className={styles.input}
-                value={state.slots}
-                onChange={(event) =>
-                  update({ slots: Number(event.target.value) })
-                }
-              >
-                {slotOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
+          {!(state.hitPoints && state.mana) && (
+            <p className={styles.notice}>
+              Sem vida e mana, não conseguimos calcular Overpower e Overflux.
+            </p>
+          )}
         </section>
 
         <section className={styles.panel} aria-labelledby="charms-title">
           <h2 id="charms-title" className={styles.panelTitle}>
-            Seus charms
+            <span className={styles.charmsLabel}>Seus charms</span>
+            <button
+              className={styles.charmsToggle}
+              type="button"
+              aria-expanded={isCharmsOpen}
+              aria-controls="charm-list"
+              onClick={() => setIsCharmsOpen(!isCharmsOpen)}
+            >
+              Seus charms
+              <span className={styles.charmsCount}>
+                Ativos: {owned.length} de {charms.length}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <path
+                  d="M2 4 6 8 10 4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </h2>
-          <ul className={styles.charmList}>
+          <ul
+            id="charm-list"
+            className={styles.charmList}
+            data-collapsed={!isCharmsOpen || undefined}
+          >
             {charms.map((charm) => {
               const tier = state.charmTiers[charm.id] ?? null;
 
               return (
-                <li key={charm.id} className={styles.charm}>
+                <li
+                  key={charm.id}
+                  className={styles.charm}
+                  data-off={tier === null || undefined}
+                >
                   <label className={styles.charmName}>
                     <input
                       type="checkbox"
@@ -259,7 +269,11 @@ export default function CharmOptimizer() {
                     />
                     {charm.name}
                   </label>
-                  <div role="group" aria-label={`Tier de ${charm.name}`}>
+                  <div
+                    className={styles.tiers}
+                    role="group"
+                    aria-label={`Tier de ${charm.name}`}
+                  >
                     {tiers.map((option) => (
                       <button
                         key={option}
@@ -267,9 +281,9 @@ export default function CharmOptimizer() {
                         type="button"
                         disabled={tier === null}
                         aria-pressed={tier === option}
-                        aria-label={`Tier ${option} de ${charm.name}: ${
-                          tierChances[option - 1] * 100
-                        }% de chance`}
+                        aria-label={`Tier ${option} de ${charm.name}: ${formatChance(
+                          option,
+                        )} de chance`}
                         onClick={() => setTier(charm.id, option)}
                       >
                         T{option}
@@ -305,6 +319,7 @@ export default function CharmOptimizer() {
               <textarea
                 className={styles.input}
                 rows={6}
+                placeholder={LOG_EXAMPLE}
                 value={log}
                 onChange={(event) => setLog(event.target.value)}
               />
@@ -315,44 +330,56 @@ export default function CharmOptimizer() {
           </div>
         )}
 
-        <label className={styles.field}>
-          Buscar criatura
-          <input
-            className={styles.input}
-            type="search"
-            autoComplete="off"
-            value={search}
-            aria-expanded={isSearchOpen}
-            onFocus={() => setIsSearchOpen(true)}
-            onClick={() => setIsSearchOpen(true)}
-            onBlur={() => setIsSearchOpen(false)}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setIsSearchOpen(true);
-            }}
-          />
-        </label>
+        <div className={styles.search} ref={searchRef}>
+          <label className={styles.field}>
+            Buscar criatura
+            <input
+              className={styles.input}
+              type="search"
+              autoComplete="off"
+              placeholder="Digite o nome ou veja a lista"
+              value={search}
+              aria-expanded={isSearchOpen}
+              onFocus={() => {
+                setIsSearchOpen(true);
 
-        {isSearchOpen && searchResults.length > 0 && (
-          <ul className={styles.results}>
-            {searchResults.map((creature) => (
-              <li key={creature.name}>
-                <button
-                  className={styles.result}
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => addCreature(creature)}
-                >
-                  <span className={styles.resultName}>
-                    <CreatureIcon name={creature.name} size={32} />
-                    {creature.name}
-                  </span>
-                  <span>{formatNumber(creature.hitPoints)} HP</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                // Keeps the list above the phone keyboard.
+                if (window.matchMedia('(pointer: coarse)').matches) {
+                  searchRef.current?.scrollIntoView({ block: 'start' });
+                }
+              }}
+              onClick={() => setIsSearchOpen(true)}
+              onBlur={() => setIsSearchOpen(false)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setIsSearchOpen(true);
+              }}
+            />
+          </label>
+
+          {isSearchOpen && searchResults.length > 0 && (
+            <ul className={styles.results}>
+              {searchResults.map((creature) => (
+                <li key={creature.name}>
+                  <button
+                    className={styles.result}
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addCreature(creature)}
+                  >
+                    <span className={styles.resultName}>
+                      <CreatureIcon name={creature.name} size={32} />
+                      {creature.name}
+                    </span>
+                    <span className={styles.resultHitPoints}>
+                      {formatNumber(creature.hitPoints)} HP
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {unknownNames.length > 0 && (
           <p className={styles.notice}>
@@ -360,14 +387,11 @@ export default function CharmOptimizer() {
           </p>
         )}
 
-        {needsCharacter && (
-          <p className={styles.notice}>
-            Preencha nível, vida e mana. O nível limita o dano dos charms, e
-            Overpower e Overflux dependem da vida e da mana.
+        {!isLoaded ? (
+          <p className={styles.loading} role="status">
+            Carregando sua caçada…
           </p>
-        )}
-
-        {hunt.length === 0 ? (
+        ) : hunt.length === 0 ? (
           <p className={styles.empty}>
             Adicione as criaturas da sua caçada para ver o melhor charm de cada
             uma.
@@ -382,49 +406,59 @@ export default function CharmOptimizer() {
               return (
                 <li key={creature.name} className={styles.creature}>
                   <div className={styles.creatureHeader}>
-                    <div>
-                      <h3 className={styles.creatureName}>
-                        <CreatureIcon name={creature.name} />
-                        {creature.name}
-                      </h3>
-                      <p className={styles.muted}>
-                        {formatNumber(creature.hitPoints)} HP
-                      </p>
+                    <div className={styles.creatureSide}>
+                      <CreatureIcon name={creature.name} />
+                      <label className={styles.kills}>
+                        Mortes
+                        <input
+                          className={styles.input}
+                          type="number"
+                          inputMode="numeric"
+                          min="1"
+                          value={kills || ''}
+                          onChange={(event) =>
+                            setKills(creature.name, Number(event.target.value))
+                          }
+                        />
+                      </label>
                     </div>
-                    <label className={styles.kills}>
-                      Mortes
-                      <input
-                        className={styles.input}
-                        type="number"
-                        inputMode="numeric"
-                        min="1"
-                        value={kills || ''}
-                        onChange={(event) =>
-                          setKills(creature.name, Number(event.target.value))
-                        }
-                      />
-                    </label>
+                    <div className={styles.creatureInfo}>
+                      <div className={styles.creatureTitle}>
+                        <h3 className={styles.creatureName}>{creature.name}</h3>
+                        <span className={styles.muted}>
+                          {formatNumber(creature.hitPoints)} HP
+                        </span>
+                      </div>
+                      <div className={styles.creatureResistances}>
+                        <CreatureResistances creature={creature} />
+                      </div>
+                    </div>
                   </div>
 
-                  <CreatureResistances creature={creature} />
-
                   {assignment ? (
-                    <p className={styles.pick}>
-                      <strong className={styles.pickName}>
-                        <img
-                          className={styles.charmIcon}
-                          src={getCharmIconPath(assignment.charm.id)}
-                          width="32"
-                          height="32"
-                          alt=""
-                        />
+                    <div
+                      className={styles.pick}
+                      data-element={assignment.charm.element ?? assignment.charm.id}
+                    >
+                      <img
+                        className={styles.pickIcon}
+                        src={getCharmIconPath(assignment.charm.id)}
+                        width="48"
+                        height="48"
+                        alt=""
+                      />
+                      <p className={styles.pickName}>
                         {assignment.charm.name} T{assignment.tier}
-                      </strong>
-                      <span>
-                        {formatNumber(assignment.damagePerProc)} por ativação
-                        {assignment.isLevelCapped && ' (limitado pelo nível)'}
-                      </span>
-                    </p>
+                      </p>
+                      <p className={styles.pickDamage}>
+                        {formatNumber(assignment.damagePerProc)}{' '}
+                        <small>por ativação</small>
+                      </p>
+                      <p className={styles.pickDetail}>
+                        {formatChance(assignment.tier)} de chance
+                        {assignment.isLevelCapped && ' · limitado pelo nível'}
+                      </p>
+                    </div>
                   ) : (
                     <p className={styles.noPick}>Sem charm disponível</p>
                   )}
@@ -435,7 +469,14 @@ export default function CharmOptimizer() {
                     aria-label={`Remover ${creature.name}`}
                     onClick={() => removeCreature(creature.name)}
                   >
-                    Remover
+                    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                      <path
+                        d="M2 2 10 10M10 2 2 10"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   </button>
                 </li>
               );
@@ -443,28 +484,30 @@ export default function CharmOptimizer() {
           </ul>
         )}
 
-        {hunt.length > 0 && (
-          <div className={styles.summary}>
-            <p>
-              <strong>
-                {formatNumber(totalKills ? expectedDamage / totalKills : 0)}
-              </strong>{' '}
-              de dano extra esperado por golpe
-            </p>
-            {unused.length > 0 && (
-              <p className={styles.muted}>
-                Sem uso: {unused.map(({ charm }) => charm.name).join(', ')}.
-              </p>
-            )}
+        {hunt.length > 0 && unused.length > 0 && (
+          <div className={styles.unused}>
+            <span>Sem uso:</span>
+            {unused.map(({ charm }) => (
+              <img
+                key={charm.id}
+                className={styles.charmIcon}
+                src={getCharmIconPath(charm.id)}
+                width="32"
+                height="32"
+                alt={charm.name}
+                title={charm.name}
+              />
+            ))}
           </div>
         )}
 
         <p className={styles.footnote}>
           Considera a resistência, os HP e as mortes de cada criatura. Dano
           elemental é 5% dos HP da criatura, limitado a 2× o seu nível antes da
-          resistência. Valores do Tibia Global, conferidos em{' '}
-          {dataDate.split('-').reverse().join('/')}. O RubinOT pode ter
-          diferenças.
+          resistência. Overpower causa 5% da sua vida e Overflux 2,5% da sua
+          mana, ambos limitados a 8% do HP da criatura. Valores do Tibia Global,
+          conferidos em{' '}
+          {dataDate.split('-').reverse().join('/')}.
         </p>
       </section>
     </div>

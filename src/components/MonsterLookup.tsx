@@ -1,8 +1,10 @@
 import { useEffect, useId, useMemo, useState } from 'react';
-import { charms } from '../data/charms';
+import { bestiaryEntries } from '../data/bestiary';
+import { charms, getCharmIconPath } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
+import { getBestiaryInfo } from '../domain/bestiaryInfo';
 import { getBestElementalCharms } from '../domain/charmOptimizer';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './MonsterLookup.module.css';
@@ -19,6 +21,8 @@ const findByName = (name: string | null): Creature | undefined =>
 
 function CreatureDetails({ creature }: { creature: Creature }) {
   const best = getBestElementalCharms(charms, creature);
+  const bestiary = bestiaryEntries.find(({ name }) => name === creature.name);
+  const bestiaryInfo = bestiary && getBestiaryInfo(bestiary);
 
   return (
     <article className={styles.details}>
@@ -29,14 +33,52 @@ function CreatureDetails({ creature }: { creature: Creature }) {
       <p className={styles.hitPoints}>
         {formatNumber(creature.hitPoints)} HP
       </p>
-      <CreatureResistances creature={creature} />
+      <CreatureResistances creature={creature} showNames />
+      {bestiary && bestiaryInfo && (
+        <dl className={styles.bestiary}>
+          <div>
+            <dt>Charm Points</dt>
+            <dd>{bestiaryInfo.charmPoints}</dd>
+          </div>
+          <div>
+            <dt>Dificuldade</dt>
+            <dd>
+              {bestiary.difficulty}
+              {bestiary.isVeryRare && ' · Very Rare'}
+            </dd>
+          </div>
+          <div>
+            <dt>Classe</dt>
+            <dd>{bestiary.creatureClass}</dd>
+          </div>
+          <div>
+            <dt>Mortes por etapa</dt>
+            <dd>
+              {bestiaryInfo.stageKills.map(formatNumber).join(' / ')}
+            </dd>
+          </div>
+        </dl>
+      )}
       <div className={styles.pick}>
         <h3 className={styles.pickTitle}>Melhor charm elemental</h3>
-        <p>
-          {best.length > 0
-            ? best.map(({ name }) => name).join(', ')
-            : 'Nenhum: a criatura é imune a todos os elementos.'}
-        </p>
+        {best.length > 0 ? (
+          <ul className={styles.pickList}>
+            {best.map(({ id, name, element }) => (
+              <li key={id} data-element={element}>
+                <img
+                  className={styles.charmIcon}
+                  src={getCharmIconPath(id)}
+                  width="32"
+                  height="32"
+                  alt=""
+                />
+                {name}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Nenhum: a criatura é imune a todos os elementos.</p>
+        )}
       </div>
       <p className={styles.muted}>
         Overpower e Overflux ignoram resistências e podem render mais em

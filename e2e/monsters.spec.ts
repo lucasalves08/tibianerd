@@ -21,6 +21,8 @@ test('shows the details of a creature', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Dragon Lord' })).toBeVisible();
   await expect(page.getByText('Gelo 110%')).toBeVisible();
   await expect(page.getByText('Freeze')).toBeVisible();
+  await expect(page.getByText('Charm Points')).toBeVisible();
+  await expect(page.getByText('Mortes por etapa')).toBeVisible();
   await expect(page).toHaveURL(/creature=Dragon/);
 });
 
