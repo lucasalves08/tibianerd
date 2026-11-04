@@ -1,0 +1,32 @@
+---
+import AccountPanel from '../components/AccountPanel';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Sua conta | TibiaNerd"
+  description="Entre com o Discord para cadastrar seus personagens."
+  noindex
+>
+  <section class="intro">
+    <h1>Sua conta</h1>
+    <p>Entre para cadastrar seus personagens e procurar party.</p>
+  </section>
+
+  <AccountPanel client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: var(--text-title);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: var(--text-lg);
+  }
+</style>
