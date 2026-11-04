@@ -46,6 +46,7 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **FR-007**: Users MUST be able to delete their account and data.
 - **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST name the boss.
 - **FR-010**: Players MUST ask to join an ad, and the Discord of each side MUST stay hidden until the owner accepts.
+- **FR-011**: After an accepted request, either side MUST be able to open a private Discord room for the party, once both are in the TibiaNerd server.
 - **FR-008**: The site MUST publish a privacy page before login goes live.
 
 ## Success Criteria
@@ -54,6 +55,8 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **SC-002**: The page works at 375 px with no horizontal scrolling.
 
 ## Assumptions
+
+- Party rooms are private voice channels, which also have text chat, and are deleted after 12 hours, the next time a room is created.
 
 - Boss names come from TibiaWiki, and players can type others, since RubinOT can differ.
 

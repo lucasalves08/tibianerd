@@ -1,4 +1,5 @@
 ---
+import { DISCORD_INVITE_URL } from '../data/discord';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
@@ -36,7 +37,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p>
       Ao publicar um anúncio, seu personagem fica visível para qualquer visitante
       até o anúncio expirar ou você removê-lo. Seu nome e seu perfil no Discord
-      só aparecem para as pessoas envolvidas em um pedido aceito.
+      só aparecem para as pessoas envolvidas em um pedido aceito. Salas de party
+      são criadas no servidor do TibiaNerd e usam seu ID do Discord para liberar
+      o acesso.
     </p>
 
     <h2>Onde ficam</h2>
@@ -49,6 +52,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p>
       Em <a href="/conta/">Sua conta</a>, use Excluir conta. Isso apaga sua conta
       e os dados ligados a ela.
+    </p>
+
+    <h2>Contato</h2>
+    <p>
+      Fale com a gente no <a href={DISCORD_INVITE_URL} rel="noopener">
+        servidor do TibiaNerd no Discord</a
+      >.
     </p>
   </article>
 </BaseLayout>

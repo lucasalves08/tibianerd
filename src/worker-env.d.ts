@@ -5,7 +5,9 @@ declare module 'cloudflare:workers' {
     BETTER_AUTH_SECRET: string;
     BETTER_AUTH_URL: string;
     DB: NonNullable<BetterAuthOptions['database']>;
+    DISCORD_BOT_TOKEN?: string;
     DISCORD_CLIENT_ID: string;
     DISCORD_CLIENT_SECRET: string;
+    DISCORD_GUILD_ID: string;
   };
 }
