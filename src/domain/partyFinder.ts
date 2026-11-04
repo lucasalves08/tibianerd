@@ -1,10 +1,11 @@
-import type { RubinotWorld } from '../data/rubinotWorlds';
 import type { VocationId } from './characterStats';
+import type { GameServerId } from './characters';
 import { getShareRange } from './partyShare';
 
 export interface PartyAd {
   id: string;
-  world: RubinotWorld;
+  server: GameServerId;
+  world: string;
   vocation: VocationId;
   level: number;
   createdAt: number;
@@ -19,6 +20,7 @@ export interface PartyAdView extends PartyAd {
 }
 
 export interface PartySeeker {
+  server: GameServerId;
   world: string;
   level: number;
 }
@@ -44,7 +46,7 @@ export const isAdActive = ({ expiresAt }: PartyAd, now: number): boolean =>
 // Newest first, since a recent ad is more likely to get an answer.
 export const findCompatibleAds = <Ad extends PartyAd>(
   ads: Ad[],
-  { world, level }: PartySeeker,
+  { server, world, level }: PartySeeker,
   now: number,
 ): Ad[] => {
   const { lowest, highest } = getShareRange(level);
@@ -53,6 +55,7 @@ export const findCompatibleAds = <Ad extends PartyAd>(
     .filter(
       (ad) =>
         isAdActive(ad, now) &&
+        ad.server === server &&
         ad.world === world &&
         ad.level >= lowest &&
         ad.level <= highest,

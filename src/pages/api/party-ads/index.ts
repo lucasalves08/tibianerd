@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro';
-import { LAUNCH_WORLD } from '../../../data/rubinotWorlds';
 import { cleanAdNote } from '../../../domain/partyFinder';
 import { listAds, publishAd } from '../../../lib/partyAds';
 import { errorResponse, getUserId } from '../../../lib/session';
@@ -7,7 +6,7 @@ import { errorResponse, getUserId } from '../../../lib/session';
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) =>
-  Response.json(await listAds(LAUNCH_WORLD, await getUserId(request)));
+  Response.json(await listAds(await getUserId(request)));
 
 export const POST: APIRoute = async ({ request }) => {
   const userId = await getUserId(request);

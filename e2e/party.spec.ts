@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 const makeAd = (id: string, level: number, isMine = false) => ({
   id,
+  server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
   level,

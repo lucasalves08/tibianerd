@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { LAUNCH_WORLD, rubinotWorlds } from '../data/rubinotWorlds';
 import {
   AD_LIFETIME_MS,
   cleanAdNote,
@@ -14,6 +13,7 @@ const NOW = 1_000_000;
 
 const makeAd = (id: string, changes: Partial<PartyAd> = {}): PartyAd => ({
   id,
+  server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
   level: 967,
@@ -23,13 +23,6 @@ const makeAd = (id: string, changes: Partial<PartyAd> = {}): PartyAd => ({
 });
 
 const ids = (ads: PartyAd[]) => ads.map(({ id }) => id);
-
-describe('rubinotWorlds', () => {
-  it('lists the 16 worlds and launches on one of them', () => {
-    expect(rubinotWorlds).toHaveLength(16);
-    expect(rubinotWorlds).toContain(LAUNCH_WORLD);
-  });
-});
 
 describe('cleanAdNote', () => {
   it('cleans spaces and cuts long notes', () => {
@@ -52,7 +45,7 @@ describe('ad expiry', () => {
 });
 
 describe('findCompatibleAds', () => {
-  const seeker = { world: 'Vesperia', level: 967 } as const;
+  const seeker = { server: 'rubinot', world: 'Vesperia', level: 967 } as const;
 
   it('keeps the ads inside the level range', () => {
     const ads = [
@@ -70,6 +63,12 @@ describe('findCompatibleAds', () => {
 
   it('never mixes worlds', () => {
     const ads = [makeAd('other', { world: 'Solarian' })];
+
+    expect(findCompatibleAds(ads, seeker, NOW)).toEqual([]);
+  });
+
+  it('never mixes servers', () => {
+    const ads = [makeAd('global', { server: 'tibia' })];
 
     expect(findCompatibleAds(ads, seeker, NOW)).toEqual([]);
   });

@@ -1,8 +1,7 @@
 import { getAdExpiry, type PartyAdView } from '../domain/partyFinder';
-import type { RubinotWorld } from '../data/rubinotWorlds';
 import { db } from './db';
 
-const MAX_LISTED_ADS = 100;
+const MAX_LISTED_ADS = 200;
 /** Product choice: an ad leaves the list after this many reports. */
 const REPORTS_TO_HIDE = 3;
 
@@ -10,25 +9,22 @@ interface AdRow extends Omit<PartyAdView, 'isMine'> {
   isMine: number;
 }
 
-export const listAds = async (
-  world: RubinotWorld,
-  userId: string | null,
-): Promise<PartyAdView[]> => {
+export const listAds = async (userId: string | null): Promise<PartyAdView[]> => {
   const { results } = await db
     .prepare(
-      `SELECT a.id, a.world, c.vocation, a.level, a.note,
+      `SELECT a.id, c.server, a.world, c.vocation, a.level, a.note,
         a.created_at AS createdAt, a.expires_at AS expiresAt,
         c.name AS characterName, u.name AS discord,
         c.user_id = ?1 AS isMine
       FROM party_ads a
       JOIN characters c ON c.id = a.character_id
       JOIN "user" u ON u.id = c.user_id
-      WHERE a.world = ?2 AND a.expires_at > ?3
-        AND (SELECT count(*) FROM party_ad_reports r WHERE r.ad_id = a.id) < ?4
+      WHERE a.expires_at > ?2
+        AND (SELECT count(*) FROM party_ad_reports r WHERE r.ad_id = a.id) < ?3
       ORDER BY a.created_at DESC
-      LIMIT ?5`,
+      LIMIT ?4`,
     )
-    .bind(userId ?? '', world, Date.now(), REPORTS_TO_HIDE, MAX_LISTED_ADS)
+    .bind(userId ?? '', Date.now(), REPORTS_TO_HIDE, MAX_LISTED_ADS)
     .all<AdRow>();
 
   return results.map((row) => ({ ...row, isMine: row.isMine === 1 }));
@@ -41,9 +37,7 @@ export const publishAd = async (
   note: string,
 ): Promise<boolean> => {
   const character = await db
-    .prepare(
-      "SELECT world, level FROM characters WHERE id = ? AND user_id = ? AND server = 'rubinot'",
-    )
+    .prepare('SELECT world, level FROM characters WHERE id = ? AND user_id = ?')
     .bind(characterId, userId)
     .first<{ world: string; level: number }>();
 

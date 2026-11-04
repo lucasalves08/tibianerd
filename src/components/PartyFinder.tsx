@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { LAUNCH_WORLD } from '../data/rubinotWorlds';
 import { vocations } from '../domain/characterStats';
-import type { Character } from '../domain/characters';
+import { gameServers, type Character } from '../domain/characters';
 import {
   findCompatibleAds,
   MAX_NOTE_LENGTH,
@@ -15,6 +14,9 @@ const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 
 const vocationName = (id: string) =>
   vocations.find((vocation) => vocation.id === id)?.name ?? id;
+
+const serverName = (id: string) =>
+  gameServers.find((server) => server.id === id)?.name ?? id;
 
 const formatLevel = (level: number) => level.toLocaleString('pt-BR');
 
@@ -33,6 +35,8 @@ export default function PartyFinder() {
   const [isLoading, setIsLoading] = useState(true);
   const [characterId, setCharacterId] = useState('');
   const [note, setNote] = useState('');
+  const [serverFilter, setServerFilter] = useState('');
+  const [worldFilter, setWorldFilter] = useState('');
   const [error, setError] = useState('');
 
   const loadAds = async () => {
@@ -53,13 +57,10 @@ export default function PartyFinder() {
 
       if (response.ok) {
         const list = (await response.json()) as Character[];
-        const available = list.filter(
-          ({ server, world }) => server === 'rubinot' && world === LAUNCH_WORLD,
-        );
 
         setIsSignedIn(true);
-        setCharacters(available);
-        setCharacterId(available[0]?.id ?? '');
+        setCharacters(list);
+        setCharacterId(list[0]?.id ?? '');
       }
     };
 
@@ -110,9 +111,20 @@ export default function PartyFinder() {
   const character = characters.find(({ id }) => id === characterId);
   const myAds = ads.filter(({ isMine }) => isMine);
   const otherAds = ads.filter(({ isMine }) => !isMine);
+  const worlds = [
+    ...new Set(
+      otherAds
+        .filter(({ server }) => !serverFilter || server === serverFilter)
+        .map(({ world }) => world),
+    ),
+  ].sort();
   const visibleAds = character
     ? findCompatibleAds(otherAds, character, Date.now())
-    : otherAds;
+    : otherAds.filter(
+        ({ server, world }) =>
+          (!serverFilter || server === serverFilter) &&
+          (!worldFilter || world === worldFilter),
+      );
 
   return (
     <div className={styles.layout}>
@@ -134,7 +146,7 @@ export default function PartyFinder() {
           </>
         ) : characters.length === 0 ? (
           <>
-            <p>Cadastre um personagem de {LAUNCH_WORLD} para publicar.</p>
+            <p>Cadastre um personagem para publicar.</p>
             <a className={styles.linkButton} href="/conta/">
               Cadastrar personagem
             </a>
@@ -148,9 +160,9 @@ export default function PartyFinder() {
                 value={characterId}
                 onChange={(event) => setCharacterId(event.target.value)}
               >
-                {characters.map(({ id, name, level }) => (
+                {characters.map(({ id, name, level, world }) => (
                   <option key={id} value={id}>
-                    {name} ({formatLevel(level)})
+                    {name} ({formatLevel(level)}, {world})
                   </option>
                 ))}
               </select>
@@ -207,9 +219,47 @@ export default function PartyFinder() {
       <section className={styles.panel} aria-labelledby="ads-title">
         <h2 id="ads-title" className={styles.panelTitle}>
           {character
-            ? `Dividem XP com ${character.name}`
-            : `Procurando party em ${LAUNCH_WORLD}`}
+            ? `Dividem XP com ${character.name} em ${character.world}`
+            : 'Procurando party'}
         </h2>
+
+        {!character && (
+          <div className={styles.filters}>
+            <label className={styles.field}>
+              Servidor
+              <select
+                className={styles.input}
+                value={serverFilter}
+                onChange={(event) => {
+                  setServerFilter(event.target.value);
+                  setWorldFilter('');
+                }}
+              >
+                <option value="">Todos</option>
+                {gameServers.map(({ id, name }) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={styles.field}>
+              Mundo
+              <select
+                className={styles.input}
+                value={worldFilter}
+                onChange={(event) => setWorldFilter(event.target.value)}
+              >
+                <option value="">Todos</option>
+                {worlds.map((world) => (
+                  <option key={world} value={world}>
+                    {world}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
 
         {!isLoading && visibleAds.length === 0 && (
           <p className={styles.empty}>
@@ -223,7 +273,8 @@ export default function PartyFinder() {
               <div className={styles.adHeader}>
                 <h3 className={styles.adName}>{ad.characterName}</h3>
                 <span className={styles.muted}>
-                  {vocationName(ad.vocation)} · nível {formatLevel(ad.level)}
+                  {vocationName(ad.vocation)} · nível {formatLevel(ad.level)} ·{' '}
+                  {serverName(ad.server)}, {ad.world}
                 </span>
               </div>
               {ad.note && <p>{ad.note}</p>}
@@ -250,8 +301,9 @@ export default function PartyFinder() {
         </ul>
 
         <p className={styles.footnote}>
-          Só para RubinOT, em {LAUNCH_WORLD}. A faixa de nível usa a regra de 2/3
-          do Tibia. Os personagens não são verificados.
+          A faixa de nível usa a regra de 2/3 do Tibia, que pode variar no
+          RubinOT. Os dados vêm dos sites de cada servidor, e o site não confirma
+          quem é o dono do personagem.
         </p>
       </section>
     </div>

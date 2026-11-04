@@ -30,7 +30,7 @@ export const tools: Tool[] = [
     category: 'hunt',
     name: 'Party finder',
     shortName: 'Party',
-    description: 'Encontre quem divide XP com você em Vesperia, no RubinOT.',
+    description: 'Encontre quem divide XP com você no Tibia ou no RubinOT.',
     href: '/tools/party/',
   },
   {
