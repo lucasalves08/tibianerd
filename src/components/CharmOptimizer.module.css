@@ -151,7 +151,9 @@ textarea.input {
 }
 
 .results {
+  max-block-size: 20rem;
   border: 2px solid var(--color-line);
+  overflow-y: auto;
 }
 
 .result {

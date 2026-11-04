@@ -12,6 +12,17 @@ async function addCreature(page: import('@playwright/test').Page, name: string) 
     .click();
 }
 
+test('lists creatures when the search is clicked', async ({ page }) => {
+  await page.getByLabel('Buscar criatura').click();
+
+  await expect(page.getByRole('button', { name: /HP$/ }).first()).toBeVisible();
+
+  await page.getByRole('button', { name: /HP$/ }).first().click();
+
+  await expect(page.getByLabel('Mortes')).toHaveValue('1');
+  await expect(page.getByRole('button', { name: /HP$/ })).toHaveCount(0);
+});
+
 test('opens from the home page', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('link', { name: 'Charms' }).click();

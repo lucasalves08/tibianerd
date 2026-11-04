@@ -17,7 +17,7 @@ import { fold } from '../domain/searchTools';
 import styles from './CharmOptimizer.module.css';
 
 const STORAGE_KEY = 'tibianerd:charms';
-const MAX_SEARCH_RESULTS = 8;
+const MAX_SEARCH_RESULTS = 60;
 const ALL_SLOTS = charms.length;
 const tiers: Tier[] = [1, 2, 3];
 
@@ -110,6 +110,7 @@ export default function CharmOptimizer() {
   const [state, setState] = useState(initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [search, setSearch] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
@@ -163,11 +164,6 @@ export default function CharmOptimizer() {
 
   const searchResults = useMemo(() => {
     const term = fold(search.trim());
-
-    if (!term) {
-      return [];
-    }
-
     const inHunt = new Set(state.hunt.map(({ name }) => name));
 
     return creatures
@@ -181,6 +177,7 @@ export default function CharmOptimizer() {
   const addCreature = (creature: Creature) => {
     update({ hunt: [...state.hunt, { name: creature.name, kills: 1 }] });
     setSearch('');
+    setIsSearchOpen(false);
   };
 
   const setKills = (name: string, kills: number) =>
@@ -348,17 +345,25 @@ export default function CharmOptimizer() {
             type="search"
             autoComplete="off"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            aria-expanded={isSearchOpen}
+            onFocus={() => setIsSearchOpen(true)}
+            onClick={() => setIsSearchOpen(true)}
+            onBlur={() => setIsSearchOpen(false)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setIsSearchOpen(true);
+            }}
           />
         </label>
 
-        {searchResults.length > 0 && (
+        {isSearchOpen && searchResults.length > 0 && (
           <ul className={styles.results}>
             {searchResults.map((creature) => (
               <li key={creature.name}>
                 <button
                   className={styles.result}
                   type="button"
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() => addCreature(creature)}
                 >
                   <span>{creature.name}</span>
