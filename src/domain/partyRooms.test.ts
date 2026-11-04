@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  FIXED_ROOM_IDLE_MS,
   getDiscordIdTime,
+  getDiscordProfile,
   getNextRoomCheck,
   ROOM_IDLE_MS,
 } from './partyRooms';
@@ -16,8 +16,38 @@ describe('getDiscordIdTime', () => {
   });
 });
 
+describe('getDiscordProfile', () => {
+  const character = {
+    server: 'rubinot',
+    name: 'Igdarks soul',
+    world: 'Vesperia',
+    vocation: 'paladin',
+  } as const;
+
+  it('uses the character name and its roles', () => {
+    expect(getDiscordProfile(character)).toEqual({
+      nick: 'Igdarks soul',
+      roles: ['RubinOT', 'RP', 'Vesperia'],
+    });
+  });
+
+  it('maps every vocation', () => {
+    const roles = (['knight', 'sorcerer', 'druid', 'monk'] as const).map(
+      (vocation) => getDiscordProfile({ ...character, vocation }).roles[1],
+    );
+
+    expect(roles).toEqual(['EK', 'MS', 'ED', 'EM']);
+  });
+
+  it('respects the nickname limit', () => {
+    const name = 'a'.repeat(40);
+
+    expect(getDiscordProfile({ ...character, name }).nick).toHaveLength(32);
+  });
+});
+
 describe('getNextRoomCheck', () => {
-  const room = { lastMessageId: null, isInUse: false, isFixed: false };
+  const room = { lastMessageId: null, isInUse: false };
 
   it('keeps a room while someone is in voice', () => {
     expect(getNextRoomCheck({ ...room, isInUse: true, now: 1000 })).toBe(
@@ -28,9 +58,9 @@ describe('getNextRoomCheck', () => {
   it('counts the idle time from the last message', () => {
     const now = MESSAGE_TIME + 1000;
 
-    expect(
-      getNextRoomCheck({ ...room, lastMessageId: MESSAGE_ID, now }),
-    ).toBe(MESSAGE_TIME + ROOM_IDLE_MS);
+    expect(getNextRoomCheck({ ...room, lastMessageId: MESSAGE_ID, now })).toBe(
+      MESSAGE_TIME + ROOM_IDLE_MS,
+    );
   });
 
   it('deletes a room with no use for too long', () => {
@@ -41,17 +71,6 @@ describe('getNextRoomCheck', () => {
         now: MESSAGE_TIME + ROOM_IDLE_MS,
       }),
     ).toBeNull();
-  });
-
-  it('gives a fixed room much longer', () => {
-    expect(
-      getNextRoomCheck({
-        ...room,
-        isFixed: true,
-        lastMessageId: MESSAGE_ID,
-        now: MESSAGE_TIME + ROOM_IDLE_MS,
-      }),
-    ).toBe(MESSAGE_TIME + FIXED_ROOM_IDLE_MS);
   });
 
   it('deletes a room nobody ever used', () => {

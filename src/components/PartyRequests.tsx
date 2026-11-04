@@ -11,6 +11,11 @@ import styles from './PartyFinder.module.css';
 const DISCORD_USER_URL = 'https://discord.com/users/';
 const ROOM_ERROR = 'Não conseguimos abrir a sala agora. Tente de novo.';
 
+const roomErrors: Record<string, string> = {
+  'not-in-server': 'Os dois precisam entrar no servidor do TibiaNerd antes.',
+  full: 'Todas as salas estão ocupadas agora. Tente de novo mais tarde.',
+};
+
 const vocationName = (id: string) =>
   vocations.find((vocation) => vocation.id === id)?.name ?? id;
 
@@ -30,28 +35,20 @@ function DiscordContact({
     return null;
   }
 
-  const openRoom = async (isFixed: boolean) => {
+  const openRoom = async () => {
     setIsOpening(true);
     setMessage('');
 
     try {
       const response = await fetch(`/api/party-requests/${requestId}/room`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isFixed }),
       });
       const data = (await response.json()) as { url?: string; error?: string };
 
-      if (data.url && isFixed) {
-        setMessage('Sala fixa: ela só sai depois de 30 dias sem uso.');
-      } else if (data.url) {
+      if (data.url) {
         window.location.assign(data.url);
       } else {
-        setMessage(
-          data.error === 'not-in-server'
-            ? 'Os dois precisam entrar no servidor do TibiaNerd antes.'
-            : ROOM_ERROR,
-        );
+        setMessage(roomErrors[data.error ?? ''] ?? ROOM_ERROR);
       }
     } catch {
       setMessage(ROOM_ERROR);
@@ -78,17 +75,9 @@ function DiscordContact({
           className={styles.button}
           type="button"
           disabled={isOpening}
-          onClick={() => void openRoom(false)}
+          onClick={() => void openRoom()}
         >
           {isOpening ? 'Abrindo…' : 'Abrir sala da party'}
-        </button>
-        <button
-          className={styles.textButton}
-          type="button"
-          disabled={isOpening}
-          onClick={() => void openRoom(true)}
-        >
-          Manter como party fixa
         </button>
         <a href={DISCORD_INVITE_URL} rel="noopener">
           Entrar no servidor
