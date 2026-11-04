@@ -4,7 +4,12 @@ import { errorResponse, getUserId } from '../../../../lib/session';
 
 export const prerender = false;
 
-const statusCodes = { 'not-in-server': 409, unavailable: 503, 'not-found': 404 };
+const statusCodes = {
+  'not-in-server': 409,
+  full: 503,
+  unavailable: 503,
+  'not-found': 404,
+};
 
 export const POST: APIRoute = async ({ params, request }) => {
   const userId = await getUserId(request);

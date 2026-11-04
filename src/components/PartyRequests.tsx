@@ -11,6 +11,11 @@ import styles from './PartyFinder.module.css';
 const DISCORD_USER_URL = 'https://discord.com/users/';
 const ROOM_ERROR = 'Não conseguimos abrir a sala agora. Tente de novo.';
 
+const roomErrors: Record<string, string> = {
+  'not-in-server': 'Os dois precisam entrar no servidor do TibiaNerd antes.',
+  full: 'Todas as salas estão ocupadas agora. Tente de novo mais tarde.',
+};
+
 const vocationName = (id: string) =>
   vocations.find((vocation) => vocation.id === id)?.name ?? id;
 
@@ -43,11 +48,7 @@ function DiscordContact({
       if (data.url) {
         window.location.assign(data.url);
       } else {
-        setMessage(
-          data.error === 'not-in-server'
-            ? 'Os dois precisam entrar no servidor do TibiaNerd antes.'
-            : ROOM_ERROR,
-        );
+        setMessage(roomErrors[data.error ?? ''] ?? ROOM_ERROR);
       }
     } catch {
       setMessage(ROOM_ERROR);
