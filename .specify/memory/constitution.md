@@ -88,7 +88,7 @@ Rationale: the maintainer is a senior iOS developer who is new to web and wants 
 - Local verification MUST be limited to unit tests with `npm test`.
 - CI MUST run type checks, unit tests, the build and UI tests.
 - Changes MUST reach `main` through a pull request.
-- Every pull request MUST open as a draft and stay one until the maintainer validates it.
+- Every pull request MUST open ready for review, unless the maintainer asks for a draft.
 - A ready pull request merges automatically when CI passes.
 - Pull request descriptions MUST stay short, and screenshots MUST be few and current.
 
@@ -106,4 +106,4 @@ Amendments require the maintainer's approval and a version change:
 Every feature plan MUST check compliance with these principles. Any exception MUST be
 justified in that plan.
 
-**Version**: 1.3.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.4.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
