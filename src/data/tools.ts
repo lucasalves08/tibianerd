@@ -37,6 +37,7 @@ export const tools: Tool[] = [
     name: 'Bestiary',
     description: 'Marque seu progresso e veja o que falta para ganhar pontos.',
     keywords: ['bestiário', 'charm points', 'pontos', 'kills'],
+    href: '/tools/bestiary',
   },
   {
     id: 'exercise',
