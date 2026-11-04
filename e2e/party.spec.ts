@@ -40,6 +40,7 @@ test('shows only ads that share experience with the character', async ({
       json: [
         {
           id: 'c1',
+          server: 'rubinot',
           name: 'Lucas',
           world: 'Vesperia',
           vocation: 'paladin',
