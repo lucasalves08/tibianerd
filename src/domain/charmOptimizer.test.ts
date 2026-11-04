@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { charms, type Tier } from '../data/charms';
 import type { Creature, Element } from '../data/creatures';
 import {
+  getBestElementalCharms,
   getDamagePerProc,
   optimizeCharms,
   type Character,
@@ -64,6 +65,36 @@ describe('getDamagePerProc', () => {
         character,
       ),
     ).toBeCloseTo(80);
+  });
+});
+
+describe('getBestElementalCharms', () => {
+  const best = (creature: Creature) =>
+    getBestElementalCharms(charms, creature).map(({ id }) => id);
+
+  it('picks the highest modifier', () => {
+    expect(best(makeCreature('dragon', 1000, { ice: 110 }))).toEqual(['freeze']);
+  });
+
+  it('keeps every charm that ties', () => {
+    expect(best(makeCreature('tie', 1000, { fire: 120, ice: 120 }))).toEqual([
+      'enflame',
+      'freeze',
+    ]);
+  });
+
+  it('returns nothing when every element is immune', () => {
+    const immune = makeCreature('immune', 1000, {
+      physical: 0,
+      earth: 0,
+      fire: 0,
+      energy: 0,
+      ice: 0,
+      death: 0,
+      holy: 0,
+    });
+
+    expect(best(immune)).toEqual([]);
   });
 });
 
