@@ -11,6 +11,17 @@ test('offers Discord login to visitors', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('keeps the login button when the session never answers', async ({
+  page,
+}) => {
+  await page.route('**/api/auth/get-session', () => {});
+  await page.goto('/conta/');
+
+  await expect(
+    page.getByRole('button', { name: 'Entrar com Discord' }),
+  ).toBeVisible({ timeout: 12000 });
+});
+
 test('shows the signed in player', async ({ page }) => {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: { user: { name: 'lucas' } } }),
