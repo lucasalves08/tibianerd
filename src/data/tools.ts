@@ -51,6 +51,7 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
     keywords: ['imbue', 'imbuing', 'gold token', 'market', 'custo'],
+    href: '/ferramentas/imbuements',
   },
   {
     id: 'hunting-places',
