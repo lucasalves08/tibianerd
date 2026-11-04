@@ -35,8 +35,8 @@ export default function CreatureResistances({
             <img
               className={styles.icon}
               src={`/icons/elements/${element}.webp`}
-              width="16"
-              height="16"
+              width="18"
+              height="18"
               alt=""
             />
             <span className={showNames ? undefined : styles.hidden}>
