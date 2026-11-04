@@ -18,7 +18,7 @@ import {
   type OwnedCharm,
 } from '../domain/charmOptimizer';
 import { parseHuntLog } from '../domain/parseHuntLog';
-import { fold } from '../domain/fold';
+import { fold, foldForSearch } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';
@@ -109,10 +109,10 @@ function SearchPicker<Item>({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const results = useMemo(() => {
-    const term = fold(search.trim());
+    const term = foldForSearch(search.trim());
 
     return items
-      .filter((item) => fold(getName(item)).includes(term))
+      .filter((item) => foldForSearch(getName(item)).includes(term))
       .slice(0, MAX_SEARCH_RESULTS);
   }, [search, items, getName]);
 

@@ -83,6 +83,28 @@ describe('getBestElements', () => {
   });
 });
 
+describe('findHunts with places missing levels', () => {
+  it('keeps a place without any level and lists it last', () => {
+    const found = findHunts(
+      [makeHunt('Azzilon Castle', [null, null, null]), makeHunt('Rats', [8, 8, 8])],
+      { vocation: 'knight', level: 100, city: '', element: '', query: '' },
+      new Map(),
+    );
+
+    expect(found.map(({ name }) => name)).toEqual(['Rats', 'Azzilon Castle']);
+  });
+
+  it('finds a place despite a doubled letter', () => {
+    const found = findHunts(
+      [makeHunt('Azzilon Castle', [null, null, null])],
+      { vocation: 'knight', level: null, city: '', element: '', query: 'azilon' },
+      new Map(),
+    );
+
+    expect(found).toHaveLength(1);
+  });
+});
+
 describe('findHunts', () => {
   const list = [
     makeHunt('Low', [10, 10, 10]),

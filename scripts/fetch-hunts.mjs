@@ -135,15 +135,11 @@ function parseHunt(title, wikitext, spawns) {
     readNumber(wikitext, field),
   );
 
-  if (levels.every((level) => level === null)) {
-    return null;
-  }
-
   const creatureNames = readCreatures(wikitext);
   const coordinates = readCoordinates(wikitext);
 
   return [
-    readField(wikitext, 'name') || title,
+    (readField(wikitext, 'name') || title).replace(/\s*<br\s*\/?>\s*/gi, ': '),
     readField(wikitext, 'city'),
     ...levels,
     readNumber(wikitext, 'expstar'),
