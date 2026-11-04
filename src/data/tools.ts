@@ -30,6 +30,7 @@ export const tools: Tool[] = [
     name: 'Consulta de monstros',
     description: 'HP, resistências e melhor charm de cada criatura.',
     keywords: ['monstro', 'criatura', 'creature', 'resistência', 'hp'],
+    href: '/tools/monsters',
   },
   {
     id: 'bestiary',
@@ -37,6 +38,7 @@ export const tools: Tool[] = [
     name: 'Bestiary',
     description: 'Marque seu progresso e veja o que falta para ganhar pontos.',
     keywords: ['bestiário', 'charm points', 'pontos', 'kills'],
+    href: '/tools/bestiary',
   },
   {
     id: 'exercise',
@@ -44,6 +46,7 @@ export const tools: Tool[] = [
     name: 'Calculadora de exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
     keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
+    href: '/tools/exercise',
   },
   {
     id: 'imbuements',
@@ -51,6 +54,7 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
     keywords: ['imbue', 'imbuing', 'gold token', 'market', 'custo'],
+    href: '/tools/imbuements',
   },
   {
     id: 'hunting-places',

@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { charms, tierChances, type Tier } from '../data/charms';
 import {
-  creatures,
-  dataDate,
-  elements,
-  type Creature,
-  type Element,
-} from '../data/creatures';
+  charms,
+  getCharmIconPath,
+  tierChances,
+  type Tier,
+} from '../data/charms';
+import { creatures, dataDate, type Creature } from '../data/creatures';
 import {
   optimizeCharms,
   type HuntCreature,
@@ -14,22 +13,13 @@ import {
 } from '../domain/charmOptimizer';
 import { parseHuntLog } from '../domain/parseHuntLog';
 import { fold } from '../domain/searchTools';
+import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';
 
 const STORAGE_KEY = 'tibianerd:charms';
-const MAX_SEARCH_RESULTS = 8;
+const MAX_SEARCH_RESULTS = 60;
 const ALL_SLOTS = charms.length;
 const tiers: Tier[] = [1, 2, 3];
-
-const elementNames: Record<Element, string> = {
-  physical: 'Físico',
-  earth: 'Terra',
-  fire: 'Fogo',
-  energy: 'Energia',
-  ice: 'Gelo',
-  death: 'Morte',
-  holy: 'Sagrado',
-};
 
 const slotOptions = [
   { value: 2, label: '2 (Free)' },
@@ -85,31 +75,11 @@ function NumberField({
   );
 }
 
-function Resistances({ creature }: { creature: Creature }) {
-  return (
-    <ul className={styles.resistances}>
-      {elements.map((element) => {
-        const modifier = creature.modifiers[element];
-
-        return (
-          <li
-            key={element}
-            className={styles.resistance}
-            data-weak={modifier > 100 || undefined}
-            data-immune={modifier === 0 || undefined}
-          >
-            {elementNames[element]} {modifier}%
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
 export default function CharmOptimizer() {
   const [state, setState] = useState(initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [search, setSearch] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
@@ -163,11 +133,6 @@ export default function CharmOptimizer() {
 
   const searchResults = useMemo(() => {
     const term = fold(search.trim());
-
-    if (!term) {
-      return [];
-    }
-
     const inHunt = new Set(state.hunt.map(({ name }) => name));
 
     return creatures
@@ -181,6 +146,7 @@ export default function CharmOptimizer() {
   const addCreature = (creature: Creature) => {
     update({ hunt: [...state.hunt, { name: creature.name, kills: 1 }] });
     setSearch('');
+    setIsSearchOpen(false);
   };
 
   const setKills = (name: string, kills: number) =>
@@ -283,6 +249,13 @@ export default function CharmOptimizer() {
                         setTier(charm.id, event.target.checked ? 2 : null)
                       }
                     />
+                    <img
+                      className={styles.charmIcon}
+                      src={getCharmIconPath(charm.id)}
+                      width="32"
+                      height="32"
+                      alt=""
+                    />
                     {charm.name}
                   </label>
                   <div role="group" aria-label={`Tier de ${charm.name}`}>
@@ -348,17 +321,25 @@ export default function CharmOptimizer() {
             type="search"
             autoComplete="off"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            aria-expanded={isSearchOpen}
+            onFocus={() => setIsSearchOpen(true)}
+            onClick={() => setIsSearchOpen(true)}
+            onBlur={() => setIsSearchOpen(false)}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setIsSearchOpen(true);
+            }}
           />
         </label>
 
-        {searchResults.length > 0 && (
+        {isSearchOpen && searchResults.length > 0 && (
           <ul className={styles.results}>
             {searchResults.map((creature) => (
               <li key={creature.name}>
                 <button
                   className={styles.result}
                   type="button"
+                  onMouseDown={(event) => event.preventDefault()}
                   onClick={() => addCreature(creature)}
                 >
                   <span>{creature.name}</span>
@@ -418,11 +399,18 @@ export default function CharmOptimizer() {
                     </label>
                   </div>
 
-                  <Resistances creature={creature} />
+                  <CreatureResistances creature={creature} />
 
                   {assignment ? (
                     <p className={styles.pick}>
-                      <strong>
+                      <strong className={styles.pickName}>
+                        <img
+                          className={styles.charmIcon}
+                          src={getCharmIconPath(assignment.charm.id)}
+                          width="32"
+                          height="32"
+                          alt=""
+                        />
                         {assignment.charm.name} T{assignment.tier}
                       </strong>
                       <span>

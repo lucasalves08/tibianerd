@@ -1,0 +1,31 @@
+---
+import MonsterLookup from '../../components/MonsterLookup';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Consulta de monstros do Tibia | TibiaNerd"
+  description="Veja HP, resistências e o melhor charm elemental de cada criatura do Tibia."
+>
+  <section class="intro">
+    <h1>Consulta de monstros</h1>
+    <p>Veja HP, resistências e o melhor charm de cada criatura.</p>
+  </section>
+
+  <MonsterLookup client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 3rem);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: 1.125rem;
+  }
+</style>
