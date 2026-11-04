@@ -1,0 +1,1087 @@
+{
+  "source": "https://tibia.fandom.com/wiki/Imbuing",
+  "license": "CC-BY-SA",
+  "fetchedAt": "2026-11-04",
+  "imbuements": [
+    {
+      "name": "Bash",
+      "availableFor": "All Helmets and Club Weapons",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Cyclops Toe",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Cyclops Toe",
+              "amount": 20
+            },
+            {
+              "item": "Ogre Nose Ring",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Cyclops Toe",
+              "amount": 20
+            },
+            {
+              "item": "Ogre Nose Ring",
+              "amount": 15
+            },
+            {
+              "item": "Warmaster's Wristguards",
+              "amount": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Blockade",
+      "availableFor": "All Helmets, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Piece of Scarab Shell",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Piece of Scarab Shell",
+              "amount": 20
+            },
+            {
+              "item": "Brimstone Shell",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Piece of Scarab Shell",
+              "amount": 20
+            },
+            {
+              "item": "Brimstone Shell",
+              "amount": 25
+            },
+            {
+              "item": "Frazzle Skin",
+              "amount": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Chop",
+      "availableFor": "All Helmets and Axe Weapons",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Orc Tooth",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Orc Tooth",
+              "amount": 20
+            },
+            {
+              "item": "Battle Stone",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Orc Tooth",
+              "amount": 20
+            },
+            {
+              "item": "Battle Stone",
+              "amount": 25
+            },
+            {
+              "item": "Moohtant Horn",
+              "amount": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cloud Fabric",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Wyvern Talisman",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Wyvern Talisman",
+              "amount": 20
+            },
+            {
+              "item": "Crawler Head Plating",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Wyvern Talisman",
+              "amount": 20
+            },
+            {
+              "item": "Crawler Head Plating",
+              "amount": 15
+            },
+            {
+              "item": "Wyrm Scale",
+              "amount": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Demon Presence",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Cultish Robe",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Cultish Robe",
+              "amount": 25
+            },
+            {
+              "item": "Cultish Mask",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Cultish Robe",
+              "amount": 25
+            },
+            {
+              "item": "Cultish Mask",
+              "amount": 25
+            },
+            {
+              "item": "Hellspawn Tail",
+              "amount": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dragon Hide",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Green Dragon Leather",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Green Dragon Leather",
+              "amount": 20
+            },
+            {
+              "item": "Blazing Bone",
+              "amount": 10
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Green Dragon Leather",
+              "amount": 20
+            },
+            {
+              "item": "Blazing Bone",
+              "amount": 10
+            },
+            {
+              "item": "Draken Sulphur",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Electrify",
+      "availableFor": "Melee Weapons, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Rorc Feather",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Rorc Feather",
+              "amount": 25
+            },
+            {
+              "item": "Peacock Feather Fan",
+              "amount": 5
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Rorc Feather",
+              "amount": 25
+            },
+            {
+              "item": "Peacock Feather Fan",
+              "amount": 5
+            },
+            {
+              "item": "Energy Vein",
+              "amount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Epiphany",
+      "availableFor": "All Wands and mage-exclusive Helmets.",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Elvish Talisman",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Elvish Talisman",
+              "amount": 25
+            },
+            {
+              "item": "Broken Shamanic Staff",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Elvish Talisman",
+              "amount": 25
+            },
+            {
+              "item": "Broken Shamanic Staff",
+              "amount": 15
+            },
+            {
+              "item": "Strand of Medusa Hair",
+              "amount": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Featherweight",
+      "availableFor": "Backpacks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Fairy Wings",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Fairy Wings",
+              "amount": 20
+            },
+            {
+              "item": "Little Bowl of Myrrh",
+              "amount": 10
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Fairy Wings",
+              "amount": 20
+            },
+            {
+              "item": "Little Bowl of Myrrh",
+              "amount": 10
+            },
+            {
+              "item": "Goosebump Leather",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Frost",
+      "availableFor": "Melee Weapons, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Frosty Heart",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Frosty Heart",
+              "amount": 25
+            },
+            {
+              "item": "Seacrest Hair",
+              "amount": 10
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Frosty Heart",
+              "amount": 25
+            },
+            {
+              "item": "Seacrest Hair",
+              "amount": 10
+            },
+            {
+              "item": "Polar Bear Paw",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Lich Shroud",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "2%",
+          "sources": [
+            {
+              "item": "Flask of Embalming Fluid",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "5%",
+          "sources": [
+            {
+              "item": "Flask of Embalming Fluid",
+              "amount": 25
+            },
+            {
+              "item": "Gloom Wolf Fur",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Flask of Embalming Fluid",
+              "amount": 25
+            },
+            {
+              "item": "Gloom Wolf Fur",
+              "amount": 20
+            },
+            {
+              "item": "Mystical Hourglass",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Precision",
+      "availableFor": "All Helmets, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Elven Scouting Glass",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Elven Scouting Glass",
+              "amount": 25
+            },
+            {
+              "item": "Elven Hoof",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Elven Scouting Glass",
+              "amount": 25
+            },
+            {
+              "item": "Elven Hoof",
+              "amount": 20
+            },
+            {
+              "item": "Metal Spike",
+              "amount": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Punch",
+      "availableFor": "All Helmets and Fist Weapons",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Tarantula Egg",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Tarantula Egg",
+              "amount": 25
+            },
+            {
+              "item": "Mantassin Tail",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Tarantula Egg",
+              "amount": 25
+            },
+            {
+              "item": "Mantassin Tail",
+              "amount": 20
+            },
+            {
+              "item": "Gold-Brocaded Cloth",
+              "amount": 15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Quara Scale",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Winter Wolf Fur",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Winter Wolf Fur",
+              "amount": 25
+            },
+            {
+              "item": "Thick Fur",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Winter Wolf Fur",
+              "amount": 25
+            },
+            {
+              "item": "Thick Fur",
+              "amount": 15
+            },
+            {
+              "item": "Deepling Warts",
+              "amount": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reap",
+      "availableFor": "Melee Weapons, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Pile of Grave Earth",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Pile of Grave Earth",
+              "amount": 25
+            },
+            {
+              "item": "Demonic Skeletal Hand",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Pile of Grave Earth",
+              "amount": 25
+            },
+            {
+              "item": "Demonic Skeletal Hand",
+              "amount": 20
+            },
+            {
+              "item": "Petrified Scream",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Scorch",
+      "availableFor": "Melee Weapons, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Fiery Heart",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Fiery Heart",
+              "amount": 25
+            },
+            {
+              "item": "Green Dragon Scale",
+              "amount": 5
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Fiery Heart",
+              "amount": 25
+            },
+            {
+              "item": "Green Dragon Scale",
+              "amount": 5
+            },
+            {
+              "item": "Demon Horn",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Slash",
+      "availableFor": "All Helmets and Sword Weapons",
+      "tiers": [
+        {
+          "effect": "1",
+          "sources": [
+            {
+              "item": "Lion's Mane",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "2",
+          "sources": [
+            {
+              "item": "Lion's Mane",
+              "amount": 25
+            },
+            {
+              "item": "Mooh'tah Shell",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "4",
+          "sources": [
+            {
+              "item": "Lion's Mane",
+              "amount": 25
+            },
+            {
+              "item": "Mooh'tah Shell",
+              "amount": 25
+            },
+            {
+              "item": "War Crystal",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Snake Skin",
+      "availableFor": "All Armors, Shields and Spellbooks",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Piece of Swampling Wood",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Piece of Swampling Wood",
+              "amount": 25
+            },
+            {
+              "item": "Snake Skin",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Piece of Swampling Wood",
+              "amount": 25
+            },
+            {
+              "item": "Snake Skin",
+              "amount": 20
+            },
+            {
+              "item": "Brimstone Fangs",
+              "amount": 10
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Strike",
+      "availableFor": "All Weapons",
+      "tiers": [
+        {
+          "effect": "5% / 5%",
+          "sources": [
+            {
+              "item": "Protective Charm",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "5% / 15%",
+          "sources": [
+            {
+              "item": "Protective Charm",
+              "amount": 20
+            },
+            {
+              "item": "Sabretooth",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "5% / 40%",
+          "sources": [
+            {
+              "item": "Protective Charm",
+              "amount": 20
+            },
+            {
+              "item": "Sabretooth",
+              "amount": 25
+            },
+            {
+              "item": "Vexclaw Talon",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Swiftness",
+      "availableFor": "Boots",
+      "tiers": [
+        {
+          "effect": "10",
+          "sources": [
+            {
+              "item": "Damselfly Wing",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "15",
+          "sources": [
+            {
+              "item": "Damselfly Wing",
+              "amount": 15
+            },
+            {
+              "item": "Compass",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "30",
+          "sources": [
+            {
+              "item": "Damselfly Wing",
+              "amount": 15
+            },
+            {
+              "item": "Compass",
+              "amount": 25
+            },
+            {
+              "item": "Waspoid Wing",
+              "amount": 20
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Vampirism",
+      "availableFor": "All Weapons and Armors",
+      "tiers": [
+        {
+          "effect": "5%",
+          "sources": [
+            {
+              "item": "Vampire Teeth",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Vampire Teeth",
+              "amount": 25
+            },
+            {
+              "item": "Bloody Pincers",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Vampire Teeth",
+              "amount": 25
+            },
+            {
+              "item": "Bloody Pincers",
+              "amount": 15
+            },
+            {
+              "item": "Piece of Dead Brain",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Venom",
+      "availableFor": "Melee Weapons, Bows and Crossbows",
+      "tiers": [
+        {
+          "effect": "10%",
+          "sources": [
+            {
+              "item": "Swamp Grass",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Swamp Grass",
+              "amount": 25
+            },
+            {
+              "item": "Poisonous Slime",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Swamp Grass",
+              "amount": 25
+            },
+            {
+              "item": "Poisonous Slime",
+              "amount": 20
+            },
+            {
+              "item": "Slime Heart",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Vibrancy",
+      "availableFor": "Boots",
+      "tiers": [
+        {
+          "effect": "15%",
+          "sources": [
+            {
+              "item": "Wereboar Hooves",
+              "amount": 20
+            }
+          ]
+        },
+        {
+          "effect": "25%",
+          "sources": [
+            {
+              "item": "Wereboar Hooves",
+              "amount": 20
+            },
+            {
+              "item": "Crystallized Anger",
+              "amount": 15
+            }
+          ]
+        },
+        {
+          "effect": "50%",
+          "sources": [
+            {
+              "item": "Wereboar Hooves",
+              "amount": 20
+            },
+            {
+              "item": "Crystallized Anger",
+              "amount": 15
+            },
+            {
+              "item": "Quill",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Void",
+      "availableFor": "All Weapons and Helmets",
+      "tiers": [
+        {
+          "effect": "3%",
+          "sources": [
+            {
+              "item": "Rope Belt",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "5%",
+          "sources": [
+            {
+              "item": "Rope Belt",
+              "amount": 25
+            },
+            {
+              "item": "Silencer Claws",
+              "amount": 25
+            }
+          ]
+        },
+        {
+          "effect": "8%",
+          "sources": [
+            {
+              "item": "Rope Belt",
+              "amount": 25
+            },
+            {
+              "item": "Silencer Claws",
+              "amount": 25
+            },
+            {
+              "item": "Some Grimeleech Wings",
+              "amount": 5
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

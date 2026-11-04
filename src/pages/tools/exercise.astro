@@ -1,0 +1,31 @@
+---
+import ExerciseCalculator from '../../components/ExerciseCalculator';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Calculadora de exercise weapons para Tibia | TibiaNerd"
+  description="Veja quantas exercise weapons, quanto gold e quanto tempo faltam para a skill que você quer no Tibia."
+>
+  <section class="intro">
+    <h1>Calculadora de exercise</h1>
+    <p>Veja quantas armas, quanto gold e quanto tempo até a sua skill.</p>
+  </section>
+
+  <ExerciseCalculator client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 3rem);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: 1.125rem;
+  }
+</style>

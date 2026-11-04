@@ -46,6 +46,7 @@ export const tools: Tool[] = [
     name: 'Calculadora de exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
     keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
+    href: '/tools/exercise',
   },
   {
     id: 'imbuements',
@@ -53,6 +54,7 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
     keywords: ['imbue', 'imbuing', 'gold token', 'market', 'custo'],
+    href: '/tools/imbuements',
   },
   {
     id: 'hunting-places',
