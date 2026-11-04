@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/ferramentas/exercise');
+  await page.goto('/tools/exercise');
   await page.waitForLoadState('networkidle');
 });
 

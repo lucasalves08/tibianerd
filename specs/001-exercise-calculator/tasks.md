@@ -15,7 +15,7 @@
 
 **Purpose**: add the tool to the site structure.
 
-- [X] T001 Add `href: '/ferramentas/exercise'` to the `exercise` tool in `src/data/tools.ts`
+- [X] T001 Add `href: '/tools/exercise'` to the `exercise` tool in `src/data/tools.ts`
 
 ---
 
@@ -52,7 +52,7 @@
 - [X] T010 [US1] Show charges, time, Global notice, source, review date and the note about levels shown in the game in `src/components/ExerciseCalculator.tsx`
 - [X] T011 [US1] Show guidance for missing input and messages linked to invalid fields in `src/components/ExerciseCalculator.tsx`
 - [X] T012 [P] [US1] Style the tool in `src/components/ExerciseCalculator.module.css`, with tap targets of at least `var(--tap-target)` and no horizontal scrolling at 375 px
-- [X] T013 [US1] Create `src/pages/ferramentas/exercise.astro` with `client:load`, Portuguese title and description
+- [X] T013 [US1] Create `src/pages/tools/exercise.astro` with `client:load`, Portuguese title and description
 - [X] T014 [US1] Save and restore the last values in `src/components/ExerciseCalculator.tsx` under `tibianerd:exercise`, keeping the tool working when storage fails
 - [X] T015 [P] [US1] Write UI tests in `e2e/exercise.spec.ts`: opening from the home page, the Knight reference, invalid target, reload and no horizontal scrolling
 

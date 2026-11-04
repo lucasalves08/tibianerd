@@ -4,7 +4,7 @@
 
 ## Summary
 
-Add a page at `/ferramentas/exercise` that calculates charges, weapons, cost and time from static
+Add a page at `/tools/exercise` that calculates charges, weapons, cost and time from static
 Tibia Global data. Game rules are pure functions, and the page updates as the player types.
 
 ## Technical Context
@@ -45,7 +45,7 @@ src/
   domain/exerciseCalculator.test.ts
   components/ExerciseCalculator.tsx
   components/ExerciseCalculator.module.css
-  pages/ferramentas/exercise.astro
+  pages/tools/exercise.astro
   data/tools.ts                      # adds the link on the home page
 e2e/exercise.spec.ts
 ```

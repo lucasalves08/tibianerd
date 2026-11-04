@@ -1,4 +1,4 @@
-# Page Contract: `/ferramentas/exercise`
+# Page Contract: `/tools/exercise`
 
 ## Inputs
 
