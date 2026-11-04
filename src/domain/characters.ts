@@ -18,6 +18,8 @@ export interface CharacterInfo {
 
 export interface Character extends CharacterInfo {
   id: string;
+  isVerified: boolean;
+  verificationCode: string | null;
 }
 
 /** Product limit against abuse, not a game rule. */
@@ -75,6 +77,7 @@ interface TibiaDataResponse {
       world?: unknown;
       vocation?: unknown;
       level?: unknown;
+      comment?: unknown;
       guild?: { name?: unknown };
     };
   };
@@ -86,9 +89,23 @@ interface RubinotResponse {
     world?: unknown;
     vocation?: unknown;
     level?: unknown;
+    comment?: unknown;
     guild?: { name?: unknown } | string | null;
   } | null;
 }
+
+export const createVerificationCode = (random: Uint8Array): string =>
+  `TN-${[...random].map((byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+
+export const readComment = (
+  server: GameServerId,
+  data: TibiaDataResponse & RubinotResponse,
+): string | null => {
+  const comment =
+    server === 'tibia' ? data.character?.character?.comment : data.player?.comment;
+
+  return typeof comment === 'string' ? comment : null;
+};
 
 export const parseTibiaData = (data: TibiaDataResponse): CharacterInfo | null => {
   const character = data.character?.character;

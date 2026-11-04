@@ -1,6 +1,7 @@
 import {
   parseRubinot,
   parseTibiaData,
+  readComment,
   type CharacterInfo,
   type GameServerId,
 } from '../domain/characters';
@@ -25,12 +26,8 @@ const sources: Record<
 
 export class LookupUnavailableError extends Error {}
 
-export const lookupCharacter = async (
-  server: GameServerId,
-  name: string,
-): Promise<CharacterInfo | null> => {
-  const { url, parse } = sources[server];
-  const response = await fetch(url(name), {
+const fetchCharacter = async (server: GameServerId, name: string) => {
+  const response = await fetch(sources[server].url(name), {
     headers: { 'User-Agent': 'TibiaNerd' },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   }).catch(() => {
@@ -45,5 +42,23 @@ export const lookupCharacter = async (
     throw new LookupUnavailableError();
   }
 
-  return parse((await response.json()) as never);
+  return response.json();
+};
+
+export const lookupCharacter = async (
+  server: GameServerId,
+  name: string,
+): Promise<CharacterInfo | null> => {
+  const data = await fetchCharacter(server, name);
+
+  return data ? sources[server].parse(data as never) : null;
+};
+
+export const lookupComment = async (
+  server: GameServerId,
+  name: string,
+): Promise<string | null> => {
+  const data = await fetchCharacter(server, name);
+
+  return data ? readComment(server, data as never) : null;
 };

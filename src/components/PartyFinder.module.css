@@ -154,6 +154,12 @@
   gap: var(--space-3);
 }
 
+.verified {
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
 .filters {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

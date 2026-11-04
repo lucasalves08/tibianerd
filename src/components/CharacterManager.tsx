@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { DISCORD_INVITE_URL } from '../data/discord';
 import { vocations } from '../domain/characterStats';
 import {
   gameServers,
@@ -16,7 +17,11 @@ const errorMessages: Record<string, string> = {
   duplicate: 'Você já cadastrou este personagem.',
   'not-found': 'Não encontramos este personagem.',
   limit: 'Você atingiu o limite de personagens.',
-  unavailable: 'O servidor do jogo não respondeu. Tente de novo.',
+  unavailable: 'O serviço não respondeu. Tente de novo.',
+  claimed: 'Este personagem já foi verificado por outra conta.',
+  'code-not-found':
+    'Ainda não achamos o código. Salve o comentário e tente de novo em alguns minutos.',
+  'not-in-server': 'Entre no servidor do Discord e tente de novo.',
 };
 const DEFAULT_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 
@@ -49,6 +54,7 @@ export default function CharacterManager() {
   const [found, setFound] = useState<CharacterInfo | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
 
   useEffect(() => {
     fetch(API_URL)
@@ -158,6 +164,76 @@ export default function CharacterManager() {
     }
   };
 
+  const startVerification = async ({ id }: Character) => {
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/${id}/verification`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        setError(await errorFrom(response));
+        return;
+      }
+
+      const { code } = (await response.json()) as { code: string };
+
+      setCharacters(
+        characters.map((item) =>
+          item.id === id ? { ...item, verificationCode: code } : item,
+        ),
+      );
+    } catch {
+      setError(DEFAULT_ERROR);
+    }
+  };
+
+  const confirmVerification = async ({ id }: Character) => {
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/${id}/verification`, {
+        method: 'PUT',
+      });
+
+      if (!response.ok) {
+        setError(await errorFrom(response));
+        return;
+      }
+
+      setCharacters(
+        characters.map((item) =>
+          item.id === id
+            ? { ...item, isVerified: true, verificationCode: null }
+            : item,
+        ),
+      );
+      setNotice('Personagem verificado. Pode tirar o código do comentário.');
+    } catch {
+      setError(DEFAULT_ERROR);
+    }
+  };
+
+  const useOnDiscord = async ({ id, name: characterName }: Character) => {
+    setError('');
+    setNotice('');
+
+    try {
+      const response = await fetch(`${API_URL}/${id}/discord`, {
+        method: 'POST',
+      });
+
+      if (response.ok) {
+        setNotice(`Seu perfil no Discord agora mostra ${characterName}.`);
+      } else {
+        setError(await errorFrom(response));
+      }
+    } catch {
+      setError(DEFAULT_ERROR);
+    }
+  };
+
   const removeCharacter = async ({ id, name: characterName }: Character) => {
     if (!window.confirm(`Remover ${characterName}?`)) {
       return;
@@ -195,17 +271,14 @@ export default function CharacterManager() {
           {characters.map((character) => (
             <li key={character.id} className={styles.character}>
               <div className={styles.info}>
-                <strong>{character.name}</strong>
+                <strong>
+                  {character.name}
+                  {character.isVerified && (
+                    <span className={styles.verified}> ✓ Verificado</span>
+                  )}
+                </strong>
                 <span className={styles.muted}>{describe(character)}</span>
               </div>
-              <button
-                className={styles.textButton}
-                type="button"
-                aria-label={`Atualizar ${character.name}`}
-                onClick={() => void refreshCharacter(character)}
-              >
-                Atualizar
-              </button>
               <button
                 className={styles.remove}
                 type="button"
@@ -221,6 +294,53 @@ export default function CharacterManager() {
                   />
                 </svg>
               </button>
+              <div className={styles.actions}>
+                <button
+                  className={styles.textButton}
+                  type="button"
+                  aria-label={`Atualizar ${character.name}`}
+                  onClick={() => void refreshCharacter(character)}
+                >
+                  Atualizar
+                </button>
+                {character.isVerified ? (
+                  <button
+                    className={styles.textButton}
+                    type="button"
+                    aria-label={`Usar ${character.name} no Discord`}
+                    onClick={() => void useOnDiscord(character)}
+                  >
+                    Usar no Discord
+                  </button>
+                ) : (
+                  !character.verificationCode && (
+                    <button
+                      className={styles.textButton}
+                      type="button"
+                      aria-label={`Verificar ${character.name}`}
+                      onClick={() => void startVerification(character)}
+                    >
+                      Verificar
+                    </button>
+                  )
+                )}
+              </div>
+              {character.verificationCode && (
+                <div className={styles.verification}>
+                  <p>
+                    Coloque <strong>{character.verificationCode}</strong> no
+                    comentário do personagem, na sua conta do{' '}
+                    {serverName(character.server)}, e confirme.
+                  </p>
+                  <button
+                    className={styles.button}
+                    type="button"
+                    onClick={() => void confirmVerification(character)}
+                  >
+                    Já coloquei o código
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -269,11 +389,24 @@ export default function CharacterManager() {
         </button>
       </form>
 
+      {notice && (
+        <p className={styles.notice} role="status">
+          {notice}
+        </p>
+      )}
+
       {error && (
         <p className={styles.error} role="alert">
           {error}
         </p>
       )}
+
+      <p className={styles.muted}>
+        Quer conversar com a comunidade?{' '}
+        <a href={DISCORD_INVITE_URL} rel="noopener">
+          Entrar no Discord
+        </a>
+      </p>
     </section>
   );
 }

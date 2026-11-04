@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   cleanCharacterName,
+  createVerificationCode,
   isGameServer,
   parseRubinot,
   parseTibiaData,
+  readComment,
 } from './characters';
 
 describe('cleanCharacterName', () => {
@@ -24,6 +26,27 @@ describe('isGameServer', () => {
   it('accepts only the known servers', () => {
     expect(isGameServer('rubinot')).toBe(true);
     expect(isGameServer('antica')).toBe(false);
+  });
+});
+
+describe('createVerificationCode', () => {
+  it('builds a readable code', () => {
+    expect(createVerificationCode(new Uint8Array([171, 12, 255]))).toBe(
+      'TN-AB0CFF',
+    );
+  });
+});
+
+describe('readComment', () => {
+  it('reads the comment of each server', () => {
+    expect(
+      readComment('tibia', { character: { character: { comment: 'TN-1' } } }),
+    ).toBe('TN-1');
+    expect(readComment('rubinot', { player: { comment: 'TN-2' } })).toBe('TN-2');
+  });
+
+  it('finds nothing without a comment', () => {
+    expect(readComment('rubinot', {})).toBeNull();
   });
 });
 

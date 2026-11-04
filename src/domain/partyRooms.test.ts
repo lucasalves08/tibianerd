@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  fixedRoles,
   getDiscordIdTime,
   getDiscordProfile,
   getNextRoomCheck,
@@ -43,6 +44,20 @@ describe('getDiscordProfile', () => {
     const name = 'a'.repeat(40);
 
     expect(getDiscordProfile({ ...character, name }).nick).toHaveLength(32);
+  });
+});
+
+describe('fixedRoles', () => {
+  it('keeps vocations above servers', () => {
+    expect(fixedRoles.map(({ name }) => name)).toEqual([
+      'EK',
+      'RP',
+      'MS',
+      'ED',
+      'EM',
+      'RubinOT',
+      'Tibia',
+    ]);
   });
 });
 

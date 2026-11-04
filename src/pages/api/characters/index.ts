@@ -8,6 +8,7 @@ import { lookupCharacter } from '../../../lib/characterLookup';
 import {
   countCharacters,
   createCharacter,
+  isClaimedByOther,
   listCharacters,
 } from '../../../lib/characters';
 import { errorResponse, getUserId } from '../../../lib/session';
@@ -50,6 +51,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!info) {
       return errorResponse('not-found', 404);
+    }
+
+    if (await isClaimedByOther(userId, info)) {
+      return errorResponse('claimed', 409);
     }
 
     return Response.json(await createCharacter(userId, info), { status: 201 });

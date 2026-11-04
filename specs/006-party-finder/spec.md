@@ -65,7 +65,9 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 
 - Every world of Tibia and RubinOT is open, and data from each stays apart. The maintainer plays on Vesperia, so that list is seeded first.
 - Ads last 6 hours, a product choice that can change with real use.
-- Characters are not verified in the first version, but they must exist: the server fetches them by name.
+- A character must exist, since the server fetches it by name. Owners prove it with a code in the character comment, and only verified characters change a Discord nickname or roles.
+- A verified character cannot be registered by another account, and unverified copies are removed.
+- Verified players can apply their character to the Discord server without a party.
 - Character data comes from TibiaData for Tibia and from the public character search of RubinOT, only when a signed-in player asks.
 - The 2/3 level rule comes from Tibia Global and MUST be confirmed on RubinOT before launch.
 - RubinOT has a free in-game Huntfinder with solo, duo and party filters, so hunt suggestions are not the core of this feature.
