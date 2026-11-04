@@ -39,7 +39,7 @@ test('marks the unfinished tools as under construction', async ({ page }) => {
 test('opens a tool from its card', async ({ page }) => {
   await page.getByRole('link', { name: 'Hunting places' }).click();
 
-  await expect(page).toHaveURL(/\/tools\/hunting-places$/);
+  await expect(page).toHaveURL(/\/tools\/hunting-places\/$/);
 });
 
 test('only shows the tool menu inside a tool', async ({ page }) => {
@@ -62,7 +62,7 @@ test('opens the tool menu on phones', async ({ page }, testInfo) => {
   await page.getByRole('button', { name: 'Menu' }).click();
   await link.click();
 
-  await expect(page).toHaveURL(/\/tools\/exercise$/);
+  await expect(page).toHaveURL(/\/tools\/exercise\/$/);
 });
 
 test('does not scroll horizontally', async ({ page }) => {

@@ -2,6 +2,7 @@
 import { tools } from '../data/tools';
 
 const { pathname } = Astro.url;
+const currentPath = `${pathname.replace(/\/$/, '')}/`;
 // The home cards already list every tool.
 const isHome = pathname === '/';
 ---
@@ -26,7 +27,7 @@ const isHome = pathname === '/';
             <li>
               <a
                 href={href}
-                aria-current={pathname.startsWith(href) ? 'page' : undefined}
+                aria-current={currentPath.startsWith(href) ? 'page' : undefined}
               >
                 {shortName}
               </a>

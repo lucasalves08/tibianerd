@@ -11,9 +11,10 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const currentPath = `${Astro.url.pathname.replace(/\/$/, '')}/`;
 const isUnderConstruction = tools.some(
   ({ href, isUnderConstruction }) =>
-    isUnderConstruction && Astro.url.pathname.startsWith(href),
+    isUnderConstruction && currentPath.startsWith(href),
 );
 ---
 

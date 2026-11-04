@@ -23,7 +23,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     shortName: 'Charms',
     description: 'O melhor charm para cada criatura da sua caçada.',
-    href: '/tools/charms',
+    href: '/tools/charms/',
   },
   {
     id: 'monsters',
@@ -31,7 +31,7 @@ export const tools: Tool[] = [
     name: 'Consulta de monstros',
     shortName: 'Monstros',
     description: 'HP, resistências, melhor charm e Charm Points de cada criatura.',
-    href: '/tools/monsters',
+    href: '/tools/monsters/',
     isUnderConstruction: true,
   },
   {
@@ -40,7 +40,7 @@ export const tools: Tool[] = [
     name: 'Calculadora de exercise',
     shortName: 'Exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
-    href: '/tools/exercise',
+    href: '/tools/exercise/',
     isUnderConstruction: true,
   },
   {
@@ -49,7 +49,7 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     shortName: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
-    href: '/tools/imbuements',
+    href: '/tools/imbuements/',
     isUnderConstruction: true,
   },
   {
@@ -58,7 +58,7 @@ export const tools: Tool[] = [
     name: 'Hunting places',
     shortName: 'Hunting places',
     description: 'Encontre spots por vocação, nível e tipo de dano.',
-    href: '/tools/hunting-places',
+    href: '/tools/hunting-places/',
     isUnderConstruction: true,
   },
 ];
