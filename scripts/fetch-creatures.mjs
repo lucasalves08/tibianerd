@@ -49,7 +49,7 @@ async function listCreatureTitles() {
 }
 
 function readField(wikitext, field) {
-  const match = wikitext.match(new RegExp(`^\\|\\s*${field}\\s*=\\s*(.*)$`, 'mi'));
+  const match = wikitext.match(new RegExp(`^\\|\\s*${field}\\s*=[ \\t]*(.*)$`, 'mi'));
 
   return match?.[1].trim() ?? '';
 }
