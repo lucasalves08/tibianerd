@@ -57,7 +57,7 @@ function HuntCard({
         </a>
       </h2>
       <p className={styles.muted}>
-        {[hunt.city, `Nível ${getMinimumLevel(hunt, vocation)}+`]
+        {[hunt.city, formatLevel(getMinimumLevel(hunt, vocation))]
           .filter(Boolean)
           .join(' · ')}
       </p>
@@ -79,6 +79,9 @@ function HuntCard({
     </li>
   );
 }
+
+const formatLevel = (level: number | null) =>
+  level === null ? 'Nível não informado' : `Nível ${level}+`;
 
 export default function HuntFinder() {
   const [vocation, setVocation] = useState<HuntVocationId>('knight');

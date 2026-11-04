@@ -1,6 +1,6 @@
 import { elements, type Creature, type Element } from '../data/creatures';
 import { huntVocations, type Hunt, type HuntVocationId } from '../data/hunts';
-import { fold } from './fold';
+import { fold, foldForSearch } from './fold';
 
 export interface HuntFilters {
   vocation: HuntVocationId;
@@ -53,17 +53,18 @@ export function findHunts(
   creaturesByName: Map<string, Creature>,
 ): Hunt[] {
   const { vocation, level, city, element, query } = filters;
-  const term = fold(query.trim());
+  const term = foldForSearch(query.trim());
 
   return hunts
     .filter((hunt) => {
       const minimum = getMinimumLevel(hunt, vocation);
+      const hasNoLevels = hunt.levels.every((value) => value === null);
 
       return (
-        minimum !== null &&
-        (level === null || minimum <= level) &&
+        (hasNoLevels ||
+          (minimum !== null && (level === null || minimum <= level))) &&
         (!city || hunt.city === city) &&
-        (!term || fold(hunt.name).includes(term)) &&
+        (!term || foldForSearch(hunt.name).includes(term)) &&
         (!element || getBestElements(hunt, creaturesByName).includes(element))
       );
     })
