@@ -13,8 +13,8 @@
   inline-size: 100%;
   min-block-size: 3.5rem;
   padding-inline: var(--space-4);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-surface);
   color: var(--color-text);
   font: inherit;
@@ -34,7 +34,8 @@
 .results {
   margin: 0;
   padding: 0;
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   list-style: none;
 }
 
@@ -61,7 +62,8 @@
   display: grid;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-background);
 }
 
@@ -82,7 +84,8 @@
 
 .pick {
   padding: var(--space-3);
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
 }
 
 .pickTitle {

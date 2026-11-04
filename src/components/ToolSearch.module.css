@@ -6,19 +6,12 @@
 
 .input {
   display: block;
-  inline-size: calc(100% - 2 * var(--pixel));
-  min-block-size: 3.5rem;
-  margin-inline: var(--pixel);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
   padding-inline: var(--space-4);
-  border: 0;
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-surface);
-  /* Stepped corners, like a window from an old game. */
-  box-shadow:
-    0 calc(-1 * var(--pixel)) 0 var(--color-line),
-    0 var(--pixel) 0 var(--color-line),
-    calc(-1 * var(--pixel)) 0 0 var(--color-line),
-    var(--pixel) 0 0 var(--color-line);
   color: var(--color-text);
   font-size: 1.25rem;
 }
@@ -29,8 +22,8 @@
 }
 
 .input:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: calc(var(--pixel) + 2px);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0;
 }
 
 .filters {
@@ -43,7 +36,8 @@
 .filter {
   min-block-size: var(--tap-target);
   padding-inline: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
   color: var(--color-text);
   font-weight: 700;
@@ -101,7 +95,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
@@ -183,7 +178,8 @@
 
 .empty {
   padding: var(--space-6) var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 

@@ -10,10 +10,18 @@ export default defineConfig({
     {
       provider: fontProviders.fontsource(),
       name: 'Pixelify Sans',
-      cssVariable: '--font-display',
+      cssVariable: '--font-logo',
       weights: [600],
       subsets: ['latin', 'latin-ext'],
       fallbacks: ['monospace'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Manrope',
+      cssVariable: '--font-display',
+      weights: [700, 800],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['sans-serif'],
     },
     {
       provider: fontProviders.fontsource(),

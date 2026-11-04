@@ -9,7 +9,8 @@
   gap: var(--space-4);
   min-inline-size: 0;
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
@@ -43,7 +44,8 @@
   inline-size: 100%;
   block-size: 100%;
   padding: var(--space-2) var(--space-1);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-background);
   color: var(--color-text);
   font-size: 0.75rem;
@@ -78,14 +80,15 @@
 .tier {
   flex: 1;
   min-block-size: var(--tap-target);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-background);
   color: var(--color-text);
   cursor: pointer;
 }
 
 .tier + .tier {
-  margin-inline-start: -2px;
+  margin-inline-start: var(--space-1);
 }
 
 .tier[aria-pressed='true'] {
@@ -112,8 +115,8 @@
   inline-size: 100%;
   min-block-size: var(--tap-target);
   padding-inline: var(--space-3);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-background);
   color: var(--color-text);
   font: inherit;
@@ -134,7 +137,8 @@
 
 .stats div {
   padding: var(--space-3);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-background);
 }
 

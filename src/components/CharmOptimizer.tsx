@@ -259,7 +259,11 @@ export default function CharmOptimizer() {
                     />
                     {charm.name}
                   </label>
-                  <div role="group" aria-label={`Tier de ${charm.name}`}>
+                  <div
+                    className={styles.tiers}
+                    role="group"
+                    aria-label={`Tier de ${charm.name}`}
+                  >
                     {tiers.map((option) => (
                       <button
                         key={option}
@@ -315,44 +319,49 @@ export default function CharmOptimizer() {
           </div>
         )}
 
-        <label className={styles.field}>
-          Buscar criatura
-          <input
-            className={styles.input}
-            type="search"
-            autoComplete="off"
-            value={search}
-            aria-expanded={isSearchOpen}
-            onFocus={() => setIsSearchOpen(true)}
-            onClick={() => setIsSearchOpen(true)}
-            onBlur={() => setIsSearchOpen(false)}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              setIsSearchOpen(true);
-            }}
-          />
-        </label>
+        <div className={styles.search}>
+          <label className={styles.field}>
+            Buscar criatura
+            <input
+              className={styles.input}
+              type="search"
+              autoComplete="off"
+              placeholder="Clique para ver a lista ou digite o nome"
+              value={search}
+              aria-expanded={isSearchOpen}
+              onFocus={() => setIsSearchOpen(true)}
+              onClick={() => setIsSearchOpen(true)}
+              onBlur={() => setIsSearchOpen(false)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setIsSearchOpen(true);
+              }}
+            />
+          </label>
 
-        {isSearchOpen && searchResults.length > 0 && (
-          <ul className={styles.results}>
-            {searchResults.map((creature) => (
-              <li key={creature.name}>
-                <button
-                  className={styles.result}
-                  type="button"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => addCreature(creature)}
-                >
-                  <span className={styles.resultName}>
-                    <CreatureIcon name={creature.name} size={32} />
-                    {creature.name}
-                  </span>
-                  <span>{formatNumber(creature.hitPoints)} HP</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+          {isSearchOpen && searchResults.length > 0 && (
+            <ul className={styles.results}>
+              {searchResults.map((creature) => (
+                <li key={creature.name}>
+                  <button
+                    className={styles.result}
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addCreature(creature)}
+                  >
+                    <span className={styles.resultName}>
+                      <CreatureIcon name={creature.name} size={32} />
+                      {creature.name}
+                    </span>
+                    <span className={styles.resultHitPoints}>
+                      {formatNumber(creature.hitPoints)} HP
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {unknownNames.length > 0 && (
           <p className={styles.notice}>
@@ -365,6 +374,35 @@ export default function CharmOptimizer() {
             Preencha nível, vida e mana. O nível limita o dano dos charms, e
             Overpower e Overflux dependem da vida e da mana.
           </p>
+        )}
+
+        {hunt.length > 0 && (
+          <div className={styles.summary}>
+            <div>
+              <p className={styles.summaryLabel}>
+                Dano extra esperado por golpe
+              </p>
+              <p className={styles.summaryValue}>
+                {formatNumber(totalKills ? expectedDamage / totalKills : 0)}
+              </p>
+            </div>
+            {unused.length > 0 && (
+              <div className={styles.unused}>
+                <span>Sem uso:</span>
+                {unused.map(({ charm }) => (
+                  <img
+                    key={charm.id}
+                    className={styles.charmIcon}
+                    src={getCharmIconPath(charm.id)}
+                    width="32"
+                    height="32"
+                    alt={charm.name}
+                    title={charm.name}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {hunt.length === 0 ? (
@@ -382,49 +420,55 @@ export default function CharmOptimizer() {
               return (
                 <li key={creature.name} className={styles.creature}>
                   <div className={styles.creatureHeader}>
-                    <div>
-                      <h3 className={styles.creatureName}>
-                        <CreatureIcon name={creature.name} />
-                        {creature.name}
-                      </h3>
-                      <p className={styles.muted}>
-                        {formatNumber(creature.hitPoints)} HP
-                      </p>
+                    <CreatureIcon name={creature.name} />
+                    <div className={styles.creatureInfo}>
+                      <h3 className={styles.creatureName}>{creature.name}</h3>
+                      <div className={styles.creatureMeta}>
+                        <span className={styles.muted}>
+                          {formatNumber(creature.hitPoints)} HP
+                        </span>
+                        <label className={styles.kills}>
+                          Mortes
+                          <input
+                            className={styles.input}
+                            type="number"
+                            inputMode="numeric"
+                            min="1"
+                            value={kills || ''}
+                            onChange={(event) =>
+                              setKills(
+                                creature.name,
+                                Number(event.target.value),
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+                      <CreatureResistances creature={creature} />
                     </div>
-                    <label className={styles.kills}>
-                      Mortes
-                      <input
-                        className={styles.input}
-                        type="number"
-                        inputMode="numeric"
-                        min="1"
-                        value={kills || ''}
-                        onChange={(event) =>
-                          setKills(creature.name, Number(event.target.value))
-                        }
-                      />
-                    </label>
                   </div>
 
-                  <CreatureResistances creature={creature} />
-
                   {assignment ? (
-                    <p className={styles.pick}>
-                      <strong className={styles.pickName}>
-                        <img
-                          className={styles.charmIcon}
-                          src={getCharmIconPath(assignment.charm.id)}
-                          width="32"
-                          height="32"
-                          alt=""
-                        />
+                    <div className={styles.pick}>
+                      <img
+                        className={styles.pickIcon}
+                        src={getCharmIconPath(assignment.charm.id)}
+                        width="48"
+                        height="48"
+                        alt=""
+                      />
+                      <p className={styles.pickName}>
                         {assignment.charm.name} T{assignment.tier}
-                      </strong>
-                      <span>
-                        {formatNumber(assignment.damagePerProc)} por ativação
-                        {assignment.isLevelCapped && ' (limitado pelo nível)'}
-                      </span>
-                    </p>
+                      </p>
+                      <p className={styles.pickDamage}>
+                        {formatNumber(assignment.damagePerProc)}{' '}
+                        <small>por ativação</small>
+                      </p>
+                      <p className={styles.pickDetail}>
+                        {formatNumber(assignment.damagePerHit)} por golpe
+                        {assignment.isLevelCapped && ' · limitado pelo nível'}
+                      </p>
+                    </div>
                   ) : (
                     <p className={styles.noPick}>Sem charm disponível</p>
                   )}
@@ -435,28 +479,12 @@ export default function CharmOptimizer() {
                     aria-label={`Remover ${creature.name}`}
                     onClick={() => removeCreature(creature.name)}
                   >
-                    Remover
+                    ×
                   </button>
                 </li>
               );
             })}
           </ul>
-        )}
-
-        {hunt.length > 0 && (
-          <div className={styles.summary}>
-            <p>
-              <strong>
-                {formatNumber(totalKills ? expectedDamage / totalKills : 0)}
-              </strong>{' '}
-              de dano extra esperado por golpe
-            </p>
-            {unused.length > 0 && (
-              <p className={styles.muted}>
-                Sem uso: {unused.map(({ charm }) => charm.name).join(', ')}.
-              </p>
-            )}
-          </div>
         )}
 
         <p className={styles.footnote}>

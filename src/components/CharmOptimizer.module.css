@@ -14,7 +14,8 @@
   gap: var(--space-4);
   min-inline-size: 0;
   padding: var(--space-4);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
   background: var(--color-surface);
 }
 
@@ -27,7 +28,12 @@
 }
 
 .panelTitle {
-  font-size: 1.375rem;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .fields {
@@ -39,16 +45,17 @@
 .field {
   display: grid;
   gap: var(--space-1);
-  font-size: 0.875rem;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
 .input {
   inline-size: 100%;
-  min-block-size: var(--tap-target);
+  min-block-size: 2.5rem;
   padding-inline: var(--space-3);
-  border: 2px solid var(--color-line);
-  border-radius: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
   background: var(--color-background);
   color: var(--color-text);
   font: inherit;
@@ -62,16 +69,18 @@ textarea.input {
 }
 
 .input:focus-visible {
-  outline: 3px solid var(--color-accent);
+  outline: 2px solid var(--color-accent);
   outline-offset: 0;
 }
 
 .button {
-  min-block-size: var(--tap-target);
-  padding-inline: var(--space-4);
-  border: 2px solid var(--color-accent);
+  min-block-size: 2.25rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-small);
   background: transparent;
   color: var(--color-accent);
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -99,12 +108,17 @@ textarea.input {
   list-style: none;
 }
 
+.charmList {
+  display: grid;
+  gap: var(--space-1);
+  margin-block: calc(-1 * var(--space-1));
+}
+
 .charm {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
-  padding-block: var(--space-1);
 }
 
 .charmName {
@@ -112,7 +126,9 @@ textarea.input {
   flex: 1;
   align-items: center;
   gap: var(--space-2);
-  min-block-size: var(--tap-target);
+  min-inline-size: 0;
+  min-block-size: 2.5rem;
+  font-size: 0.9375rem;
   font-weight: 700;
 }
 
@@ -121,74 +137,94 @@ textarea.input {
   image-rendering: pixelated;
 }
 
-.pickName {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .charmName input {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
+  flex: none;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
   accent-color: var(--color-accent);
 }
 
+.tiers {
+  display: flex;
+  flex: none;
+  gap: 0.125rem;
+}
+
 .tier {
-  inline-size: var(--tap-target);
-  block-size: var(--tap-target);
-  border: 2px solid var(--color-line);
-  background: var(--color-background);
-  color: var(--color-text);
+  inline-size: 2.25rem;
+  block-size: 2rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.tier + .tier {
-  margin-inline-start: -2px;
-}
-
 .tier[aria-pressed='true'] {
-  position: relative;
   border-color: var(--color-accent);
   background: var(--color-accent);
   color: var(--color-on-accent);
-  font-weight: 700;
 }
 
 .tier:disabled {
-  color: var(--color-muted);
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.45;
+}
+
+.search {
+  position: relative;
 }
 
 .results {
-  max-block-size: 20rem;
-  border: 2px solid var(--color-line);
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-1));
+  inset-inline: 0;
+  z-index: 1;
+  max-block-size: 22rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.5);
   overflow-y: auto;
 }
 
 .result {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   inline-size: 100%;
   min-block-size: var(--tap-target);
   padding-inline: var(--space-3);
   border: 0;
-  background: var(--color-background);
+  background: transparent;
   color: var(--color-text);
   text-align: start;
   cursor: pointer;
-  align-items: center;
 }
 
 .result:hover {
   background: var(--color-line);
 }
 
+.resultName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.resultHitPoints {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
 .notice {
-  padding: var(--space-3);
-  border-inline-start: var(--pixel) solid var(--color-marker);
-  background: var(--color-background);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgb(255 225 77 / 0.35);
+  border-radius: var(--radius-small);
+  background: rgb(255 225 77 / 0.07);
   font-size: 0.875rem;
 }
 
@@ -198,32 +234,70 @@ textarea.input {
   text-align: center;
 }
 
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  background: rgb(92 200 255 / 0.07);
+}
+
+.summaryLabel {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
+.summaryValue {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.unused {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+}
+
 .creatures {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .creature {
+  position: relative;
   display: grid;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: 2px solid var(--color-line);
-  background: var(--color-background);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-raised);
 }
 
 .creatureHeader {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
   gap: var(--space-3);
+  min-inline-size: 0;
+  padding-inline-end: var(--space-6);
+}
+
+.creatureInfo {
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: 0;
 }
 
 .creatureName {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.125rem;
   line-height: 1.2;
 }
 
@@ -232,70 +306,121 @@ textarea.input {
   font-size: 0.875rem;
 }
 
+.creatureMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
 .kills {
-  display: grid;
-  flex: none;
-  gap: var(--space-1);
-  inline-size: 6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
   font-size: 0.875rem;
-  font-weight: 700;
+}
+
+.kills .input {
+  inline-size: 5.5rem;
+  min-block-size: 2.25rem;
 }
 
 .pick {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-3);
   padding: var(--space-3);
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-small);
+  background: var(--color-background);
 }
 
-.pick strong {
-  font-size: 1.125rem;
+.pickIcon {
+  grid-row: span 3;
+  inline-size: 3rem;
+  block-size: 3rem;
+  image-rendering: pixelated;
+}
+
+.pickName {
+  color: var(--color-accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pickDamage {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.pickDamage small {
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.pickDetail {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
 }
 
 .noPick {
+  align-self: center;
   color: var(--color-muted);
+  text-align: center;
 }
 
 .remove {
-  justify-self: start;
-  min-block-size: var(--tap-target);
-  padding: 0;
+  position: absolute;
+  inset-block-start: var(--space-1);
+  inset-inline-end: var(--space-1);
+  inline-size: var(--tap-target);
+  block-size: var(--tap-target);
   border: 0;
-  background: none;
-  color: var(--color-accent);
-  text-decoration: underline;
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.125rem;
   cursor: pointer;
 }
 
-.summary {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  border: 2px solid var(--color-line);
-}
-
-.summary strong {
-  font-family: var(--font-display);
-  font-size: 1.75rem;
-  font-weight: 600;
+.remove:hover {
+  background: var(--color-line);
+  color: var(--color-text);
 }
 
 .footnote {
   color: var(--color-muted);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+}
+
+@media (min-width: 44rem) {
+  .creature {
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    align-items: center;
+  }
 }
 
 @media (min-width: 60rem) {
   .layout {
-    grid-template-columns: 24rem minmax(0, 1fr);
+    grid-template-columns: 21rem minmax(0, 1fr);
   }
 }
 
-.resultName {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+@media (pointer: coarse) {
+  .tier {
+    inline-size: var(--tap-target);
+    block-size: var(--tap-target);
+  }
+
+  .charmName {
+    min-block-size: var(--tap-target);
+  }
 }

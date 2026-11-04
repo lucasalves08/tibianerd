@@ -25,6 +25,7 @@ export default function CreatureResistances({
           <li
             key={element}
             className={styles.item}
+            data-element={element}
             data-weak={modifier > 100 || undefined}
             data-immune={modifier === 0 || undefined}
           >
