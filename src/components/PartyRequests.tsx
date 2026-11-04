@@ -30,17 +30,21 @@ function DiscordContact({
     return null;
   }
 
-  const openRoom = async () => {
+  const openRoom = async (isFixed: boolean) => {
     setIsOpening(true);
     setMessage('');
 
     try {
       const response = await fetch(`/api/party-requests/${requestId}/room`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFixed }),
       });
       const data = (await response.json()) as { url?: string; error?: string };
 
-      if (data.url) {
+      if (data.url && isFixed) {
+        setMessage('Sala fixa: ela só sai depois de 30 dias sem uso.');
+      } else if (data.url) {
         window.location.assign(data.url);
       } else {
         setMessage(
@@ -74,9 +78,17 @@ function DiscordContact({
           className={styles.button}
           type="button"
           disabled={isOpening}
-          onClick={() => void openRoom()}
+          onClick={() => void openRoom(false)}
         >
           {isOpening ? 'Abrindo…' : 'Abrir sala da party'}
+        </button>
+        <button
+          className={styles.textButton}
+          type="button"
+          disabled={isOpening}
+          onClick={() => void openRoom(true)}
+        >
+          Manter como party fixa
         </button>
         <a href={DISCORD_INVITE_URL} rel="noopener">
           Entrar no servidor

@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers';
+import { getNextRoomCheck, getRoomIdleMs } from '../domain/partyRooms';
 import { db } from './db';
 
 const API_URL = 'https://discord.com/api/v10';
@@ -8,7 +9,6 @@ const MEMBER_OVERWRITE = 1;
 const VIEW_CHANNEL = 1024;
 // View, send, read history, connect and speak.
 const MEMBER_PERMISSIONS = '3214336';
-const ROOM_LIFETIME_MS = 12 * 60 * 60 * 1000;
 const MAX_ROOMS_CLEANED = 5;
 
 export type RoomResult =
@@ -35,24 +35,78 @@ const memberOverwrite = (id: string) => ({
   allow: MEMBER_PERMISSIONS,
 });
 
-const removeExpiredRooms = async () => {
-  const now = Date.now();
+interface DiscordChannel {
+  last_message_id?: string | null;
+  permission_overwrites?: { id: string; type: number }[];
+}
+
+// Discord answers with an error for someone outside voice, so only a match counts.
+const isInChannel = async (userId: string, channelId: string) => {
+  const response = await discord(
+    `/guilds/${env.DISCORD_GUILD_ID}/voice-states/${userId}`,
+  );
+
+  if (!response.ok) {
+    return false;
+  }
+
+  const state = (await response.json()) as { channel_id?: string | null };
+
+  return state.channel_id === channelId;
+};
+
+const reviewRoom = async (adId: string, channelId: string, isFixed: boolean) => {
+  const response = await discord(`/channels/${channelId}`);
+
+  // 404 means someone already deleted the channel by hand.
+  if (response.status === 404) {
+    await db.prepare('DELETE FROM party_rooms WHERE ad_id = ?').bind(adId).run();
+    return;
+  }
+
+  if (!response.ok) {
+    return;
+  }
+
+  const channel = (await response.json()) as DiscordChannel;
+  const members = (channel.permission_overwrites ?? []).filter(
+    ({ id, type }) => type === MEMBER_OVERWRITE && id !== env.DISCORD_CLIENT_ID,
+  );
+  const presence = await Promise.all(
+    members.map(({ id }) => isInChannel(id, channelId)),
+  );
+  const nextCheck = getNextRoomCheck({
+    lastMessageId: channel.last_message_id ?? null,
+    isInUse: presence.includes(true),
+    isFixed,
+    now: Date.now(),
+  });
+
+  if (nextCheck) {
+    await db
+      .prepare('UPDATE party_rooms SET expires_at = ? WHERE ad_id = ?')
+      .bind(nextCheck, adId)
+      .run();
+    return;
+  }
+
+  const deleted = await discord(`/channels/${channelId}`, { method: 'DELETE' });
+
+  if (deleted.ok || deleted.status === 404) {
+    await db.prepare('DELETE FROM party_rooms WHERE ad_id = ?').bind(adId).run();
+  }
+};
+
+const reviewExpiredRooms = async () => {
   const { results } = await db
     .prepare(
-      'SELECT ad_id AS adId, channel_id AS channelId FROM party_rooms WHERE expires_at <= ? LIMIT ?',
+      'SELECT ad_id AS adId, channel_id AS channelId, is_fixed AS isFixed FROM party_rooms WHERE expires_at <= ? LIMIT ?',
     )
-    .bind(now, MAX_ROOMS_CLEANED)
-    .all<{ adId: string; channelId: string }>();
+    .bind(Date.now(), MAX_ROOMS_CLEANED)
+    .all<{ adId: string; channelId: string; isFixed: number }>();
 
-  for (const { adId, channelId } of results) {
-    const response = await discord(`/channels/${channelId}`, {
-      method: 'DELETE',
-    });
-
-    // 404 means someone already deleted the channel by hand.
-    if (response.ok || response.status === 404) {
-      await db.prepare('DELETE FROM party_rooms WHERE ad_id = ?').bind(adId).run();
-    }
+  for (const { adId, channelId, isFixed } of results) {
+    await reviewRoom(adId, channelId, isFixed === 1);
   }
 };
 
@@ -96,6 +150,7 @@ const addToRoom = async (channelId: string, userId: string) => {
 export const openRoom = async (
   userId: string,
   requestId: string,
+  isFixed: boolean,
 ): Promise<RoomResult> => {
   if (!env.DISCORD_BOT_TOKEN) {
     return { status: 'unavailable' };
@@ -150,7 +205,7 @@ export const openRoom = async (
       return { status: 'unavailable' };
     }
   } else {
-    await removeExpiredRooms();
+    await reviewExpiredRooms();
     channelId = await createRoom(ownerName, members);
 
     if (!channelId) {
@@ -161,7 +216,16 @@ export const openRoom = async (
       .prepare(
         'INSERT INTO party_rooms (ad_id, channel_id, expires_at) VALUES (?, ?, ?)',
       )
-      .bind(adId, channelId, Date.now() + ROOM_LIFETIME_MS)
+      .bind(adId, channelId, Date.now() + getRoomIdleMs(false))
+      .run();
+  }
+
+  if (isFixed) {
+    await db
+      .prepare(
+        'UPDATE party_rooms SET is_fixed = 1, expires_at = ? WHERE ad_id = ?',
+      )
+      .bind(Date.now() + getRoomIdleMs(true), adId)
       .run();
   }
 

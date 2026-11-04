@@ -13,7 +13,14 @@ export const POST: APIRoute = async ({ params, request }) => {
     return errorResponse('unauthorized', 401);
   }
 
-  const result = await openRoom(userId, params.id!).catch(
+  const body = (await request.json().catch(() => null)) as {
+    isFixed?: unknown;
+  } | null;
+  const result = await openRoom(
+    userId,
+    params.id!,
+    body?.isFixed === true,
+  ).catch(
     () => ({ status: 'unavailable' }) as const,
   );
 

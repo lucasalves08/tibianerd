@@ -56,7 +56,8 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 
 ## Assumptions
 
-- Party rooms are private voice channels, which also have text chat, and are deleted after 12 hours, the next time a room is created.
+- Party rooms are private voice channels, which also have text chat. A room is deleted after 12 hours without messages or voice, or 30 days when the party marks it as fixed.
+- Rooms are reviewed when a new room is created, since the site has no scheduled job yet.
 
 - Boss names come from TibiaWiki, and players can type others, since RubinOT can differ.
 
