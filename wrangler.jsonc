@@ -1,5 +1,18 @@
 {
   "name": "tibianerd",
   "compatibility_date": "2026-11-01",
-  "previews": {}
+  "compatibility_flags": ["nodejs_compat"],
+  "previews": {},
+  "vars": {
+    "BETTER_AUTH_URL": "https://tibianerd.lucas-alves0828.workers.dev",
+    "DISCORD_CLIENT_ID": "1567601351704445018"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tibianerd",
+      "database_id": "c0e150a2-13c8-41b5-b627-4783546d3654",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
