@@ -419,6 +419,9 @@ export default function PartyFinder() {
             <li key={ad.id} className={styles.ad}>
               <div className={styles.adHeader}>
                 <h3 className={styles.adName}>{ad.characterName}</h3>
+                {ad.isVerified && (
+                  <span className={styles.verified}>✓ Verificado</span>
+                )}
                 <span className={styles.muted}>
                   {vocationName(ad.vocation)} · nível {formatLevel(ad.level)} ·{' '}
                   {serverName(ad.server)}, {ad.world}
@@ -463,7 +466,7 @@ export default function PartyFinder() {
         <p className={styles.footnote}>
           Hunts usam a regra de 2/3 do Tibia, que pode variar no RubinOT. Bosses
           mostram todos do mesmo mundo, em qualquer nível. A lista de bosses vem
-          da TibiaWiki. O site não confirma quem é o dono do personagem.
+          da TibiaWiki. Só o selo Verificado confirma o dono do personagem.
         </p>
       </section>
     </div>

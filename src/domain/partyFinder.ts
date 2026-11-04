@@ -23,6 +23,7 @@ export interface PartyAd {
 
 export interface PartyAdView extends PartyAd {
   characterName: string;
+  isVerified: boolean;
   note: string;
   isMine: boolean;
 }

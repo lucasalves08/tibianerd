@@ -1,15 +1,14 @@
 import { env } from 'cloudflare:workers';
-import type { CharacterInfo } from '../domain/characters';
 import {
   getDiscordIdTime,
-  getDiscordProfile,
   getNextRoomCheck,
   MAX_ROOMS,
   ROOM_IDLE_MS,
+  type RoomCharacter,
 } from '../domain/partyRooms';
 import { db } from './db';
+import { discord, getMemberRoles, guildPath, syncMember } from './discord';
 
-const API_URL = 'https://discord.com/api/v10';
 const CATEGORY_CHANNEL = 4;
 const VOICE_CHANNEL = 2;
 const CATEGORY_NAME = 'Parties';
@@ -20,8 +19,6 @@ const VIEW_CHANNEL = 1024;
 const MEMBER_PERMISSIONS = '3214336';
 const MAX_ROOMS_CLEANED = 5;
 const MAX_ROOMS_COMPARED = 10;
-
-type RoomCharacter = Pick<CharacterInfo, 'server' | 'name' | 'world' | 'vocation'>;
 
 export type RoomResult =
   | { status: 'ready'; url: string }
@@ -37,83 +34,6 @@ interface DiscordChannel {
   last_message_id?: string | null;
   permission_overwrites?: { id: string; type: number }[];
 }
-
-const discord = (path: string, init: RequestInit = {}) =>
-  fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-const guildPath = `/guilds/${env.DISCORD_GUILD_ID}`;
-
-const getMemberRoles = async (userId: string): Promise<string[] | null> => {
-  const response = await discord(`${guildPath}/members/${userId}`);
-
-  if (!response.ok) {
-    return null;
-  }
-
-  return ((await response.json()) as { roles: string[] }).roles;
-};
-
-const getRoleId = async (name: string): Promise<string | null> => {
-  const saved = await db
-    .prepare('SELECT role_id AS roleId FROM discord_roles WHERE name = ?')
-    .bind(name)
-    .first<{ roleId: string }>();
-
-  if (saved) {
-    return saved.roleId;
-  }
-
-  const response = await discord(`${guildPath}/roles`, {
-    method: 'POST',
-    body: JSON.stringify({ name, mentionable: true }),
-  });
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const { id } = (await response.json()) as { id: string };
-
-  await db
-    .prepare('INSERT OR IGNORE INTO discord_roles (name, role_id) VALUES (?, ?)')
-    .bind(name, id)
-    .run();
-
-  return id;
-};
-
-// A failure here must not stop the room: the server owner cannot be renamed.
-const syncMember = async (
-  userId: string,
-  currentRoles: string[],
-  character: RoomCharacter,
-) => {
-  const { nick, roles } = getDiscordProfile(character);
-  const { results } = await db
-    .prepare('SELECT role_id AS roleId FROM discord_roles')
-    .all<{ roleId: string }>();
-  const managed = new Set(results.map(({ roleId }) => roleId));
-  const wanted = await Promise.all(roles.map(getRoleId));
-  const kept = currentRoles.filter((roleId) => !managed.has(roleId));
-  const memberPath = `${guildPath}/members/${userId}`;
-
-  await discord(memberPath, {
-    method: 'PATCH',
-    body: JSON.stringify({
-      roles: [...kept, ...wanted.filter((roleId) => roleId !== null)],
-    }),
-  });
-  await discord(memberPath, {
-    method: 'PATCH',
-    body: JSON.stringify({ nick }),
-  });
-};
 
 const memberOverwrite = (id: string) => ({
   id,
@@ -316,8 +236,10 @@ export const openRoom = async (
       `SELECT r.ad_id AS adId,
         owner.server AS ownerServer, owner.name AS ownerName,
         owner.world AS ownerWorld, owner.vocation AS ownerVocation,
+        owner.verified_at IS NOT NULL AS ownerVerified,
         member.server AS memberServer, member.name AS memberName,
         member.world AS memberWorld, member.vocation AS memberVocation,
+        member.verified_at IS NOT NULL AS memberVerified,
         ownerAccount.accountId AS ownerDiscordId,
         memberAccount.accountId AS memberDiscordId
       FROM party_join_requests r
@@ -338,10 +260,12 @@ export const openRoom = async (
       ownerName: string;
       ownerWorld: string;
       ownerVocation: RoomCharacter['vocation'];
+      ownerVerified: number;
       memberServer: RoomCharacter['server'];
       memberName: string;
       memberWorld: string;
       memberVocation: RoomCharacter['vocation'];
+      memberVerified: number;
       ownerDiscordId: string;
       memberDiscordId: string;
     }>();
@@ -360,18 +284,24 @@ export const openRoom = async (
     return { status: 'not-in-server' };
   }
 
-  await syncMember(ownerDiscordId, ownerRoles, {
-    server: request.ownerServer,
-    name: ownerName,
-    world: request.ownerWorld,
-    vocation: request.ownerVocation,
-  }).catch(() => {});
-  await syncMember(memberDiscordId, memberRoles, {
-    server: request.memberServer,
-    name: request.memberName,
-    world: request.memberWorld,
-    vocation: request.memberVocation,
-  }).catch(() => {});
+  // Only a proven character changes a name in the server.
+  if (request.ownerVerified === 1) {
+    await syncMember(ownerDiscordId, ownerRoles, {
+      server: request.ownerServer,
+      name: ownerName,
+      world: request.ownerWorld,
+      vocation: request.ownerVocation,
+    }).catch(() => false);
+  }
+
+  if (request.memberVerified === 1) {
+    await syncMember(memberDiscordId, memberRoles, {
+      server: request.memberServer,
+      name: request.memberName,
+      world: request.memberWorld,
+      vocation: request.memberVocation,
+    }).catch(() => false);
+  }
 
   const room = await db
     .prepare('SELECT channel_id AS channelId FROM party_rooms WHERE ad_id = ?')

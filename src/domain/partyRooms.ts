@@ -20,6 +20,22 @@ const vocationRoles: Record<VocationId, string> = {
 
 const serverRoles = { rubinot: 'RubinOT', tibia: 'Tibia' };
 
+/** Highest first: Discord colors a name by its highest role. */
+export const fixedRoles = [
+  { name: 'EK', color: 0xe74c3c },
+  { name: 'RP', color: 0xf1c40f },
+  { name: 'MS', color: 0x3498db },
+  { name: 'ED', color: 0x2ecc71 },
+  { name: 'EM', color: 0x9b59b6 },
+  { name: 'RubinOT', color: 0xe67e22 },
+  { name: 'Tibia', color: 0x95a5a6 },
+];
+
+export type RoomCharacter = Pick<
+  CharacterInfo,
+  'server' | 'name' | 'world' | 'vocation'
+>;
+
 export interface DiscordProfile {
   nick: string;
   roles: string[];
@@ -30,7 +46,7 @@ export const getDiscordProfile = ({
   name,
   world,
   vocation,
-}: Pick<CharacterInfo, 'server' | 'name' | 'world' | 'vocation'>): DiscordProfile => ({
+}: RoomCharacter): DiscordProfile => ({
   nick: name.slice(0, MAX_NICKNAME_LENGTH),
   roles: [serverRoles[server], vocationRoles[vocation], world],
 });

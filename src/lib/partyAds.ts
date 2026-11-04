@@ -9,8 +9,9 @@ const MAX_LISTED_ADS = 200;
 /** Product choice: an ad leaves the list after this many reports. */
 const REPORTS_TO_HIDE = 3;
 
-interface AdRow extends Omit<PartyAdView, 'isMine'> {
+interface AdRow extends Omit<PartyAdView, 'isMine' | 'isVerified'> {
   isMine: number;
+  isVerified: number;
 }
 
 export const listAds = async (userId: string | null): Promise<PartyAdView[]> => {
@@ -18,7 +19,7 @@ export const listAds = async (userId: string | null): Promise<PartyAdView[]> => 
     .prepare(
       `SELECT a.id, a.purpose, a.boss, c.server, a.world, c.vocation, a.level, a.note,
         a.created_at AS createdAt, a.expires_at AS expiresAt,
-        c.name AS characterName,
+        c.name AS characterName, c.verified_at IS NOT NULL AS isVerified,
         c.user_id = ?1 AS isMine
       FROM party_ads a
       JOIN characters c ON c.id = a.character_id
@@ -30,7 +31,11 @@ export const listAds = async (userId: string | null): Promise<PartyAdView[]> => 
     .bind(userId ?? '', Date.now(), REPORTS_TO_HIDE, MAX_LISTED_ADS)
     .all<AdRow>();
 
-  return results.map((row) => ({ ...row, isMine: row.isMine === 1 }));
+  return results.map((row) => ({
+    ...row,
+    isMine: row.isMine === 1,
+    isVerified: row.isVerified === 1,
+  }));
 };
 
 // One ad per player keeps the list honest: a new ad replaces the old one.

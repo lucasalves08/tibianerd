@@ -1,3 +1,7 @@
+---
+import { DISCORD_INVITE_URL } from '../data/discord';
+---
+
 <footer>
   <p>
     O TibiaNerd é um site de fãs, sem vínculo com a CipSoft. O{' '}
@@ -11,7 +15,10 @@
       CC-BY-SA</a
     >.
   </p>
-  <p class="links"><a href="/privacidade/">Privacidade</a></p>
+  <p class="links">
+    <a href="/privacidade/">Privacidade</a> ·
+    <a href={DISCORD_INVITE_URL} rel="noopener">Discord</a>
+  </p>
 </footer>
 
 <style>
