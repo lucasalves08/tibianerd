@@ -32,8 +32,8 @@
 
 .character {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 5.5rem auto;
-  align-items: end;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
   gap: var(--space-2);
   padding: var(--space-3);
   border: 1px solid var(--color-line);
@@ -48,7 +48,6 @@
   overflow-wrap: anywhere;
 }
 
-.levelField,
 .field {
   display: grid;
   gap: var(--space-1);
@@ -59,12 +58,58 @@
 
 .form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
-.wide {
-  grid-column: 1 / -1;
+.servers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  margin-block-end: var(--space-1);
+  padding: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.server {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-target);
+  cursor: pointer;
+}
+
+.server input {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  accent-color: var(--color-accent);
+}
+
+.found {
+  display: grid;
+  padding: var(--space-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-small);
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-background));
+  overflow-wrap: anywhere;
+}
+
+.textButton {
+  min-block-size: var(--tap-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .input {
@@ -86,7 +131,6 @@
 }
 
 .button {
-  grid-column: 1 / -1;
   min-block-size: var(--tap-target);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-small);
@@ -97,7 +141,12 @@
   cursor: pointer;
 }
 
-.button:hover {
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.button:hover:enabled {
   background: var(--color-accent);
   color: var(--color-on-accent);
 }

@@ -1,14 +1,22 @@
-import { rubinotWorlds, type RubinotWorld } from '../data/rubinotWorlds';
 import { vocations, type VocationId } from './characterStats';
 
-export interface CharacterInput {
+export const gameServers = [
+  { id: 'rubinot', name: 'RubinOT' },
+  { id: 'tibia', name: 'Tibia' },
+] as const;
+
+export type GameServerId = (typeof gameServers)[number]['id'];
+
+export interface CharacterInfo {
+  server: GameServerId;
   name: string;
-  world: RubinotWorld;
+  world: string;
   vocation: VocationId;
   level: number;
+  guild: string | null;
 }
 
-export interface Character extends CharacterInput {
+export interface Character extends CharacterInfo {
   id: string;
 }
 
@@ -17,30 +25,86 @@ export const MAX_CHARACTERS = 20;
 
 const NAME_PATTERN = /^\p{L}[\p{L}' -]{1,29}$/u;
 
-export const isValidLevel = (level: unknown): level is number =>
-  Number.isSafeInteger(level) && (level as number) > 0;
+export const cleanCharacterName = (name: unknown): string | null => {
+  const clean = typeof name === 'string' ? name.trim().replace(/\s+/g, ' ') : '';
 
-export const parseCharacter = (input: unknown): CharacterInput | null => {
-  const { name, world, vocation, level } = (input ?? {}) as Record<
-    string,
-    unknown
-  >;
-  const cleanName =
-    typeof name === 'string' ? name.trim().replace(/\s+/g, ' ') : '';
+  return NAME_PATTERN.test(clean) ? clean : null;
+};
+
+export const isGameServer = (server: unknown): server is GameServerId =>
+  gameServers.some(({ id }) => id === server);
+
+// "Elite Knight" and "Knight" are the same vocation here.
+const toVocation = (text: unknown): VocationId | null => {
+  const lower = String(text).toLowerCase();
+
+  return vocations.find(({ id }) => lower.includes(id))?.id ?? null;
+};
+
+const toInfo = (
+  server: GameServerId,
+  raw: { name?: unknown; world?: unknown; vocation?: unknown; level?: unknown },
+  guild: unknown,
+): CharacterInfo | null => {
+  const vocation = toVocation(raw.vocation);
 
   if (
-    !NAME_PATTERN.test(cleanName) ||
-    !rubinotWorlds.some((item) => item === world) ||
-    !vocations.some(({ id }) => id === vocation) ||
-    !isValidLevel(level)
+    typeof raw.name !== 'string' ||
+    !raw.name ||
+    typeof raw.world !== 'string' ||
+    !vocation ||
+    !Number.isSafeInteger(raw.level)
   ) {
     return null;
   }
 
   return {
-    name: cleanName,
-    world: world as RubinotWorld,
-    vocation: vocation as VocationId,
-    level,
+    server,
+    name: raw.name,
+    world: raw.world,
+    vocation,
+    level: raw.level as number,
+    guild: typeof guild === 'string' && guild ? guild : null,
   };
+};
+
+interface TibiaDataResponse {
+  character?: {
+    character?: {
+      name?: unknown;
+      world?: unknown;
+      vocation?: unknown;
+      level?: unknown;
+      guild?: { name?: unknown };
+    };
+  };
+}
+
+interface RubinotResponse {
+  player?: {
+    name?: unknown;
+    world?: unknown;
+    vocation?: unknown;
+    level?: unknown;
+    guild?: { name?: unknown } | string | null;
+  } | null;
+}
+
+export const parseTibiaData = (data: TibiaDataResponse): CharacterInfo | null => {
+  const character = data.character?.character;
+
+  return character ? toInfo('tibia', character, character.guild?.name) : null;
+};
+
+export const parseRubinot = (data: RubinotResponse): CharacterInfo | null => {
+  const { player } = data;
+
+  if (!player) {
+    return null;
+  }
+
+  const guild =
+    typeof player.guild === 'object' ? player.guild?.name : player.guild;
+
+  return toInfo('rubinot', player, guild);
 };

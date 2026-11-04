@@ -33,13 +33,24 @@ test('shows the player photo in the header', async ({ page }) => {
 
 test('adds and lists characters', async ({ page }) => {
   const characters: object[] = [];
+  const info = {
+    server: 'rubinot',
+    name: 'Lucas Teste',
+    world: 'Vesperia',
+    vocation: 'paladin',
+    level: 967,
+    guild: null,
+  };
 
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: { user: { name: 'lucas' } } }),
   );
+  await page.route('**/api/characters/lookup*', (route) =>
+    route.fulfill({ json: info }),
+  );
   await page.route('**/api/characters', (route) => {
     if (route.request().method() === 'POST') {
-      const character = { id: '1', ...route.request().postDataJSON() };
+      const character = { id: '1', ...info };
 
       characters.push(character);
       return route.fulfill({ status: 201, json: character });
@@ -49,15 +60,11 @@ test('adds and lists characters', async ({ page }) => {
   });
   await page.goto('/conta/');
 
-  await expect(page.getByLabel('Mundo')).toHaveValue('Vesperia');
-
   await page.getByLabel('Nome do personagem').fill('Lucas Teste');
-  await page.getByLabel('Vocação').selectOption('paladin');
-  await page.getByLabel('Nível', { exact: true }).fill('967');
   await page.getByRole('button', { name: 'Adicionar personagem' }).click();
 
-  await expect(page.getByText('Paladin · Vesperia')).toBeVisible();
-  await expect(page.getByLabel('Nível de Lucas Teste')).toHaveValue('967');
+  await expect(page.getByRole('listitem').getByText('Lucas Teste')).toBeVisible();
+  await expect(page.getByRole('listitem').getByText('RubinOT, Vesperia')).toBeVisible();
 });
 
 test('offers Discord login to visitors', async ({ page }) => {

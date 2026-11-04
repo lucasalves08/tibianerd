@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { LAUNCH_WORLD, rubinotWorlds } from '../data/rubinotWorlds';
 import {
   AD_LIFETIME_MS,
+  cleanAdNote,
   findCompatibleAds,
   getAdExpiry,
   isAdActive,
+  MAX_NOTE_LENGTH,
   type PartyAd,
 } from './partyFinder';
 
@@ -26,6 +28,17 @@ describe('rubinotWorlds', () => {
   it('lists the 16 worlds and launches on one of them', () => {
     expect(rubinotWorlds).toHaveLength(16);
     expect(rubinotWorlds).toContain(LAUNCH_WORLD);
+  });
+});
+
+describe('cleanAdNote', () => {
+  it('cleans spaces and cuts long notes', () => {
+    expect(cleanAdNote('  hoje   à noite ')).toBe('hoje à noite');
+    expect(cleanAdNote('a'.repeat(500))).toHaveLength(MAX_NOTE_LENGTH);
+  });
+
+  it('ignores what is not text', () => {
+    expect(cleanAdNote(42)).toBe('');
   });
 });
 
