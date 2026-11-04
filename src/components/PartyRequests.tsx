@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { DISCORD_INVITE_URL } from '../data/discord';
 import { vocations } from '../domain/characterStats';
 import type {
   IncomingRequest,
@@ -7,33 +9,85 @@ import type {
 import styles from './PartyFinder.module.css';
 
 const DISCORD_USER_URL = 'https://discord.com/users/';
+const ROOM_ERROR = 'Não conseguimos abrir a sala agora. Tente de novo.';
 
 const vocationName = (id: string) =>
   vocations.find((vocation) => vocation.id === id)?.name ?? id;
 
 function DiscordContact({
+  requestId,
   discord,
   discordId,
 }: {
+  requestId: string;
   discord: string | null;
   discordId: string | null;
 }) {
+  const [isOpening, setIsOpening] = useState(false);
+  const [message, setMessage] = useState('');
+
   if (!discord) {
     return null;
   }
 
+  const openRoom = async () => {
+    setIsOpening(true);
+    setMessage('');
+
+    try {
+      const response = await fetch(`/api/party-requests/${requestId}/room`, {
+        method: 'POST',
+      });
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (data.url) {
+        window.location.assign(data.url);
+      } else {
+        setMessage(
+          data.error === 'not-in-server'
+            ? 'Os dois precisam entrar no servidor do TibiaNerd antes.'
+            : ROOM_ERROR,
+        );
+      }
+    } catch {
+      setMessage(ROOM_ERROR);
+    } finally {
+      setIsOpening(false);
+    }
+  };
+
   return (
-    <p className={styles.contact}>
-      Discord: <strong>{discord}</strong>
-      {discordId && (
-        <>
-          {' · '}
-          <a href={`${DISCORD_USER_URL}${discordId}`} rel="noopener">
-            Abrir no Discord
-          </a>
-        </>
+    <div className={styles.contact}>
+      <p>
+        Discord: <strong>{discord}</strong>
+        {discordId && (
+          <>
+            {' · '}
+            <a href={`${DISCORD_USER_URL}${discordId}`} rel="noopener">
+              Abrir perfil
+            </a>
+          </>
+        )}
+      </p>
+      <div className={styles.decisions}>
+        <button
+          className={styles.button}
+          type="button"
+          disabled={isOpening}
+          onClick={() => void openRoom()}
+        >
+          {isOpening ? 'Abrindo…' : 'Abrir sala da party'}
+        </button>
+        <a href={DISCORD_INVITE_URL} rel="noopener">
+          Entrar no servidor
+        </a>
+      </div>
+      {message && (
+        <p className={styles.error} role="alert">
+          {message}
+        </p>
       )}
-    </p>
+    </div>
   );
 }
 
@@ -82,6 +136,7 @@ export default function PartyRequests({
                   </div>
                 ) : (
                   <DiscordContact
+                    requestId={request.id}
                     discord={request.discord}
                     discordId={request.discordId}
                   />
@@ -107,6 +162,7 @@ export default function PartyRequests({
                   </span>
                 </p>
                 <DiscordContact
+                  requestId={request.id}
                   discord={request.discord}
                   discordId={request.discordId}
                 />

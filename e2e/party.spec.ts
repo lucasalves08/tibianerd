@@ -120,7 +120,7 @@ test('asks to join and shows the Discord after the answer', async ({ page }) => 
 
   await expect(page.getByRole('button', { name: /Pedir para entrar/ })).toBeDisabled();
   await expect(page.getByText('player-near')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Abrir no Discord' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: 'Abrir perfil' })).toHaveAttribute(
     'href',
     'https://discord.com/users/123',
   );

@@ -12,7 +12,8 @@
   },
   "vars": {
     "BETTER_AUTH_URL": "https://tibianerd.lucas-alves0828.workers.dev",
-    "DISCORD_CLIENT_ID": "1567601351704445018"
+    "DISCORD_CLIENT_ID": "1567601351704445018",
+    "DISCORD_GUILD_ID": "1567634332078841907"
   },
   "kv_namespaces": [
     {
