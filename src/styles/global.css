@@ -113,6 +113,17 @@
     color: var(--color-accent);
   }
 
+  /* Values here are large, so stepping by one with arrows does not help. */
+  input[type='number'] {
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
   mark {
     background: var(--color-marker);
     color: var(--color-on-marker);
