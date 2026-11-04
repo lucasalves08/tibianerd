@@ -3,6 +3,7 @@ import styles from './AccountPanel.module.css';
 
 const AUTH_URL = '/api/auth';
 const REQUEST_TIMEOUT_MS = 8000;
+const ACCOUNT_KEY = 'tibianerd:account';
 
 interface Session {
   user: { name: string };
@@ -31,6 +32,23 @@ export default function AccountPanel() {
       .catch(() => setHasError(true))
       .finally(() => setIsLoading(false));
   }, []);
+
+  // The header reads this to show the name on every page.
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    try {
+      if (session) {
+        localStorage.setItem(ACCOUNT_KEY, session.user.name);
+      } else {
+        localStorage.removeItem(ACCOUNT_KEY);
+      }
+    } catch {
+      // Nothing to do: the link just keeps saying Entrar.
+    }
+  }, [session, isLoading]);
 
   const run = async (action: () => Promise<void>) => {
     setHasError(false);

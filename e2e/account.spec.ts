@@ -1,5 +1,21 @@
 import { expect, test } from '@playwright/test';
 
+test('reaches the login from the home page', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Entrar' }).click();
+
+  await expect(page).toHaveURL(/\/conta\/$/);
+});
+
+test('links the privacy page in the footer', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Privacidade' }).click();
+
+  await expect(
+    page.getByRole('heading', { name: 'Privacidade' }),
+  ).toBeVisible();
+});
+
 test('offers Discord login to visitors', async ({ page }) => {
   await page.route('**/api/auth/get-session', (route) =>
     route.fulfill({ json: null }),

@@ -37,6 +37,17 @@ const isHome = pathname === '/';
       </nav>
     )
   }
+  <a class="account" href="/conta/" data-account-link>Entrar</a>
+  <script is:inline>
+    // Shows the saved name without asking the server on every page.
+    try {
+      const name = localStorage.getItem('tibianerd:account');
+
+      if (name) {
+        document.querySelector('[data-account-link]').textContent = name;
+      }
+    } catch {}
+  </script>
 </header>
 
 <style>
@@ -67,6 +78,29 @@ const isHome = pathname === '/';
 
   nav {
     min-inline-size: 0;
+  }
+
+  .account {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    max-inline-size: 9rem;
+    min-block-size: var(--tap-target);
+    padding-inline: var(--space-3);
+    overflow: hidden;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-small);
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .account:hover {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
 
   .menu-button {
@@ -119,14 +153,22 @@ const isHome = pathname === '/';
     color: var(--color-text);
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: 56rem) {
     nav {
       flex: 1;
     }
   }
 
   /* The five tool names do not fit next to the logo on a phone. */
-  @media (max-width: 47.99rem) {
+  @media (max-width: 55.99rem) {
+    header {
+      gap: var(--space-2);
+    }
+
+    .logo {
+      margin-inline-end: auto;
+    }
+
     .menu-button {
       display: inline-flex;
     }
