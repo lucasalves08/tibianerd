@@ -1,6 +1,8 @@
 import { useEffect, useId, useMemo, useState } from 'react';
+import { bestiaryEntries } from '../data/bestiary';
 import { charms, getCharmIconPath } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
+import { getBestiaryInfo } from '../domain/bestiaryInfo';
 import { getBestElementalCharms } from '../domain/charmOptimizer';
 import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
@@ -19,6 +21,8 @@ const findByName = (name: string | null): Creature | undefined =>
 
 function CreatureDetails({ creature }: { creature: Creature }) {
   const best = getBestElementalCharms(charms, creature);
+  const bestiary = bestiaryEntries.find(({ name }) => name === creature.name);
+  const bestiaryInfo = bestiary && getBestiaryInfo(bestiary);
 
   return (
     <article className={styles.details}>
@@ -30,6 +34,31 @@ function CreatureDetails({ creature }: { creature: Creature }) {
         {formatNumber(creature.hitPoints)} HP
       </p>
       <CreatureResistances creature={creature} showNames />
+      {bestiary && bestiaryInfo && (
+        <dl className={styles.bestiary}>
+          <div>
+            <dt>Charm Points</dt>
+            <dd>{bestiaryInfo.charmPoints}</dd>
+          </div>
+          <div>
+            <dt>Dificuldade</dt>
+            <dd>
+              {bestiary.difficulty}
+              {bestiary.isVeryRare && ' · Very Rare'}
+            </dd>
+          </div>
+          <div>
+            <dt>Classe</dt>
+            <dd>{bestiary.creatureClass}</dd>
+          </div>
+          <div>
+            <dt>Mortes por etapa</dt>
+            <dd>
+              {bestiaryInfo.stageKills.map(formatNumber).join(' / ')}
+            </dd>
+          </div>
+        </dl>
+      )}
       <div className={styles.pick}>
         <h3 className={styles.pickTitle}>Melhor charm elemental</h3>
         {best.length > 0 ? (

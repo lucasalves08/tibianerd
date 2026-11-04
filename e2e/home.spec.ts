@@ -23,7 +23,7 @@ test('shows the home page without console errors', async ({ page }) => {
 });
 
 test('shows a card for every tool', async ({ page }) => {
-  await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(6);
+  await expect(page.getByRole('main').getByRole('listitem')).toHaveCount(5);
 });
 
 test('opens a tool from its card', async ({ page }) => {

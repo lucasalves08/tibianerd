@@ -29,16 +29,8 @@ export const tools: Tool[] = [
     category: 'reference',
     name: 'Consulta de monstros',
     shortName: 'Monstros',
-    description: 'HP, resistências e melhor charm de cada criatura.',
+    description: 'HP, resistências, melhor charm e Charm Points de cada criatura.',
     href: '/tools/monsters',
-  },
-  {
-    id: 'bestiary',
-    category: 'character',
-    name: 'Bestiary',
-    shortName: 'Bestiary',
-    description: 'Marque seu progresso e veja o que falta para ganhar pontos.',
-    href: '/tools/bestiary',
   },
   {
     id: 'exercise',

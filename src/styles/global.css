@@ -70,6 +70,16 @@
   }
 }
 
+/* Keeps the old page on screen until the new one paints, so nothing blinks. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
