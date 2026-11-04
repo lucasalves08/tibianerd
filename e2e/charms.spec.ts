@@ -55,7 +55,7 @@ test('applies the level limit', async ({ page }) => {
 });
 
 test('reads a Hunt Analyzer log', async ({ page }) => {
-  await page.getByRole('button', { name: 'Colar do Hunt Analyzer' }).click();
+  await page.getByRole('button', { name: 'Hunt Analyzer' }).click();
   await page
     .getByLabel('Texto do Hunt Analyzer')
     .fill('Killed Monsters:\n  10x dragon\n  3x not a creature');
@@ -78,12 +78,12 @@ test('fills life and mana from the vocation and level', async ({ page }) => {
 });
 
 test('adds the creatures of a hunting place', async ({ page }) => {
-  await page.getByRole('button', { name: 'Escolher hunting place' }).click();
-  await expect(page.getByRole('option', { name: 'Escolha um lugar' })).toBeAttached();
-  await page.getByLabel('Hunting place').selectOption("Ab'Dendriel Elf Cave");
+  await page.getByRole('button', { name: 'Hunting place' }).click();
+  await page.getByLabel('Hunting place').fill('elf cave');
+  await page.getByRole('button', { name: /^Ab'Dendriel Elf Cave/ }).click();
 
   await expect(page.getByRole('heading', { name: 'Elf Scout' })).toBeVisible();
-  await expect(page.getByText('ajuste as mortes')).toBeVisible();
+  await expect(page.getByText('Com o Hunt Analyzer')).toBeVisible();
 });
 
 test('remembers the setup after reloading', async ({ page }) => {

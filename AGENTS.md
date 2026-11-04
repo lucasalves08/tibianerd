@@ -8,7 +8,7 @@ Write everything in English: code, comments, tests, commits, branches, pull requ
 - Keep working without asking for confirmation. Ask only about a real doubt that the maintainer must settle, or before a hard to reverse action.
 - Challenge ideas that do not make sense, and say why.
 - Run only `npm test` locally. CI runs everything else.
-- Open every pull request as a draft, and keep related work in one draft. Only the maintainer marks it ready, and CI merges it when it passes.
+- Open every pull request ready for review, and keep related work in one pull request. CI merges it when it passes, and the maintainer tests on the published site. Use a draft only when the maintainer asks for one.
 - Keep pull request descriptions short.
 
 ## Development

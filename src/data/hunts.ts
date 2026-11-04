@@ -17,6 +17,8 @@ export interface Hunt {
   experienceRating: number | null;
   lootRating: number | null;
   creatureNames: string[];
+  /** Estimated spawns, in the same order as creatureNames. */
+  creatureSpawns: number[];
 }
 
 type HuntRow = [
@@ -28,18 +30,30 @@ type HuntRow = [
   number | null,
   number | null,
   string[],
+  number[],
 ];
 
 export const huntDataDate = huntData.fetchedAt;
 
 export const hunts: Hunt[] = (huntData.hunts as HuntRow[]).map(
-  ([name, city, knight, paladin, mage, experience, loot, creatureNames]) => ({
+  ([
+    name,
+    city,
+    knight,
+    paladin,
+    mage,
+    experience,
+    loot,
+    creatureNames,
+    creatureSpawns,
+  ]) => ({
     name,
     city,
     levels: [knight, paladin, mage],
     experienceRating: experience,
     lootRating: loot,
     creatureNames,
+    creatureSpawns,
   }),
 );
 

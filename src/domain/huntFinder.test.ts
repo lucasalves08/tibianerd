@@ -32,6 +32,7 @@ const makeHunt = (name: string, levels: (number | null)[], city = 'Thais'): Hunt
   name,
   city,
   levels,
+  creatureSpawns: [],
   experienceRating: 3,
   lootRating: 3,
   creatureNames: ['Ice Beast', 'Fire Beast'],
