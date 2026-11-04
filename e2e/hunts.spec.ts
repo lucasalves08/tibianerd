@@ -21,6 +21,9 @@ test('shows spots up to the player level', async ({ page }) => {
   await page.getByLabel('Seu nível').fill('50');
 
   await expect(count).not.toHaveText(before ?? '');
+
+  await page.getByLabel('Buscar spot').fill('alchemist quarter');
+
   await expect(page.getByRole('link', { name: 'Alchemist Quarter' })).toBeVisible();
 });
 
