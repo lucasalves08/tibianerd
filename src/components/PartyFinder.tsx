@@ -60,9 +60,8 @@ export default function PartyFinder() {
   };
 
   useEffect(() => {
-    const load = async () => {
-      await loadAds();
-
+    // Each request stands alone, so a failure in the ads keeps the login state.
+    const loadCharacters = async () => {
       const response = await fetch('/api/characters');
 
       if (response.ok) {
@@ -74,9 +73,12 @@ export default function PartyFinder() {
       }
     };
 
-    load()
-      .catch(() => setError('Não conseguimos carregar os anúncios.'))
-      .finally(() => setIsLoading(false));
+    void Promise.all([
+      loadAds().catch(() => setError('Não conseguimos carregar os anúncios.')),
+      loadCharacters().catch(() =>
+        setError('Não conseguimos carregar seus personagens.'),
+      ),
+    ]).finally(() => setIsLoading(false));
   }, []);
 
   const send = async (url: string, options: RequestInit) => {
