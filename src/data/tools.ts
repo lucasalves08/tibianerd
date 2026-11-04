@@ -13,7 +13,7 @@ export const tools: Tool[] = [
     keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
   },
   {
-    id: 'monstros',
+    id: 'monsters',
     name: 'Consulta de monstros',
     description: 'HP, resistências e melhor charm de cada criatura.',
     keywords: ['monstro', 'criatura', 'creature', 'resistência', 'hp'],
