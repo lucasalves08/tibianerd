@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   charms,
   getCharmIconPath,
@@ -83,6 +83,8 @@ export default function CharmOptimizer() {
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
+  const [isCharmsOpen, setIsCharmsOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Browser storage can be missing or blocked, and the tool works without it.
   useEffect(() => {
@@ -210,14 +212,37 @@ export default function CharmOptimizer() {
           )}
         </section>
 
-        <section
-          className={`${styles.panel} ${styles.charmsPanel}`}
-          aria-labelledby="charms-title"
-        >
+        <section className={styles.panel} aria-labelledby="charms-title">
           <h2 id="charms-title" className={styles.panelTitle}>
-            Seus charms
+            <span className={styles.charmsLabel}>Seus charms</span>
+            <button
+              className={styles.charmsToggle}
+              type="button"
+              aria-expanded={isCharmsOpen}
+              aria-controls="charm-list"
+              onClick={() => setIsCharmsOpen(!isCharmsOpen)}
+            >
+              Seus charms
+              <span className={styles.charmsCount}>
+                Ativos: {owned.length} de {charms.length}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+                <path
+                  d="M2 4 6 8 10 4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </h2>
-          <ul className={styles.charmList}>
+          <ul
+            id="charm-list"
+            className={styles.charmList}
+            data-collapsed={!isCharmsOpen || undefined}
+          >
             {charms.map((charm) => {
               const tier = state.charmTiers[charm.id] ?? null;
 
@@ -305,17 +330,24 @@ export default function CharmOptimizer() {
           </div>
         )}
 
-        <div className={styles.search}>
+        <div className={styles.search} ref={searchRef}>
           <label className={styles.field}>
             Buscar criatura
             <input
               className={styles.input}
               type="search"
               autoComplete="off"
-              placeholder="Clique para ver a lista ou digite o nome"
+              placeholder="Digite o nome ou veja a lista"
               value={search}
               aria-expanded={isSearchOpen}
-              onFocus={() => setIsSearchOpen(true)}
+              onFocus={() => {
+                setIsSearchOpen(true);
+
+                // Keeps the list above the phone keyboard.
+                if (window.matchMedia('(pointer: coarse)').matches) {
+                  searchRef.current?.scrollIntoView({ block: 'start' });
+                }
+              }}
               onClick={() => setIsSearchOpen(true)}
               onBlur={() => setIsSearchOpen(false)}
               onChange={(event) => {

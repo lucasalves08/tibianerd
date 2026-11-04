@@ -11,7 +11,17 @@ const isHome = pathname === '/';
   {
     !isHome && (
       <nav aria-label="Ferramentas">
-        <ul>
+        <button class="menu-button" type="button" popovertarget="tool-menu">
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path
+              d="M2 4h14M2 9h14M2 14h14"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"></path>
+          </svg>
+          Menu
+        </button>
+        <ul id="tool-menu" popover="auto">
           {tools.map(({ href, shortName }) => (
             <li>
               <a
@@ -34,9 +44,9 @@ const isHome = pathname === '/';
     inset-block-start: 0;
     z-index: 2;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-1) var(--space-6);
+    justify-content: space-between;
+    gap: var(--space-6);
     padding: var(--space-2) max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
     border-block-end: 1px solid var(--color-line);
     /* A translucent sticky bar can change how the browser smooths its text. */
@@ -56,22 +66,37 @@ const isHome = pathname === '/';
 
   nav {
     min-inline-size: 0;
-    max-inline-size: 100%;
   }
 
-  @media (max-width: 40rem) {
-    header {
-      position: static;
-    }
+  .menu-button {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--tap-target);
+    padding-inline: var(--space-3);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-small);
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    cursor: pointer;
   }
 
+  /* Undoes the browser's popover styles while the menu sits in the header. */
   ul {
+    position: static;
     display: flex;
-    flex-wrap: wrap;
     gap: var(--space-1);
+    inline-size: auto;
+    block-size: auto;
     margin: 0;
     padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
     list-style: none;
+    overflow: visible;
   }
 
   nav a {
@@ -91,5 +116,45 @@ const isHome = pathname === '/';
   nav a[aria-current='page'] {
     background: var(--color-raised);
     color: var(--color-text);
+  }
+
+  @media (min-width: 48rem) {
+    nav {
+      flex: 1;
+    }
+  }
+
+  /* The five tool names do not fit next to the logo on a phone. */
+  @media (max-width: 47.99rem) {
+    .menu-button {
+      display: inline-flex;
+    }
+
+    ul {
+      position: fixed;
+      inset: calc(var(--tap-target) + 2 * var(--space-2) + var(--space-1))
+        var(--page-gutter) auto;
+      flex-direction: column;
+      padding: var(--space-2);
+      border: 1px solid var(--color-line);
+      border-radius: var(--radius);
+      background: var(--color-raised);
+      box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.5);
+    }
+
+    ul:not(:popover-open) {
+      display: none;
+    }
+
+    nav a {
+      display: flex;
+      min-block-size: var(--tap-target);
+      font-size: var(--text-md);
+    }
+
+    nav a:hover,
+    nav a[aria-current='page'] {
+      background: var(--color-line);
+    }
   }
 </style>

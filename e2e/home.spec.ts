@@ -40,6 +40,21 @@ test('only shows the tool menu inside a tool', async ({ page }) => {
   await expect(page.getByRole('navigation')).toBeVisible();
 });
 
+test('opens the tool menu on phones', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+
+  await page.goto('/tools/charms');
+  await page.waitForLoadState('networkidle');
+  const link = page.getByRole('link', { name: 'Exercise' });
+
+  await expect(link).toBeHidden();
+
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await link.click();
+
+  await expect(page).toHaveURL(/\/tools\/exercise$/);
+});
+
 test('does not scroll horizontally', async ({ page }) => {
   const overflow = await page.evaluate(() => {
     const { scrollWidth, clientWidth } = document.documentElement;

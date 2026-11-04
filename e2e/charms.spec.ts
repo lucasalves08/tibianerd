@@ -75,6 +75,19 @@ test('remembers the setup after reloading', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Dragon' })).toBeVisible();
 });
 
+test('keeps the charm list closed on phones until asked', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile');
+
+  const wound = page.getByRole('checkbox', { name: 'Wound' });
+  await expect(wound).toBeHidden();
+
+  await page.getByRole('button', { name: /Seus charms/ }).click();
+
+  await expect(wound).toBeVisible();
+});
+
 test('does not scroll horizontally', async ({ page }) => {
   await addCreature(page, 'Dragon');
 

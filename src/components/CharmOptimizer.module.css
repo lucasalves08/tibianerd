@@ -7,6 +7,7 @@
 .sidebar {
   display: grid;
   gap: var(--space-4);
+  min-inline-size: 0;
 }
 
 .panel {
@@ -34,6 +35,41 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.charmsToggle {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  inline-size: 100%;
+  min-block-size: var(--tap-target);
+  margin-block: calc(-1 * var(--space-2));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.charmsCount {
+  margin-inline-start: auto;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.charmsToggle svg {
+  flex: none;
+  transition: rotate 150ms;
+}
+
+.charmsToggle[aria-expanded='true'] svg {
+  rotate: 180deg;
 }
 
 .fields {
@@ -185,6 +221,7 @@ textarea.input {
 
 .search {
   position: relative;
+  scroll-margin-block-start: 5rem;
 }
 
 .results {
@@ -410,14 +447,18 @@ textarea.input {
   font-size: var(--text-sm);
 }
 
-/* On small screens, the results come before the long list of charms. */
+/* On small screens, the long list of charms stays closed until needed. */
 @media (max-width: 59.99rem) {
-  .sidebar {
-    display: contents;
+  .charmsLabel {
+    display: none;
   }
 
-  .charmsPanel {
-    order: 1;
+  .charmsToggle {
+    display: flex;
+  }
+
+  .charmList[data-collapsed] {
+    display: none;
   }
 }
 
@@ -468,6 +509,7 @@ textarea.input {
   }
 
   .button,
+  .input,
   .kills .input {
     min-block-size: var(--tap-target);
   }
