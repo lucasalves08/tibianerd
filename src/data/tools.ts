@@ -22,7 +22,7 @@ export const tools: Tool[] = [
     name: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
     keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
-    href: '/ferramentas/charms',
+    href: '/tools/charms',
   },
   {
     id: 'monsters',
@@ -51,7 +51,7 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
     keywords: ['imbue', 'imbuing', 'gold token', 'market', 'custo'],
-    href: '/ferramentas/imbuements',
+    href: '/tools/imbuements',
   },
   {
     id: 'hunting-places',
