@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import {
   getDiscordIdTime,
   getNextRoomCheck,
+  getRoomMessage,
   MAX_ROOMS,
   ROOM_IDLE_MS,
   type RoomCharacter,
@@ -233,7 +234,7 @@ export const openRoom = async (
   // Only the two sides of an accepted request reach the room.
   const request = await db
     .prepare(
-      `SELECT r.ad_id AS adId,
+      `SELECT r.ad_id AS adId, a.purpose, a.note,
         owner.server AS ownerServer, owner.name AS ownerName,
         owner.world AS ownerWorld, owner.vocation AS ownerVocation,
         owner.verified_at IS NOT NULL AS ownerVerified,
@@ -256,6 +257,8 @@ export const openRoom = async (
     .bind(requestId, userId)
     .first<{
       adId: string;
+      purpose: 'hunt' | 'boss';
+      note: string;
       ownerServer: RoomCharacter['server'];
       ownerName: string;
       ownerWorld: string;
@@ -331,6 +334,17 @@ export const openRoom = async (
       )
       .bind(adId, channelId, Date.now() + ROOM_IDLE_MS)
       .run();
+    await discord(`/channels/${channelId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({
+        content: getRoomMessage({
+          purpose: request.purpose,
+          note: request.note,
+          world: request.ownerWorld,
+          vocations: [request.ownerVocation, request.memberVocation],
+        }),
+      }),
+    }).catch(() => {});
   }
 
   return {

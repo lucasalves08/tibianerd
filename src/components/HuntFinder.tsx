@@ -201,7 +201,7 @@ export default function HuntFinder() {
           </select>
         </label>
         <label className={styles.field}>
-          Buscar spot
+          Buscar lugar
           <input
             className={styles.input}
             type="search"
@@ -214,8 +214,8 @@ export default function HuntFinder() {
 
       <p className={styles.muted} role="status">
         {results.length === 1
-          ? '1 spot encontrado'
-          : `${results.length} spots encontrados`}
+          ? '1 lugar encontrado'
+          : `${results.length} lugares encontrados`}
       </p>
 
       <ul className={styles.list}>

@@ -77,7 +77,7 @@ function DiscordContact({
           disabled={isOpening}
           onClick={() => void openRoom()}
         >
-          {isOpening ? 'Abrindo…' : 'Abrir sala da party'}
+          {isOpening ? 'Abrindo…' : 'Abrir sala do grupo'}
         </button>
         <a href={DISCORD_INVITE_URL} rel="noopener">
           Entrar no servidor
@@ -112,7 +112,7 @@ export default function PartyRequests({
                 <p>
                   <strong>{request.characterName}</strong>{' '}
                   <span className={styles.muted}>
-                    {vocationName(request.vocation)} · nível{' '}
+                    {vocationName(request.vocation)} ·{' '}
                     {request.level.toLocaleString('pt-BR')}
                   </span>
                 </p>

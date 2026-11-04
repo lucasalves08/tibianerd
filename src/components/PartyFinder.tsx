@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { vocations } from '../domain/characterStats';
-import { gameServers, type Character } from '../domain/characters';
+import {
+  gameServers,
+  type Character,
+} from '../domain/characters';
 import {
   adPurposes,
   findCompatibleAds,
-  MAX_BOSS_LENGTH,
   MAX_NOTE_LENGTH,
   type AdPurpose,
   type IncomingRequest,
@@ -12,7 +13,10 @@ import {
   type OutgoingRequest,
   type PartyAdView,
 } from '../domain/partyFinder';
+import { getShareRange } from '../domain/partyShare';
+import PlayerCard from './PlayerCard';
 import PartyRequests from './PartyRequests';
+import Segmented from './Segmented';
 import styles from './PartyFinder.module.css';
 
 const ADS_URL = '/api/party-ads';
@@ -20,14 +24,10 @@ const REQUESTS_URL = '/api/party-requests';
 const MINUTE_IN_MS = 60 * 1000;
 const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 
-const vocationName = (id: string) =>
-  vocations.find((vocation) => vocation.id === id)?.name ?? id;
+const adGoal = ({ purpose }: Pick<PartyAdView, 'purpose'>) =>
+  purpose === 'boss' ? 'Boss' : 'Hunt';
 
-const serverName = (id: string) =>
-  gameServers.find((server) => server.id === id)?.name ?? id;
-
-const adGoal = ({ purpose, boss }: Pick<PartyAdView, 'purpose' | 'boss'>) =>
-  purpose === 'boss' ? `Boss: ${boss}` : 'Hunt';
+const purposeFilters = [{ id: 'all', name: 'Todos' }, ...adPurposes] as const;
 
 const formatLevel = (level: number) => level.toLocaleString('pt-BR');
 
@@ -49,9 +49,9 @@ export default function PartyFinder() {
   const [characterId, setCharacterId] = useState('');
   const [note, setNote] = useState('');
   const [purpose, setPurpose] = useState<AdPurpose>('hunt');
-  const [boss, setBoss] = useState('');
-  const [bossNames, setBossNames] = useState<string[]>([]);
-  const [purposeFilter, setPurposeFilter] = useState('');
+  const [purposeFilter, setPurposeFilter] = useState<
+    (typeof purposeFilters)[number]['id']
+  >('all');
   const [serverFilter, setServerFilter] = useState('');
   const [worldFilter, setWorldFilter] = useState('');
   const [error, setError] = useState('');
@@ -147,21 +147,11 @@ export default function PartyFinder() {
     const isPublished = await send(ADS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characterId, note, purpose, boss }),
+      body: JSON.stringify({ characterId, note, purpose }),
     });
 
     if (isPublished) {
       setNote('');
-      setBoss('');
-    }
-  };
-
-  const choosePurpose = (id: AdPurpose) => {
-    setPurpose(id);
-
-    // The list of bosses only loads for those who look for one.
-    if (id === 'boss' && bossNames.length === 0) {
-      void import('../data/bosses').then(({ bosses }) => setBossNames(bosses));
     }
   };
 
@@ -206,14 +196,14 @@ export default function PartyFinder() {
           (!worldFilter || world === worldFilter),
       );
   const visibleAds = matchingAds.filter(
-    (ad) => !purposeFilter || ad.purpose === purposeFilter,
+    (ad) => purposeFilter === 'all' || ad.purpose === purposeFilter,
   );
 
   return (
     <div className={styles.layout}>
       <section className={styles.panel} aria-labelledby="publish-title">
         <h2 id="publish-title" className={styles.panelTitle}>
-          Procurar party
+          Publicar anúncio
         </h2>
 
         {isLoading ? (
@@ -225,7 +215,7 @@ export default function PartyFinder() {
             <p>Entre com o Discord para publicar um anúncio.</p>
             <a
               className={styles.linkButton}
-              href="/conta/"
+              href="/account/"
               data-astro-prefetch="false"
             >
               Entrar
@@ -236,7 +226,7 @@ export default function PartyFinder() {
             <p>Cadastre um personagem para publicar.</p>
             <a
               className={styles.linkButton}
-              href="/conta/"
+              href="/account/"
               data-astro-prefetch="false"
             >
               Cadastrar personagem
@@ -258,45 +248,24 @@ export default function PartyFinder() {
                 ))}
               </select>
             </label>
-            <fieldset className={styles.purposes}>
-              <legend className={styles.legend}>O que você procura?</legend>
-              {adPurposes.map(({ id, name }) => (
-                <label key={id} className={styles.purpose}>
-                  <input
-                    type="radio"
-                    name="purpose"
-                    checked={purpose === id}
-                    onChange={() => choosePurpose(id)}
-                  />
-                  {name}
-                </label>
-              ))}
-            </fieldset>
-            {purpose === 'boss' && (
-              <label className={styles.field}>
-                Qual boss?
-                <input
-                  className={styles.input}
-                  list="boss-names"
-                  autoComplete="off"
-                  maxLength={MAX_BOSS_LENGTH}
-                  placeholder="Digite o nome do boss"
-                  value={boss}
-                  onChange={(event) => setBoss(event.target.value)}
-                />
-                <datalist id="boss-names">
-                  {bossNames.map((name) => (
-                    <option key={name} value={name} />
-                  ))}
-                </datalist>
-              </label>
-            )}
+            <Segmented
+              label="O que você procura?"
+              name="purpose"
+              options={adPurposes}
+              value={purpose}
+              onChange={setPurpose}
+            />
             <label className={styles.field}>
-              Recado (opcional)
-              <input
-                className={styles.input}
+              {purpose === 'boss' ? 'Qual boss ou rotação?' : 'Recado (opcional)'}
+              <textarea
+                className={styles.textarea}
+                rows={3}
                 maxLength={MAX_NOTE_LENGTH}
-                placeholder="Hoje à noite, quero caçar em Roshamuul"
+                placeholder={
+                  purpose === 'boss'
+                    ? 'Rotação GT fixa, ou Ferumbras hoje à noite'
+                    : 'Hoje à noite, quero caçar em Roshamuul'
+                }
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
               />
@@ -304,13 +273,13 @@ export default function PartyFinder() {
             <button
               className={styles.button}
               type="button"
-              disabled={purpose === 'boss' && !boss.trim()}
+              disabled={purpose === 'boss' && !note.trim()}
               onClick={() => void publish()}
             >
               Publicar anúncio
             </button>
             <p className={styles.muted}>
-              O anúncio mostra seu personagem e sai do ar em 6 horas. Seu Discord
+              O anúncio mostra seu personagem e sai do ar em 12 horas. Seu Discord
               só aparece para quem você aceitar.
             </p>
           </>
@@ -348,27 +317,27 @@ export default function PartyFinder() {
       </section>
 
       <section className={styles.panel} aria-labelledby="ads-title">
-        <h2 id="ads-title" className={styles.panelTitle}>
-          {character
-            ? `Dividem XP com ${character.name} em ${character.world}`
-            : 'Procurando party'}
-        </h2>
+        <div>
+          <h2 id="ads-title" className={styles.listTitle}>
+            {character
+              ? `Dividem XP com ${character.name}`
+              : 'Procurando grupo'}
+          </h2>
+          {character && (
+            <p className={styles.muted}>
+              Divide com níveis {formatLevel(getShareRange(character.level).lowest)} a{' '}
+              {formatLevel(getShareRange(character.level).highest)}
+            </p>
+          )}
+        </div>
 
-        <label className={styles.field}>
-          Mostrar
-          <select
-            className={styles.input}
-            value={purposeFilter}
-            onChange={(event) => setPurposeFilter(event.target.value)}
-          >
-            <option value="">Hunt e boss</option>
-            {adPurposes.map(({ id, name }) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Segmented
+          label="Mostrar"
+          name="purpose-filter"
+          options={purposeFilters}
+          value={purposeFilter}
+          onChange={setPurposeFilter}
+        />
 
         {!character && (
           <div className={styles.filters}>
@@ -416,57 +385,56 @@ export default function PartyFinder() {
 
         <ul className={styles.ads}>
           {visibleAds.map((ad) => (
-            <li key={ad.id} className={styles.ad}>
-              <div className={styles.adHeader}>
-                <h3 className={styles.adName}>{ad.characterName}</h3>
-                {ad.isVerified && (
-                  <span className={styles.verified}>✓ Verificado</span>
-                )}
-                <span className={styles.muted}>
-                  {vocationName(ad.vocation)} · nível {formatLevel(ad.level)} ·{' '}
-                  {serverName(ad.server)}, {ad.world}
-                </span>
-              </div>
-              <p className={styles.goal} data-purpose={ad.purpose}>
-                {adGoal(ad)}
-              </p>
-              {ad.note && <p>{ad.note}</p>}
-              {character && (
-                <button
-                  className={styles.button}
-                  type="button"
-                  disabled={outgoing.some(({ adId }) => adId === ad.id)}
-                  aria-label={`Pedir para entrar na party de ${ad.characterName}`}
-                  onClick={() => requestToJoin(ad.id)}
-                >
-                  {outgoing.some(({ adId }) => adId === ad.id)
-                    ? 'Pedido enviado'
-                    : 'Pedir para entrar'}
-                </button>
-              )}
-              <div className={styles.adFooter}>
-                <span className={styles.muted}>
-                  {formatRemaining(ad.expiresAt)}
-                </span>
-                {isSignedIn && (
-                  <button
-                    className={styles.textButton}
-                    type="button"
-                    aria-label={`Denunciar anúncio de ${ad.characterName}`}
-                    onClick={() => report(ad.id)}
-                  >
-                    Denunciar
-                  </button>
-                )}
-              </div>
+            <li key={ad.id}>
+              <PlayerCard
+                character={{ ...ad, name: ad.characterName }}
+                isVerified={ad.isVerified}
+                corner={
+                  <span className={styles.goal} data-purpose={ad.purpose}>
+                    {adGoal(ad)}
+                  </span>
+                }
+              >
+                {ad.note && <p className={styles.note}>{ad.note}</p>}
+                <div className={styles.adFooter}>
+                  <span className={styles.muted}>
+                    {formatRemaining(ad.expiresAt)}
+                    {isSignedIn && (
+                      <>
+                        {' · '}
+                        <button
+                          className={styles.textButton}
+                          type="button"
+                          aria-label={`Denunciar anúncio de ${ad.characterName}`}
+                          onClick={() => report(ad.id)}
+                        >
+                          Denunciar
+                        </button>
+                      </>
+                    )}
+                  </span>
+                  {character && (
+                    <button
+                      className={styles.button}
+                      type="button"
+                      disabled={outgoing.some(({ adId }) => adId === ad.id)}
+                      aria-label={`Pedir para entrar no grupo de ${ad.characterName}`}
+                      onClick={() => requestToJoin(ad.id)}
+                    >
+                      {outgoing.some(({ adId }) => adId === ad.id)
+                        ? 'Pedido enviado'
+                        : 'Pedir para entrar'}
+                    </button>
+                  )}
+                </div>
+              </PlayerCard>
             </li>
           ))}
         </ul>
 
         <p className={styles.footnote}>
-          Hunts usam a regra de 2/3 do Tibia, que pode variar no RubinOT. Bosses
-          mostram todos do mesmo mundo, em qualquer nível. A lista de bosses vem
-          da TibiaWiki. Só o selo Verificado confirma o dono do personagem.
+          Hunts mostram quem divide XP com você. Bosses mostram todos do seu
+          mundo.
         </p>
       </section>
     </div>

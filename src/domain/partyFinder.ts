@@ -1,5 +1,5 @@
 import type { VocationId } from './characterStats';
-import type { GameServerId } from './characters';
+import type { CharacterSex, GameServerId } from './characters';
 import { getShareRange } from './partyShare';
 
 export const adPurposes = [
@@ -12,7 +12,6 @@ export type AdPurpose = (typeof adPurposes)[number]['id'];
 export interface PartyAd {
   id: string;
   purpose: AdPurpose;
-  boss: string | null;
   server: GameServerId;
   world: string;
   vocation: VocationId;
@@ -23,6 +22,8 @@ export interface PartyAd {
 
 export interface PartyAdView extends PartyAd {
   characterName: string;
+  outfit: string | null;
+  sex: CharacterSex;
   isVerified: boolean;
   note: string;
   isMine: boolean;
@@ -59,10 +60,9 @@ export interface PartySeeker {
 const HOUR_IN_MS = 60 * 60 * 1000;
 
 export const MAX_NOTE_LENGTH = 140;
-export const MAX_BOSS_LENGTH = 60;
 
 /** Product choice, not a game rule: a hunt plan rarely lasts longer. */
-export const AD_LIFETIME_MS = 6 * HOUR_IN_MS;
+export const AD_LIFETIME_MS = 12 * HOUR_IN_MS;
 
 export const getAdExpiry = (createdAt: number): number =>
   createdAt + AD_LIFETIME_MS;
@@ -74,15 +74,6 @@ export const cleanAdNote = (note: unknown): string =>
 
 export const isAdPurpose = (purpose: unknown): purpose is AdPurpose =>
   adPurposes.some(({ id }) => id === purpose);
-
-export const cleanBossName = (boss: unknown): string | null => {
-  const clean =
-    typeof boss === 'string'
-      ? boss.replace(/\s+/g, ' ').trim().slice(0, MAX_BOSS_LENGTH)
-      : '';
-
-  return clean || null;
-};
 
 export const isJoinDecision = (status: unknown): status is JoinDecision =>
   joinDecisions.some((decision) => decision === status);

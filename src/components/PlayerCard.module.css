@@ -1,0 +1,118 @@
+.card {
+  --vocation: var(--color-accent);
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-raised);
+  transition: border-color 150ms;
+}
+
+.card:hover {
+  border-color: color-mix(in srgb, var(--vocation) 55%, var(--color-line));
+}
+
+.card[data-vocation='knight'] {
+  --vocation: #e74c3c;
+}
+
+.card[data-vocation='paladin'] {
+  --vocation: #f1c40f;
+}
+
+.card[data-vocation='sorcerer'] {
+  --vocation: #3498db;
+}
+
+.card[data-vocation='druid'] {
+  --vocation: #2ecc71;
+}
+
+.card[data-vocation='monk'] {
+  --vocation: #9b59b6;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.portrait {
+  flex: none;
+  overflow: hidden;
+  border-radius: var(--radius-small);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--vocation) 32%, var(--color-background)),
+    var(--color-background) 75%
+  );
+}
+
+.sprite {
+  display: block;
+  inline-size: 84px;
+  block-size: 84px;
+  /* A row of 8 walking frames, with the character in the bottom right of each 128px frame. */
+  object-fit: none;
+  object-position: -46px -46px;
+  image-rendering: pixelated;
+}
+
+.card:hover .sprite {
+  animation: outfit-walk 800ms steps(8) infinite;
+}
+
+@keyframes outfit-walk {
+  to {
+    object-position: -1070px -46px;
+  }
+}
+
+/* Doubled to match the size of the 128px outfit images. */
+.portrait :global(.vocation-walk) {
+  margin: 10px;
+  scale: 2;
+  translate: -24px -24px;
+}
+
+.card:hover :global(.vocation-walk) {
+  animation: vocation-walk 800ms steps(8) infinite;
+}
+
+.main {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-lg);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.verified {
+  flex: none;
+  color: var(--color-accent);
+}
+
+.vocation {
+  color: color-mix(in srgb, var(--vocation) 70%, var(--color-text));
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.place {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.corner {
+  flex: none;
+  align-self: flex-start;
+}

@@ -3,7 +3,6 @@ import { expect, test } from '@playwright/test';
 const makeAd = (id: string, level: number, isMine = false) => ({
   id,
   purpose: 'hunt',
-  boss: null,
   server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
@@ -12,6 +11,9 @@ const makeAd = (id: string, level: number, isMine = false) => ({
   createdAt: 1000,
   expiresAt: Date.now() + 60 * 60 * 1000,
   characterName: `Player ${id}`,
+  outfit: null,
+  sex: 'male',
+  isVerified: false,
   isMine,
 });
 
@@ -59,7 +61,7 @@ test('shows only ads that share experience with the character', async ({
 test('shows boss ads from the same world at any level', async ({ page }) => {
   await page.route('**/api/party-ads', (route) =>
     route.fulfill({
-      json: [{ ...makeAd('boss', 200), purpose: 'boss', boss: 'Ferumbras' }],
+      json: [{ ...makeAd('boss', 200), purpose: 'boss', note: 'Rotação GT' }],
     }),
   );
   await page.route('**/api/characters', (route) =>
@@ -78,7 +80,7 @@ test('shows boss ads from the same world at any level', async ({ page }) => {
   );
   await page.goto('/tools/party/');
 
-  await expect(page.getByText('Boss: Ferumbras')).toBeVisible();
+  await expect(page.getByText('Rotação GT')).toBeVisible();
 });
 
 test('asks to join and shows the Discord after the answer', async ({ page }) => {
