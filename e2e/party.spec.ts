@@ -12,7 +12,6 @@ const makeAd = (id: string, level: number, isMine = false) => ({
   createdAt: 1000,
   expiresAt: Date.now() + 60 * 60 * 1000,
   characterName: `Player ${id}`,
-  discord: `discord-${id}`,
   isMine,
 });
 
@@ -26,7 +25,6 @@ test('asks visitors to sign in and still shows the ads', async ({ page }) => {
   await page.goto('/tools/party/');
 
   await expect(page.getByRole('heading', { name: 'Player a' })).toBeVisible();
-  await expect(page.getByText('discord-a')).toBeVisible();
   await expect(
     page.getByRole('main').getByRole('link', { name: 'Entrar' }),
   ).toBeVisible();
@@ -81,6 +79,51 @@ test('shows boss ads from the same world at any level', async ({ page }) => {
   await page.goto('/tools/party/');
 
   await expect(page.getByText('Boss: Ferumbras')).toBeVisible();
+});
+
+test('asks to join and shows the Discord after the answer', async ({ page }) => {
+  await page.route('**/api/party-ads', (route) =>
+    route.fulfill({ json: [makeAd('near', 900)] }),
+  );
+  await page.route('**/api/characters', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 'c1',
+          server: 'rubinot',
+          name: 'Lucas',
+          world: 'Vesperia',
+          vocation: 'paladin',
+          level: 967,
+        },
+      ],
+    }),
+  );
+  await page.route('**/api/party-requests', (route) =>
+    route.fulfill({
+      json: {
+        incoming: [],
+        outgoing: [
+          {
+            id: 'r1',
+            adId: 'near',
+            status: 'accepted',
+            characterName: 'Player near',
+            discord: 'player-near',
+            discordId: '123',
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto('/tools/party/');
+
+  await expect(page.getByRole('button', { name: /Pedir para entrar/ })).toBeDisabled();
+  await expect(page.getByText('player-near')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Abrir no Discord' })).toHaveAttribute(
+    'href',
+    'https://discord.com/users/123',
+  );
 });
 
 test('says when nobody is looking', async ({ page }) => {
