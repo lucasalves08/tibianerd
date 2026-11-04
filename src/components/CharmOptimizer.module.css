@@ -240,22 +240,17 @@ textarea.input {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-6);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius);
-  background: rgb(92 200 255 / 0.07);
+  color: var(--color-muted);
+  font-size: 0.875rem;
 }
 
-.summaryLabel {
+.summary strong {
+  color: var(--color-text);
+}
+
+.hint {
   color: var(--color-muted);
   font-size: 0.8125rem;
-}
-
-.summaryValue {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.1;
 }
 
 .unused {
