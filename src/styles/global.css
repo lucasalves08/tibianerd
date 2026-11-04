@@ -91,7 +91,48 @@
   animation: none;
 }
 
+@keyframes loading-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes loading-slide {
+  from {
+    background-position: -40% 0;
+  }
+
+  to {
+    background-position: 140% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 @layer base {
+  /* Astro removes this attribute once a tool is ready. */
+  astro-island[ssr] {
+    pointer-events: none;
+  }
+
+  /* The delay keeps fast loads free of any flash. */
+  astro-island[ssr]::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 3;
+    block-size: 3px;
+    background: linear-gradient(var(--color-accent) 0 0) no-repeat;
+    background-size: 40% 100%;
+    animation:
+      loading-appear 1ms 150ms backwards,
+      loading-slide 1.2s linear 150ms infinite;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -184,6 +225,7 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }

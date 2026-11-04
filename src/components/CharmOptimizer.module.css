@@ -281,6 +281,26 @@ textarea.input {
   text-align: center;
 }
 
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-block: var(--space-8);
+  color: var(--color-muted);
+  animation: loading-appear 1ms 150ms backwards;
+}
+
+.loading::before {
+  content: '';
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: 2px solid var(--color-line);
+  border-block-start-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
 .unused {
   display: flex;
   flex-wrap: wrap;

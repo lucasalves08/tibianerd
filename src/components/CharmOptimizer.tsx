@@ -387,7 +387,11 @@ export default function CharmOptimizer() {
           </p>
         )}
 
-        {hunt.length === 0 ? (
+        {!isLoaded ? (
+          <p className={styles.loading} role="status">
+            Carregando sua caçada…
+          </p>
+        ) : hunt.length === 0 ? (
           <p className={styles.empty}>
             Adicione as criaturas da sua caçada para ver o melhor charm de cada
             uma.
