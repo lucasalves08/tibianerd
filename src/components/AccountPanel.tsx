@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import CharacterManager from './CharacterManager';
 import styles from './AccountPanel.module.css';
 
 const AUTH_URL = '/api/auth';
@@ -109,60 +110,63 @@ export default function AccountPanel() {
   }
 
   return (
-    <section className={styles.panel}>
-      {session ? (
-        <>
-          <div className={styles.user}>
-            {session.user.image && (
-              <img
-                className={styles.photo}
-                src={session.user.image}
-                width="48"
-                height="48"
-                alt=""
-              />
-            )}
+    <div className={styles.stack}>
+      <section className={styles.panel}>
+        {session ? (
+          <>
+            <div className={styles.user}>
+              {session.user.image && (
+                <img
+                  className={styles.photo}
+                  src={session.user.image}
+                  width="48"
+                  height="48"
+                  alt=""
+                />
+              )}
+              <p>
+                Conectado como <strong>{session.user.name}</strong>.
+              </p>
+            </div>
+            <div className={styles.actions}>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => void leave('sign-out')}
+              >
+                Sair
+              </button>
+              <button
+                className={styles.danger}
+                type="button"
+                onClick={deleteAccount}
+              >
+                Excluir conta
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
             <p>
-              Conectado como <strong>{session.user.name}</strong>.
+              Usamos só o seu nome de usuário do Discord. Não pedimos seu e-mail.
             </p>
-          </div>
-          <div className={styles.actions}>
             <button
-              className={styles.button}
+              className={styles.discord}
               type="button"
-              onClick={() => void leave('sign-out')}
+              onClick={() => void signIn()}
             >
-              Sair
+              Entrar com Discord
             </button>
-            <button
-              className={styles.danger}
-              type="button"
-              onClick={deleteAccount}
-            >
-              Excluir conta
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <p>
-            Usamos só o seu nome de usuário do Discord. Não pedimos seu e-mail.
-          </p>
-          <button
-            className={styles.discord}
-            type="button"
-            onClick={() => void signIn()}
-          >
-            Entrar com Discord
-          </button>
-        </>
-      )}
+          </>
+        )}
 
-      {hasError && (
-        <p className={styles.error} role="alert">
-          Não conseguimos concluir agora. Tente de novo.
-        </p>
-      )}
-    </section>
+        {hasError && (
+          <p className={styles.error} role="alert">
+            Não conseguimos concluir agora. Tente de novo.
+          </p>
+        )}
+      </section>
+      {session && <CharacterManager />}
+    </div>
   );
 }

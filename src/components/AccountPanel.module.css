@@ -1,3 +1,9 @@
+.stack {
+  display: grid;
+  gap: var(--space-4);
+  max-inline-size: 32rem;
+}
+
 .panel {
   display: grid;
   gap: var(--space-4);
