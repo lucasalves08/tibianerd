@@ -1,0 +1,31 @@
+---
+import ImbuementCalculator from '../../components/ImbuementCalculator';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Calculadora de imbuements do Tibia | TibiaNerd"
+  description="Veja os itens de cada imbuement do Tibia, some o custo e compare market com gold token."
+>
+  <section class="intro">
+    <h1>Imbuements</h1>
+    <p>Veja os itens, some o custo e compare com Gold Tokens.</p>
+  </section>
+
+  <ImbuementCalculator client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 6vw, 3rem);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: 1.125rem;
+  }
+</style>

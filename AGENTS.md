@@ -2,6 +2,14 @@
 
 Write everything in English: code, comments, tests, commits, branches, pull requests, issues and documentation. Only text shown to users on the site is in Brazilian Portuguese.
 
+## Working style
+
+- Reply to the maintainer in Brazilian Portuguese.
+- Keep working without asking for confirmation. Ask only about a real doubt that the maintainer must settle, or before a hard to reverse action.
+- Challenge ideas that do not make sense, and say why.
+- Run only `npm test` locally. CI runs everything else, and pull requests merge when it passes.
+- Keep pull request descriptions short.
+
 ## Development
 
 When starting the dev server, use background mode:
