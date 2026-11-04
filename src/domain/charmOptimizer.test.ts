@@ -182,6 +182,66 @@ describe('optimizeCharms', () => {
     ]);
   });
 
+  describe('on a tie', () => {
+    const inferniarchs = [
+      {
+        creature: makeCreature('Brinebrute', 32000, {
+          physical: 80,
+          earth: 110,
+          energy: 85,
+          ice: 90,
+          death: 110,
+        }),
+        kills: 1,
+      },
+      {
+        creature: makeCreature('Hellhunter', 11300, {
+          physical: 90,
+          earth: 115,
+          fire: 105,
+          energy: 85,
+          ice: 95,
+          death: 115,
+        }),
+        kills: 1,
+      },
+      {
+        creature: makeCreature('Spellreaper', 11800, {
+          physical: 90,
+          earth: 115,
+          fire: 105,
+          energy: 0,
+          ice: 90,
+          death: 115,
+        }),
+        kills: 1,
+      },
+    ];
+    const picks = (hunt: typeof inferniarchs) =>
+      optimizeCharms(
+        hunt,
+        own(charms.map(({ id }) => id).slice(0, 7), 2),
+        character,
+        6,
+      ).assignments.map(({ creature, charm }) => [creature.name, charm.id]);
+
+    it('gives the earlier charm to the earlier creature', () => {
+      expect(picks(inferniarchs)).toEqual([
+        ['Brinebrute', 'poison'],
+        ['Hellhunter', 'enflame'],
+        ['Spellreaper', 'curse'],
+      ]);
+    });
+
+    it('follows the order of the list', () => {
+      expect(picks([...inferniarchs].reverse())).toEqual([
+        ['Spellreaper', 'poison'],
+        ['Hellhunter', 'enflame'],
+        ['Brinebrute', 'curse'],
+      ]);
+    });
+  });
+
   it('uses each charm once and each creature once', () => {
     const { assignments, unused } = optimizeCharms(
       [
