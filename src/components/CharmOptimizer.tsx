@@ -12,7 +12,7 @@ import {
   type OwnedCharm,
 } from '../domain/charmOptimizer';
 import { parseHuntLog } from '../domain/parseHuntLog';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';

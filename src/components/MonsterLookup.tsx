@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useState } from 'react';
-import { charms } from '../data/charms';
+import { charms, getCharmIconPath } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
 import { getBestElementalCharms } from '../domain/charmOptimizer';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import CreatureResistances from './CreatureResistances';
 import styles from './MonsterLookup.module.css';
@@ -32,11 +32,24 @@ function CreatureDetails({ creature }: { creature: Creature }) {
       <CreatureResistances creature={creature} showNames />
       <div className={styles.pick}>
         <h3 className={styles.pickTitle}>Melhor charm elemental</h3>
-        <p>
-          {best.length > 0
-            ? best.map(({ name }) => name).join(', ')
-            : 'Nenhum: a criatura é imune a todos os elementos.'}
-        </p>
+        {best.length > 0 ? (
+          <ul className={styles.pickList}>
+            {best.map(({ id, name }) => (
+              <li key={id}>
+                <img
+                  className={styles.charmIcon}
+                  src={getCharmIconPath(id)}
+                  width="32"
+                  height="32"
+                  alt=""
+                />
+                {name}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Nenhum: a criatura é imune a todos os elementos.</p>
+        )}
       </div>
       <p className={styles.muted}>
         Overpower e Overflux ignoram resistências e podem render mais em

@@ -1,6 +1,6 @@
 import { elements, type Creature, type Element } from '../data/creatures';
 import { huntVocations, type Hunt, type HuntVocationId } from '../data/hunts';
-import { fold } from './searchTools';
+import { fold } from './fold';
 
 export interface HuntFilters {
   vocation: HuntVocationId;

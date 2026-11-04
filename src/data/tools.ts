@@ -12,8 +12,7 @@ export interface Tool {
   name: string;
   shortName: string;
   description: string;
-  keywords: string[];
-  href?: string;
+  href: string;
 }
 
 export const tools: Tool[] = [
@@ -23,7 +22,6 @@ export const tools: Tool[] = [
     name: 'Charms',
     shortName: 'Charms',
     description: 'O que usar em cada monstro e o que comprar com seus pontos.',
-    keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
     href: '/tools/charms',
   },
   {
@@ -32,7 +30,6 @@ export const tools: Tool[] = [
     name: 'Consulta de monstros',
     shortName: 'Monstros',
     description: 'HP, resistências e melhor charm de cada criatura.',
-    keywords: ['monstro', 'criatura', 'creature', 'resistência', 'hp'],
     href: '/tools/monsters',
   },
   {
@@ -41,7 +38,6 @@ export const tools: Tool[] = [
     name: 'Bestiary',
     shortName: 'Bestiary',
     description: 'Marque seu progresso e veja o que falta para ganhar pontos.',
-    keywords: ['bestiário', 'charm points', 'pontos', 'kills'],
     href: '/tools/bestiary',
   },
   {
@@ -50,7 +46,6 @@ export const tools: Tool[] = [
     name: 'Calculadora de exercise',
     shortName: 'Exercise',
     description: 'Armas, custo e tempo até a skill desejada.',
-    keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
     href: '/tools/exercise',
   },
   {
@@ -59,7 +54,6 @@ export const tools: Tool[] = [
     name: 'Imbuements',
     shortName: 'Imbuements',
     description: 'Consulte itens e compare market com gold token.',
-    keywords: ['imbue', 'imbuing', 'gold token', 'market', 'custo'],
     href: '/tools/imbuements',
   },
   {
@@ -68,7 +62,6 @@ export const tools: Tool[] = [
     name: 'Hunting places',
     shortName: 'Hunting places',
     description: 'Encontre spots por vocação, nível e tipo de dano.',
-    keywords: ['hunt', 'spot', 'respawn', 'caça', 'vocação', 'nível'],
     href: '/tools/hunting-places',
   },
 ];

@@ -1,28 +1,31 @@
 ---
 import { tools } from '../data/tools';
 
-const links = tools.filter((tool) => tool.href);
 const { pathname } = Astro.url;
+// The home cards already list every tool.
+const isHome = pathname === '/';
 ---
 
 <header>
   <a class="logo" href="/">TibiaNerd</a>
-  <nav aria-label="Ferramentas">
-    <ul>
-      {
-        links.map(({ href, shortName }) => (
-          <li>
-            <a
-              href={href}
-              aria-current={pathname.startsWith(href!) ? 'page' : undefined}
-            >
-              {shortName}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </nav>
+  {
+    !isHome && (
+      <nav aria-label="Ferramentas">
+        <ul>
+          {tools.map(({ href, shortName }) => (
+            <li>
+              <a
+                href={href}
+                aria-current={pathname.startsWith(href) ? 'page' : undefined}
+              >
+                {shortName}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
 </header>
 
 <style>

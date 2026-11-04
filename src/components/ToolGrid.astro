@@ -1,0 +1,119 @@
+---
+import { categories, tools } from '../data/tools';
+import ToolImage from './ToolImage';
+
+const categoryNames = Object.fromEntries(
+  categories.map(({ id, name }) => [id, name]),
+);
+---
+
+<ul>
+  {
+    tools.map((tool) => (
+      <li data-category={tool.category}>
+        <div class="banner">
+          <ToolImage toolId={tool.id} />
+        </div>
+        <div class="body">
+          <p class="category">{categoryNames[tool.category]}</p>
+          <h2>
+            <a href={tool.href}>{tool.name}</a>
+          </h2>
+          <p class="description">{tool.description}</p>
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    --banner-top: #5e1f2e;
+    --banner-bottom: #24121b;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    overflow: hidden;
+    transition:
+      border-color 150ms,
+      transform 150ms;
+  }
+
+  li[data-category='character'] {
+    --banner-top: #174a78;
+    --banner-bottom: #101d33;
+  }
+
+  li[data-category='reference'] {
+    --banner-top: #47308a;
+    --banner-bottom: #1a1638;
+  }
+
+  li:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+
+  .banner {
+    display: grid;
+    place-items: center;
+    background:
+      var(--floor-tiles) 0 0 / var(--grid-size) var(--grid-size),
+      linear-gradient(var(--banner-top), var(--banner-bottom));
+  }
+
+  .banner :global(img),
+  .banner :global(svg) {
+    inline-size: 128px;
+    block-size: 128px;
+    image-rendering: pixelated;
+  }
+
+  .body {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+  }
+
+  .category {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Makes the whole card clickable while the link stays on the name. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .description {
+    color: var(--color-muted);
+    font-size: 0.9375rem;
+  }
+</style>

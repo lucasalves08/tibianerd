@@ -10,7 +10,7 @@ import {
   summarizeBestiary,
   type KillCounts,
 } from '../domain/bestiaryProgress';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import CreatureIcon from './CreatureIcon';
 import styles from './BestiaryTracker.module.css';
 

@@ -13,7 +13,7 @@ import {
   getBestElements,
   getMinimumLevel,
 } from '../domain/huntFinder';
-import { fold } from '../domain/searchTools';
+import { fold } from '../domain/fold';
 import styles from './HuntFinder.module.css';
 
 const STORAGE_KEY = 'tibianerd:hunts';
