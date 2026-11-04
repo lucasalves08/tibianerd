@@ -39,7 +39,8 @@ const isHome = pathname === '/';
     gap: var(--space-1) var(--space-6);
     padding: var(--space-2) max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
     border-block-end: 1px solid var(--color-line);
-    background: rgb(12 14 20 / 0.92);
+    /* A translucent sticky bar can change how the browser smooths its text. */
+    background: var(--color-background);
   }
 
   .logo {
