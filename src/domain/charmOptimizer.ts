@@ -27,7 +27,6 @@ export interface OwnedCharm {
 export interface Assignment extends OwnedCharm {
   creature: Creature;
   damagePerProc: number;
-  damagePerHit: number;
   isLevelCapped: boolean;
 }
 
@@ -43,12 +42,19 @@ function isCapped(creature: Creature, level: number): boolean {
   );
 }
 
+// Overpower and Overflux scale with the character, before the creature's cap.
+export function getNeutralDamage(charmId: string, character: Character): number {
+  return charmId === 'overpower'
+    ? character.hitPoints * OVERPOWER_DAMAGE
+    : character.mana * OVERFLUX_DAMAGE;
+}
+
 export function getDamagePerProc(
   charm: Charm,
   creature: Creature,
   character: Character,
 ): number {
-  const { level, hitPoints, mana } = character;
+  const { level } = character;
 
   if (charm.element) {
     const base = creature.hitPoints * ELEMENTAL_DAMAGE;
@@ -59,12 +65,10 @@ export function getDamagePerProc(
     return (capped * creature.modifiers[charm.element]) / 100;
   }
 
-  const damage =
-    charm.id === 'overpower'
-      ? hitPoints * OVERPOWER_DAMAGE
-      : mana * OVERFLUX_DAMAGE;
-
-  return Math.min(damage, creature.hitPoints * NEUTRAL_CAP);
+  return Math.min(
+    getNeutralDamage(charm.id, character),
+    creature.hitPoints * NEUTRAL_CAP,
+  );
 }
 
 // A creature with more hit points takes more hits to kill, so it gets more
@@ -96,27 +100,6 @@ export function getBestElementalCharms(
   return best > 0
     ? elemental.filter((charm) => creature.modifiers[charm.element!] === best)
     : [];
-}
-
-// Weighs by hit points as well as kills, since tougher creatures take more hits.
-export function getExpectedDamagePerHit(
-  hunt: HuntCreature[],
-  assignments: Assignment[],
-): number {
-  let totalWeight = 0;
-  let totalDamage = 0;
-
-  for (const { creature, kills } of hunt) {
-    const assignment = assignments.find(
-      (item) => item.creature.name === creature.name,
-    );
-    const weight = creature.hitPoints * kills;
-
-    totalWeight += weight;
-    totalDamage += (assignment?.damagePerHit ?? 0) * weight;
-  }
-
-  return totalWeight > 0 ? totalDamage / totalWeight : 0;
 }
 
 function countBits(value: number): number {
@@ -194,7 +177,6 @@ export function optimizeCharms(
       ...ownedCharm,
       creature,
       damagePerProc,
-      damagePerHit: damagePerProc * tierChances[ownedCharm.tier - 1],
       isLevelCapped:
         Boolean(ownedCharm.charm.element) &&
         isCapped(creature, character.level),

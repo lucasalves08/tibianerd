@@ -4,7 +4,7 @@ import type { Creature, Element } from '../data/creatures';
 import {
   getBestElementalCharms,
   getDamagePerProc,
-  getExpectedDamagePerHit,
+  getNeutralDamage,
   optimizeCharms,
   type Character,
   type OwnedCharm,
@@ -69,27 +69,12 @@ describe('getDamagePerProc', () => {
   });
 });
 
-describe('getExpectedDamagePerHit', () => {
-  it('weighs creatures by hit points and kills', () => {
-    const big = makeCreature('big', 3000, {});
-    const small = makeCreature('small', 1000, {});
-    const hunt = [
-      { creature: big, kills: 1 },
-      { creature: small, kills: 1 },
-    ];
-    const assignments = own(['wound', 'freeze']).map((owned, index) => ({
-      ...owned,
-      creature: hunt[index]!.creature,
-      damagePerProc: 0,
-      damagePerHit: index === 0 ? 100 : 20,
-      isLevelCapped: false,
-    }));
+describe('getNeutralDamage', () => {
+  it('uses 5% of life for Overpower and 2.5% of mana for Overflux', () => {
+    const player = { level: 967, hitPoints: 9653, mana: 14970 };
 
-    expect(getExpectedDamagePerHit(hunt, assignments)).toBe(80);
-  });
-
-  it('returns zero for an empty hunt', () => {
-    expect(getExpectedDamagePerHit([], [])).toBe(0);
+    expect(getNeutralDamage('overpower', player)).toBeCloseTo(482.65);
+    expect(getNeutralDamage('overflux', player)).toBeCloseTo(374.25);
   });
 });
 
@@ -291,6 +276,6 @@ describe('optimizeCharms', () => {
     );
 
     expect(assignments[0]?.isLevelCapped).toBe(true);
-    expect(assignments[0]?.damagePerHit).toBeCloseTo(110);
+    expect(assignments[0]?.damagePerProc).toBeCloseTo(1000);
   });
 });

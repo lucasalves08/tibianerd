@@ -7,7 +7,7 @@ import {
 } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
 import {
-  getExpectedDamagePerHit,
+  getNeutralDamage,
   optimizeCharms,
   type HuntCreature,
   type OwnedCharm,
@@ -38,8 +38,16 @@ const initialState: SavedState = {
   hunt: [],
 };
 
+const LOG_EXAMPLE = `Session: 01:00h
+Killed Monsters:
+  251x darklight striker
+  160x walking pillar`;
+
 const formatNumber = (value: number) =>
   Math.round(value).toLocaleString('pt-BR');
+
+const formatChance = (tier: Tier) =>
+  `${Math.round(tierChances[tier - 1] * 100)}%`;
 
 const findCreature = (name: string): Creature | undefined =>
   creatures.find((creature) => fold(creature.name) === fold(name));
@@ -171,8 +179,6 @@ export default function CharmOptimizer() {
     setLog('');
   };
 
-  const needsCharacter =
-    !state.level || !state.hitPoints || !state.mana;
 
   return (
     <div className={styles.layout}>
@@ -198,10 +204,21 @@ export default function CharmOptimizer() {
               onChange={(mana) => update({ mana })}
             />
           </div>
-          {needsCharacter && (
+          {state.hitPoints && state.mana ? (
             <p className={styles.hint}>
-              O nível limita o dano dos charms em criaturas com muita vida.
-              Overpower e Overflux dependem da vida e da mana.
+              Por ativação: Overpower{' '}
+              {formatNumber(getNeutralDamage('overpower', state))} e Overflux{' '}
+              {formatNumber(getNeutralDamage('overflux', state))}, até 8% do HP
+              da criatura. Eles entram quando superam o dano elemental.
+            </p>
+          ) : (
+            <p className={styles.notice}>
+              Sem vida e mana, Overpower e Overflux ficam fora da conta.
+            </p>
+          )}
+          {!state.level && (
+            <p className={styles.hint}>
+              O nível limita o dano elemental em criaturas com muita vida.
             </p>
           )}
         </section>
@@ -245,9 +262,9 @@ export default function CharmOptimizer() {
                         type="button"
                         disabled={tier === null}
                         aria-pressed={tier === option}
-                        aria-label={`Tier ${option} de ${charm.name}: ${
-                          tierChances[option - 1] * 100
-                        }% de chance`}
+                        aria-label={`Tier ${option} de ${charm.name}: ${formatChance(
+                          option,
+                        )} de chance`}
                         onClick={() => setTier(charm.id, option)}
                       >
                         T{option}
@@ -283,6 +300,7 @@ export default function CharmOptimizer() {
               <textarea
                 className={styles.input}
                 rows={6}
+                placeholder={LOG_EXAMPLE}
                 value={log}
                 onChange={(event) => setLog(event.target.value)}
               />
@@ -402,7 +420,7 @@ export default function CharmOptimizer() {
                         <small>por ativação</small>
                       </p>
                       <p className={styles.pickDetail}>
-                        {formatNumber(assignment.damagePerHit)} por golpe
+                        {formatChance(assignment.tier)} de chance
                         {assignment.isLevelCapped && ' · limitado pelo nível'}
                       </p>
                     </div>
@@ -431,30 +449,20 @@ export default function CharmOptimizer() {
           </ul>
         )}
 
-        {hunt.length > 0 && (
-          <div className={styles.summary}>
-            <p>
-              Dano médio dos charms por golpe:{' '}
-              <strong>
-                {formatNumber(getExpectedDamagePerHit(hunt, assignments))}
-              </strong>
-            </p>
-            {unused.length > 0 && (
-              <div className={styles.unused}>
-                <span>Sem uso:</span>
-                {unused.map(({ charm }) => (
-                  <img
-                    key={charm.id}
-                    className={styles.charmIcon}
-                    src={getCharmIconPath(charm.id)}
-                    width="32"
-                    height="32"
-                    alt={charm.name}
-                    title={charm.name}
-                  />
-                ))}
-              </div>
-            )}
+        {hunt.length > 0 && unused.length > 0 && (
+          <div className={styles.unused}>
+            <span>Sem uso:</span>
+            {unused.map(({ charm }) => (
+              <img
+                key={charm.id}
+                className={styles.charmIcon}
+                src={getCharmIconPath(charm.id)}
+                width="32"
+                height="32"
+                alt={charm.name}
+                title={charm.name}
+              />
+            ))}
           </div>
         )}
 
