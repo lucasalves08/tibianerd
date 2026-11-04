@@ -26,6 +26,14 @@ export const tools: Tool[] = [
     href: '/tools/charms',
   },
   {
+    id: 'party',
+    category: 'hunt',
+    name: 'Calculadora de party',
+    shortName: 'Party',
+    description: 'Quem divide XP com você e o bônus por vocações.',
+    href: '/tools/party',
+  },
+  {
     id: 'monsters',
     category: 'reference',
     name: 'Consulta de monstros',
