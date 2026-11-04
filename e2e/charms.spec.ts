@@ -66,6 +66,26 @@ test('reads a Hunt Analyzer log', async ({ page }) => {
   await expect(page.getByText('not a creature')).toBeVisible();
 });
 
+test('fills life and mana from the vocation and level', async ({ page }) => {
+  await page.getByLabel('Vocação').selectOption('paladin');
+  await page.getByLabel('Nível').fill('967');
+
+  await expect(page.getByLabel('Vida máxima')).toHaveValue('9775');
+  await expect(page.getByLabel('Mana máxima')).toHaveValue('14475');
+
+  await page.getByLabel('Vida máxima').fill('11000');
+  await expect(page.getByLabel('Vida máxima')).toHaveValue('11000');
+});
+
+test('adds the creatures of a hunting place', async ({ page }) => {
+  await page.getByRole('button', { name: 'Escolher hunting place' }).click();
+  await expect(page.getByRole('option', { name: 'Escolha um lugar' })).toBeAttached();
+  await page.getByLabel('Hunting place').selectOption("Ab'Dendriel Elf Cave");
+
+  await expect(page.getByRole('heading', { name: 'Elf Scout' })).toBeVisible();
+  await expect(page.getByText('ajuste as mortes')).toBeVisible();
+});
+
 test('remembers the setup after reloading', async ({ page }) => {
   await page.getByLabel('Nível').fill('967');
   await addCreature(page, 'Dragon');

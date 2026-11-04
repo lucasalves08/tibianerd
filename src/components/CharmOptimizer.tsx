@@ -6,6 +6,12 @@ import {
   type Tier,
 } from '../data/charms';
 import { creatures, dataDate, type Creature } from '../data/creatures';
+import type { Hunt } from '../data/hunts';
+import {
+  getBaseStats,
+  vocations,
+  type VocationId,
+} from '../domain/characterStats';
 import {
   optimizeCharms,
   type HuntCreature,
@@ -22,6 +28,7 @@ const MAX_SEARCH_RESULTS = 30;
 const tiers: Tier[] = [1, 2, 3];
 
 interface SavedState {
+  vocation: VocationId | '';
   level: number;
   hitPoints: number;
   mana: number;
@@ -30,6 +37,7 @@ interface SavedState {
 }
 
 const initialState: SavedState = {
+  vocation: '',
   level: 0,
   hitPoints: 0,
   mana: 0,
@@ -48,8 +56,12 @@ const formatNumber = (value: number) =>
 const formatChance = (tier: Tier) =>
   `${Math.round(tierChances[tier - 1] * 100)}%`;
 
+const creaturesByName = new Map(
+  creatures.map((creature) => [fold(creature.name), creature]),
+);
+
 const findCreature = (name: string): Creature | undefined =>
-  creatures.find((creature) => fold(creature.name) === fold(name));
+  creaturesByName.get(fold(name));
 
 function NumberField({
   label,
@@ -82,6 +94,9 @@ export default function CharmOptimizer() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
+  const [isChoosingPlace, setIsChoosingPlace] = useState(false);
+  const [huntPlaces, setHuntPlaces] = useState<Hunt[]>([]);
+  const [chosenPlace, setChosenPlace] = useState('');
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
   const [isCharmsOpen, setIsCharmsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -115,6 +130,12 @@ export default function CharmOptimizer() {
 
   const update = (changes: Partial<SavedState>) =>
     setState((current) => ({ ...current, ...changes }));
+
+  const setCharacter = (changes: Pick<SavedState, 'vocation' | 'level'>) =>
+    update({
+      ...changes,
+      ...getBaseStats(changes.vocation, changes.level),
+    });
 
   const hunt: HuntCreature[] = state.hunt.flatMap(({ name, kills }) => {
     const creature = findCreature(name);
@@ -177,9 +198,46 @@ export default function CharmOptimizer() {
     );
     update({ hunt: known });
     setIsPasting(false);
+    setChosenPlace('');
     setLog('');
   };
 
+  const togglePlaces = () => {
+    setIsChoosingPlace(!isChoosingPlace);
+    setIsPasting(false);
+
+    // The list of places is heavy, so only those who open it pay for it.
+    if (huntPlaces.length === 0) {
+      void import('../data/hunts').then(({ hunts }) =>
+        setHuntPlaces(
+          hunts
+            .filter(({ creatureNames }) => creatureNames.some(findCreature))
+            .sort((first, second) => first.name.localeCompare(second.name)),
+        ),
+      );
+    }
+  };
+
+  const applyPlace = (placeName: string) => {
+    const place = huntPlaces.find(({ name }) => name === placeName);
+
+    if (!place) {
+      return;
+    }
+
+    const names = place.creatureNames.flatMap((name) => {
+      const creature = findCreature(name);
+
+      return creature ? [creature.name] : [];
+    });
+
+    setUnknownNames([]);
+    update({
+      hunt: [...new Set(names)].map((name) => ({ name, kills: 1 })),
+    });
+    setChosenPlace(place.name);
+    setIsChoosingPlace(false);
+  };
 
   return (
     <div className={styles.layout}>
@@ -189,10 +247,32 @@ export default function CharmOptimizer() {
             Seu personagem
           </h2>
           <div className={styles.fields}>
+            <label className={styles.field}>
+              Vocação
+              <select
+                className={styles.input}
+                value={state.vocation}
+                onChange={(event) =>
+                  setCharacter({
+                    vocation: event.target.value as SavedState['vocation'],
+                    level: state.level,
+                  })
+                }
+              >
+                <option value="">Escolha</option>
+                {vocations.map(({ id, name }) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
             <NumberField
               label="Nível"
               value={state.level}
-              onChange={(level) => update({ level })}
+              onChange={(level) =>
+                setCharacter({ vocation: state.vocation, level })
+              }
             />
             <NumberField
               label="Vida máxima"
@@ -205,6 +285,12 @@ export default function CharmOptimizer() {
               onChange={(mana) => update({ mana })}
             />
           </div>
+          {state.vocation && (
+            <p className={styles.muted}>
+              Vida e mana são os valores base do nível. Ajuste para incluir
+              equipamentos e outros bônus.
+            </p>
+          )}
           {!(state.hitPoints && state.mana) && (
             <p className={styles.notice}>
               Sem vida e mana, não conseguimos calcular Overpower e Overflux.
@@ -302,15 +388,49 @@ export default function CharmOptimizer() {
           <h2 id="hunt-title" className={styles.panelTitle}>
             Criaturas da caçada
           </h2>
-          <button
-            className={styles.button}
-            type="button"
-            aria-expanded={isPasting}
-            onClick={() => setIsPasting(!isPasting)}
-          >
-            Colar do Hunt Analyzer
-          </button>
+          <div className={styles.panelActions}>
+            <button
+              className={styles.button}
+              type="button"
+              aria-expanded={isPasting}
+              onClick={() => {
+                setIsPasting(!isPasting);
+                setIsChoosingPlace(false);
+              }}
+            >
+              Colar do Hunt Analyzer
+            </button>
+            <button
+              className={styles.button}
+              type="button"
+              aria-expanded={isChoosingPlace}
+              onClick={togglePlaces}
+            >
+              Escolher hunting place
+            </button>
+          </div>
         </div>
+
+        {isChoosingPlace && (
+          <label className={styles.field}>
+            Hunting place
+            <select
+              className={styles.input}
+              value=""
+              disabled={huntPlaces.length === 0}
+              onChange={(event) => applyPlace(event.target.value)}
+            >
+              <option value="">
+                {huntPlaces.length === 0 ? 'Carregando…' : 'Escolha um lugar'}
+              </option>
+              {huntPlaces.map(({ name }) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         {isPasting && (
           <div className={styles.paste}>
@@ -380,6 +500,13 @@ export default function CharmOptimizer() {
             </ul>
           )}
         </div>
+
+        {chosenPlace && hunt.length > 0 && (
+          <p className={styles.notice}>
+            {chosenPlace}: ajuste as mortes, porque a quantidade de cada
+            criatura muda o melhor charm.
+          </p>
+        )}
 
         {unknownNames.length > 0 && (
           <p className={styles.notice}>
