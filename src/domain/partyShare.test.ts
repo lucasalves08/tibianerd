@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import type { VocationId } from './characterStats';
-import { getSharedBonus, hasUnlistedBonus, summarizeParty } from './partyShare';
+import {
+  getShareRange,
+  getSharedBonus,
+  hasUnlistedBonus,
+  summarizeParty,
+} from './partyShare';
 
 const member = (vocation: VocationId, level: number) => ({ vocation, level });
+
+describe('getShareRange', () => {
+  it('follows the 2/3 rule in both directions', () => {
+    expect(getShareRange(967)).toEqual({ lowest: 645, highest: 1450 });
+  });
+});
 
 describe('getSharedBonus', () => {
   it('grows with the number of different vocations', () => {

@@ -30,6 +30,11 @@ const MAX_LISTED_VOCATIONS = BONUS_BY_VOCATIONS.length - 1;
 const lowestSharing = (level: number) => Math.ceil((level * 2) / 3);
 const highestSharing = (level: number) => Math.floor((level * 3) / 2);
 
+export const getShareRange = (level: number): LevelRange => ({
+  lowest: lowestSharing(level),
+  highest: highestSharing(level),
+});
+
 export const getSharedBonus = (vocations: VocationId[]): number =>
   BONUS_BY_VOCATIONS[Math.min(new Set(vocations).size, MAX_LISTED_VOCATIONS)]!;
 
