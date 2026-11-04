@@ -58,5 +58,6 @@ export const tools: Tool[] = [
     name: 'Hunting places',
     description: 'Encontre spots por vocação, nível e tipo de dano.',
     keywords: ['hunt', 'spot', 'respawn', 'caça', 'vocação', 'nível'],
+    href: '/ferramentas/hunting-places',
   },
 ];
