@@ -18,7 +18,7 @@ import CreatureResistances from './CreatureResistances';
 import styles from './CharmOptimizer.module.css';
 
 const STORAGE_KEY = 'tibianerd:charms';
-const MAX_SEARCH_RESULTS = 60;
+const MAX_SEARCH_RESULTS = 30;
 const tiers: Tier[] = [1, 2, 3];
 
 interface SavedState {
