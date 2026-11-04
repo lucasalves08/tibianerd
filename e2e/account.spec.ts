@@ -23,7 +23,7 @@ test('shows the player photo in the header', async ({ page }) => {
     }),
   );
   await page.goto('/account/');
-  await expect(page.getByText('Conectado como')).toBeVisible();
+  await expect(page.getByText('Conectado com o Discord')).toBeVisible();
   await page.goto('/');
 
   const link = page.getByRole('link', { name: 'Sua conta: lucas' });
@@ -97,6 +97,14 @@ test('shows the signed in player', async ({ page }) => {
   );
   await page.goto('/account/');
 
-  await expect(page.getByText('Conectado como')).toContainText('lucas');
-  await expect(page.getByRole('button', { name: 'Sair' })).toBeVisible();
+  await expect(page.getByText('Conectado com o Discord')).toBeVisible();
+  await expect(
+    page.getByRole('main').getByText('lucas', { exact: true }),
+  ).toBeVisible();
+
+  await page.getByText('Opções da conta').click();
+
+  await expect(
+    page.getByRole('button', { name: 'Sair da conta' }),
+  ).toBeVisible();
 });
