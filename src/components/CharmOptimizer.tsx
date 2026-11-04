@@ -219,7 +219,11 @@ export default function CharmOptimizer() {
               const tier = state.charmTiers[charm.id] ?? null;
 
               return (
-                <li key={charm.id} className={styles.charm}>
+                <li
+                  key={charm.id}
+                  className={styles.charm}
+                  data-off={tier === null || undefined}
+                >
                   <label className={styles.charmName}>
                     <input
                       type="checkbox"

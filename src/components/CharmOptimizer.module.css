@@ -137,6 +137,16 @@ textarea.input {
   image-rendering: pixelated;
 }
 
+.charm[data-off] .charmName {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.charm[data-off] .charmIcon {
+  filter: grayscale(1);
+  opacity: 0.4;
+}
+
 .charmName input {
   flex: none;
   inline-size: 1.125rem;
