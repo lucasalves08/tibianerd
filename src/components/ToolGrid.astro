@@ -18,7 +18,12 @@ const categoryNames = Object.fromEntries(
         <div class="body">
           <p class="category">{categoryNames[tool.category]}</p>
           <h2>
-            <a href={tool.href}>{tool.name}</a>
+            <a
+              href={tool.href}
+              data-astro-prefetch={tool.usesAccount ? 'false' : undefined}
+            >
+              {tool.name}
+            </a>
           </h2>
           <p class="description">{tool.description}</p>
         </div>

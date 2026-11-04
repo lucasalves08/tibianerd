@@ -14,6 +14,8 @@ export interface Tool {
   description: string;
   href: string;
   isUnderConstruction?: boolean;
+  /** Shows live account data, so it must not be prepared ahead of the click. */
+  usesAccount?: boolean;
 }
 
 export const tools: Tool[] = [
@@ -32,6 +34,7 @@ export const tools: Tool[] = [
     shortName: 'Party',
     description: 'Encontre quem divide XP com você no Tibia ou no RubinOT.',
     href: '/tools/party/',
+    usesAccount: true,
   },
   {
     id: 'monsters',

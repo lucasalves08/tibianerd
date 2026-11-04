@@ -69,16 +69,36 @@ export default function PartyFinder() {
 
         setIsSignedIn(true);
         setCharacters(list);
-        setCharacterId(list[0]?.id ?? '');
+        setCharacterId((current) =>
+          list.some(({ id }) => id === current) ? current : (list[0]?.id ?? ''),
+        );
       }
     };
 
-    void Promise.all([
-      loadAds().catch(() => setError('Não conseguimos carregar os anúncios.')),
-      loadCharacters().catch(() =>
-        setError('Não conseguimos carregar seus personagens.'),
-      ),
-    ]).finally(() => setIsLoading(false));
+    const load = () => {
+      setError('');
+
+      return Promise.all([
+        loadAds().catch(() =>
+          setError('Não conseguimos carregar os anúncios.'),
+        ),
+        loadCharacters().catch(() =>
+          setError('Não conseguimos carregar seus personagens.'),
+        ),
+      ]).finally(() => setIsLoading(false));
+    };
+
+    // The back button restores an old copy of the page, with old data.
+    const reloadRestored = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        void load();
+      }
+    };
+
+    void load();
+    window.addEventListener('pageshow', reloadRestored);
+
+    return () => window.removeEventListener('pageshow', reloadRestored);
   }, []);
 
   const send = async (url: string, options: RequestInit) => {
@@ -165,14 +185,22 @@ export default function PartyFinder() {
         ) : !isSignedIn ? (
           <>
             <p>Entre com o Discord para publicar um anúncio.</p>
-            <a className={styles.linkButton} href="/conta/">
+            <a
+              className={styles.linkButton}
+              href="/conta/"
+              data-astro-prefetch="false"
+            >
               Entrar
             </a>
           </>
         ) : characters.length === 0 ? (
           <>
             <p>Cadastre um personagem para publicar.</p>
-            <a className={styles.linkButton} href="/conta/">
+            <a
+              className={styles.linkButton}
+              href="/conta/"
+              data-astro-prefetch="false"
+            >
               Cadastrar personagem
             </a>
           </>

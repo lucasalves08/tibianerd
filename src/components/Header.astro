@@ -23,10 +23,11 @@ const isHome = pathname === '/';
           Menu
         </button>
         <ul id="tool-menu" popover="auto">
-          {tools.map(({ href, shortName }) => (
+          {tools.map(({ href, shortName, usesAccount }) => (
             <li>
               <a
                 href={href}
+                data-astro-prefetch={usesAccount ? 'false' : undefined}
                 aria-current={currentPath.startsWith(href) ? 'page' : undefined}
               >
                 {shortName}
@@ -37,7 +38,12 @@ const isHome = pathname === '/';
       </nav>
     )
   }
-  <a class="account" href="/conta/" data-account-link>Entrar</a>
+  <a
+    class="account"
+    href="/conta/"
+    data-account-link
+    data-astro-prefetch="false">Entrar</a
+  >
   <script is:inline>
     // Shows the saved account without asking the server on every page.
     try {
