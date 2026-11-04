@@ -1,3 +1,7 @@
+## Language
+
+Write everything in English: code, comments, tests, commits, branches, pull requests, issues and documentation. Only text shown to users on the site is in Brazilian Portuguese.
+
 ## Development
 
 When starting the dev server, use background mode:
