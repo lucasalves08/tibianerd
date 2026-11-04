@@ -7,11 +7,16 @@ import {
   MAX_BOSS_LENGTH,
   MAX_NOTE_LENGTH,
   type AdPurpose,
+  type IncomingRequest,
+  type JoinDecision,
+  type OutgoingRequest,
   type PartyAdView,
 } from '../domain/partyFinder';
+import PartyRequests from './PartyRequests';
 import styles from './PartyFinder.module.css';
 
 const ADS_URL = '/api/party-ads';
+const REQUESTS_URL = '/api/party-requests';
 const MINUTE_IN_MS = 60 * 1000;
 const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 
@@ -37,6 +42,8 @@ const formatRemaining = (expiresAt: number) => {
 export default function PartyFinder() {
   const [ads, setAds] = useState<PartyAdView[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [incoming, setIncoming] = useState<IncomingRequest[]>([]);
+  const [outgoing, setOutgoing] = useState<OutgoingRequest[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [characterId, setCharacterId] = useState('');
@@ -57,6 +64,20 @@ export default function PartyFinder() {
     }
 
     setAds((await response.json()) as PartyAdView[]);
+  };
+
+  const loadRequests = async () => {
+    const response = await fetch(REQUESTS_URL);
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        incoming: IncomingRequest[];
+        outgoing: OutgoingRequest[];
+      };
+
+      setIncoming(data.incoming);
+      setOutgoing(data.outgoing);
+    }
   };
 
   useEffect(() => {
@@ -85,6 +106,9 @@ export default function PartyFinder() {
         loadCharacters().catch(() =>
           setError('Não conseguimos carregar seus personagens.'),
         ),
+        loadRequests().catch(() =>
+          setError('Não conseguimos carregar os pedidos.'),
+        ),
       ]).finally(() => setIsLoading(false));
     };
 
@@ -111,7 +135,7 @@ export default function PartyFinder() {
         throw new Error('Request failed');
       }
 
-      await loadAds();
+      await Promise.all([loadAds(), loadRequests()]);
       return true;
     } catch {
       setError(SAVE_ERROR);
@@ -143,6 +167,20 @@ export default function PartyFinder() {
 
   const remove = (id: string) =>
     void send(`${ADS_URL}/${id}`, { method: 'DELETE' });
+
+  const requestToJoin = (id: string) =>
+    void send(`${ADS_URL}/${id}/requests`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ characterId }),
+    });
+
+  const decide = (id: string, status: JoinDecision) =>
+    void send(`${REQUESTS_URL}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
 
   const report = (id: string) => {
     if (window.confirm('Denunciar este anúncio?')) {
@@ -272,8 +310,8 @@ export default function PartyFinder() {
               Publicar anúncio
             </button>
             <p className={styles.muted}>
-              O anúncio mostra seu personagem e seu nome no Discord, e sai do ar
-              em 6 horas.
+              O anúncio mostra seu personagem e sai do ar em 6 horas. Seu Discord
+              só aparece para quem você aceitar.
             </p>
           </>
         )}
@@ -295,6 +333,12 @@ export default function PartyFinder() {
             </button>
           </div>
         ))}
+
+        <PartyRequests
+          incoming={incoming}
+          outgoing={outgoing}
+          onDecide={decide}
+        />
 
         {error && (
           <p className={styles.error} role="alert">
@@ -384,9 +428,19 @@ export default function PartyFinder() {
                 {adGoal(ad)}
               </p>
               {ad.note && <p>{ad.note}</p>}
-              <p className={styles.contact}>
-                Discord: <strong>{ad.discord}</strong>
-              </p>
+              {character && (
+                <button
+                  className={styles.button}
+                  type="button"
+                  disabled={outgoing.some(({ adId }) => adId === ad.id)}
+                  aria-label={`Pedir para entrar na party de ${ad.characterName}`}
+                  onClick={() => requestToJoin(ad.id)}
+                >
+                  {outgoing.some(({ adId }) => adId === ad.id)
+                    ? 'Pedido enviado'
+                    : 'Pedir para entrar'}
+                </button>
+              )}
               <div className={styles.adFooter}>
                 <span className={styles.muted}>
                   {formatRemaining(ad.expiresAt)}

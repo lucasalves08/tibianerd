@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   AD_LIFETIME_MS,
+  canJoinAd,
   cleanAdNote,
   cleanBossName,
   findCompatibleAds,
   getAdExpiry,
   isAdActive,
   isAdPurpose,
+  isJoinDecision,
   MAX_NOTE_LENGTH,
   type PartyAd,
 } from './partyFinder';
@@ -51,6 +53,27 @@ describe('isAdPurpose', () => {
   it('accepts only hunt and boss', () => {
     expect(isAdPurpose('boss')).toBe(true);
     expect(isAdPurpose('quest')).toBe(false);
+  });
+});
+
+describe('isJoinDecision', () => {
+  it('accepts only the two answers', () => {
+    expect(isJoinDecision('accepted')).toBe(true);
+    expect(isJoinDecision('pending')).toBe(false);
+  });
+});
+
+describe('canJoinAd', () => {
+  const seeker = { server: 'rubinot', world: 'Vesperia', level: 967 } as const;
+
+  it('allows a compatible player', () => {
+    expect(canJoinAd(makeAd('a'), seeker, NOW)).toBe(true);
+  });
+
+  it('refuses another server, an old ad and a distant level', () => {
+    expect(canJoinAd(makeAd('a', { server: 'tibia' }), seeker, NOW)).toBe(false);
+    expect(canJoinAd(makeAd('a', { expiresAt: NOW }), seeker, NOW)).toBe(false);
+    expect(canJoinAd(makeAd('a', { level: 100 }), seeker, NOW)).toBe(false);
   });
 });
 

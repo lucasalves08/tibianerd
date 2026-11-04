@@ -23,9 +23,30 @@ export interface PartyAd {
 
 export interface PartyAdView extends PartyAd {
   characterName: string;
-  discord: string;
   note: string;
   isMine: boolean;
+}
+
+export const joinDecisions = ['accepted', 'declined'] as const;
+
+export type JoinDecision = (typeof joinDecisions)[number];
+export type JoinStatus = 'pending' | JoinDecision;
+
+interface JoinRequest {
+  id: string;
+  status: JoinStatus;
+  characterName: string;
+  discord: string | null;
+  discordId: string | null;
+}
+
+export interface IncomingRequest extends JoinRequest {
+  vocation: VocationId;
+  level: number;
+}
+
+export interface OutgoingRequest extends JoinRequest {
+  adId: string;
 }
 
 export interface PartySeeker {
@@ -62,25 +83,37 @@ export const cleanBossName = (boss: unknown): string | null => {
   return clean || null;
 };
 
-export const isAdActive = ({ expiresAt }: PartyAd, now: number): boolean =>
+export const isJoinDecision = (status: unknown): status is JoinDecision =>
+  joinDecisions.some((decision) => decision === status);
+
+export const isAdActive = (
+  { expiresAt }: Pick<PartyAd, 'expiresAt'>,
+  now: number,
+): boolean =>
   expiresAt > now;
+
+export const canJoinAd = (
+  ad: Pick<PartyAd, 'server' | 'world' | 'purpose' | 'level' | 'expiresAt'>,
+  { server, world, level }: PartySeeker,
+  now: number,
+): boolean => {
+  const { lowest, highest } = getShareRange(level);
+
+  return (
+    isAdActive(ad, now) &&
+    ad.server === server &&
+    ad.world === world &&
+    (ad.purpose === 'boss' || (ad.level >= lowest && ad.level <= highest))
+  );
+};
 
 // A boss needs help, not shared experience, so its ads ignore the level range.
 // Newest first, since a recent ad is more likely to get an answer.
 export const findCompatibleAds = <Ad extends PartyAd>(
   ads: Ad[],
-  { server, world, level }: PartySeeker,
+  seeker: PartySeeker,
   now: number,
-): Ad[] => {
-  const { lowest, highest } = getShareRange(level);
-
-  return ads
-    .filter(
-      (ad) =>
-        isAdActive(ad, now) &&
-        ad.server === server &&
-        ad.world === world &&
-        (ad.purpose === 'boss' || (ad.level >= lowest && ad.level <= highest)),
-    )
+): Ad[] =>
+  ads
+    .filter((ad) => canJoinAd(ad, seeker, now))
     .sort((first, second) => second.createdAt - first.createdAt);
-};

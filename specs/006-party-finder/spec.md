@@ -18,7 +18,7 @@ A player publishes an ad saying when they want to hunt, and sees the people on t
 
 ### User Story 3 - Contact a player (Priority: P2)
 
-A player sees the character name and Discord of the person they want to hunt with.
+A player asks to join an ad. When the owner accepts, each side sees the other's Discord.
 
 ### User Story 4 - Keep the list clean (Priority: P2)
 
@@ -45,6 +45,7 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **FR-006**: Users MUST be able to report an ad, and each user MUST have an ad limit.
 - **FR-007**: Users MUST be able to delete their account and data.
 - **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST name the boss.
+- **FR-010**: Players MUST ask to join an ad, and the Discord of each side MUST stay hidden until the owner accepts.
 - **FR-008**: The site MUST publish a privacy page before login goes live.
 
 ## Success Criteria

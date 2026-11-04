@@ -18,11 +18,10 @@ export const listAds = async (userId: string | null): Promise<PartyAdView[]> => 
     .prepare(
       `SELECT a.id, a.purpose, a.boss, c.server, a.world, c.vocation, a.level, a.note,
         a.created_at AS createdAt, a.expires_at AS expiresAt,
-        c.name AS characterName, u.name AS discord,
+        c.name AS characterName,
         c.user_id = ?1 AS isMine
       FROM party_ads a
       JOIN characters c ON c.id = a.character_id
-      JOIN "user" u ON u.id = c.user_id
       WHERE a.expires_at > ?2
         AND (SELECT count(*) FROM party_ad_reports r WHERE r.ad_id = a.id) < ?3
       ORDER BY a.created_at DESC
