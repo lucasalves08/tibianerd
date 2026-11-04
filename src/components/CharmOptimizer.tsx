@@ -478,7 +478,7 @@ export default function CharmOptimizer() {
                 setIsChoosingPlace(false);
               }}
             >
-              Colar do Hunt Analyzer
+              Hunt Analyzer
             </button>
             <button
               className={styles.button}
@@ -486,7 +486,7 @@ export default function CharmOptimizer() {
               aria-expanded={isChoosingPlace}
               onClick={togglePlaces}
             >
-              Escolher hunting place
+              Hunting place
             </button>
           </div>
         </div>
