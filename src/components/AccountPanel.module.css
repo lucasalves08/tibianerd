@@ -9,6 +9,17 @@
   background: var(--color-surface);
 }
 
+.user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.photo {
+  flex: none;
+  border-radius: 50%;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

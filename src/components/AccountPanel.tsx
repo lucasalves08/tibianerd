@@ -4,9 +4,10 @@ import styles from './AccountPanel.module.css';
 const AUTH_URL = '/api/auth';
 const REQUEST_TIMEOUT_MS = 8000;
 const ACCOUNT_KEY = 'tibianerd:account';
+const ACCOUNT_IMAGE_KEY = 'tibianerd:account-image';
 
 interface Session {
-  user: { name: string };
+  user: { name: string; image?: string | null };
 }
 
 const postAuth = (path: string, body: object = {}) =>
@@ -40,8 +41,14 @@ export default function AccountPanel() {
     }
 
     try {
+      localStorage.removeItem(ACCOUNT_IMAGE_KEY);
+
       if (session) {
         localStorage.setItem(ACCOUNT_KEY, session.user.name);
+
+        if (session.user.image) {
+          localStorage.setItem(ACCOUNT_IMAGE_KEY, session.user.image);
+        }
       } else {
         localStorage.removeItem(ACCOUNT_KEY);
       }
@@ -105,9 +112,20 @@ export default function AccountPanel() {
     <section className={styles.panel}>
       {session ? (
         <>
-          <p>
-            Conectado como <strong>{session.user.name}</strong>.
-          </p>
+          <div className={styles.user}>
+            {session.user.image && (
+              <img
+                className={styles.photo}
+                src={session.user.image}
+                width="48"
+                height="48"
+                alt=""
+              />
+            )}
+            <p>
+              Conectado como <strong>{session.user.name}</strong>.
+            </p>
+          </div>
           <div className={styles.actions}>
             <button
               className={styles.button}
