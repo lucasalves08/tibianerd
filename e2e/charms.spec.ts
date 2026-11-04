@@ -79,11 +79,11 @@ test('fills life and mana from the vocation and level', async ({ page }) => {
 
 test('adds the creatures of a hunting place', async ({ page }) => {
   await page.getByRole('button', { name: 'Escolher hunting place' }).click();
-  await expect(page.getByRole('option', { name: 'Escolha um lugar' })).toBeAttached();
-  await page.getByLabel('Hunting place').selectOption("Ab'Dendriel Elf Cave");
+  await page.getByLabel('Hunting place').fill('elf cave');
+  await page.getByRole('button', { name: /^Ab'Dendriel Elf Cave/ }).click();
 
   await expect(page.getByRole('heading', { name: 'Elf Scout' })).toBeVisible();
-  await expect(page.getByText('ajuste as mortes')).toBeVisible();
+  await expect(page.getByText('Com o Hunt Analyzer')).toBeVisible();
 });
 
 test('remembers the setup after reloading', async ({ page }) => {

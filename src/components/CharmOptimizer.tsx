@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   charms,
   getCharmIconPath,
@@ -87,19 +87,104 @@ function NumberField({
   );
 }
 
+function SearchPicker<Item>({
+  label,
+  placeholder,
+  items,
+  getName,
+  renderItem,
+  onPick,
+  autoFocus = false,
+}: {
+  label: string;
+  placeholder: string;
+  items: Item[];
+  getName: (item: Item) => string;
+  renderItem: (item: Item) => ReactNode;
+  onPick: (item: Item) => void;
+  autoFocus?: boolean;
+}) {
+  const [search, setSearch] = useState('');
+  const [isOpen, setIsOpen] = useState(autoFocus);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const results = useMemo(() => {
+    const term = fold(search.trim());
+
+    return items
+      .filter((item) => fold(getName(item)).includes(term))
+      .slice(0, MAX_SEARCH_RESULTS);
+  }, [search, items, getName]);
+
+  return (
+    <div className={styles.search} ref={rootRef}>
+      <label className={styles.field}>
+        {label}
+        <input
+          className={styles.input}
+          type="search"
+          autoComplete="off"
+          autoFocus={autoFocus}
+          placeholder={placeholder}
+          value={search}
+          aria-expanded={isOpen}
+          onFocus={() => {
+            setIsOpen(true);
+
+            // Keeps the list above the phone keyboard.
+            if (window.matchMedia('(pointer: coarse)').matches) {
+              rootRef.current?.scrollIntoView({ block: 'start' });
+            }
+          }}
+          onClick={() => setIsOpen(true)}
+          onBlur={() => setIsOpen(false)}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setIsOpen(true);
+          }}
+        />
+      </label>
+
+      {isOpen && results.length > 0 && (
+        <ul className={styles.results}>
+          {results.map((item) => (
+            <li key={getName(item)}>
+              <button
+                className={styles.result}
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  onPick(item);
+                  setSearch('');
+                  setIsOpen(false);
+                }}
+              >
+                {renderItem(item)}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+const getCreatureName = ({ name }: Creature) => name;
+const getPlaceName = ({ name }: Hunt) => name;
+
 export default function CharmOptimizer() {
   const [state, setState] = useState(initialState);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [search, setSearch] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [log, setLog] = useState('');
   const [isPasting, setIsPasting] = useState(false);
   const [isChoosingPlace, setIsChoosingPlace] = useState(false);
   const [huntPlaces, setHuntPlaces] = useState<Hunt[]>([]);
-  const [chosenPlace, setChosenPlace] = useState('');
+  const [chosenPlace, setChosenPlace] = useState<{
+    name: string;
+    hasSpawns: boolean;
+  } | null>(null);
   const [unknownNames, setUnknownNames] = useState<string[]>([]);
   const [isCharmsOpen, setIsCharmsOpen] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
 
   // Browser storage can be missing or blocked, and the tool works without it.
   useEffect(() => {
@@ -154,23 +239,14 @@ export default function CharmOptimizer() {
     [state],
   );
 
-  const searchResults = useMemo(() => {
-    const term = fold(search.trim());
+  const availableCreatures = useMemo(() => {
     const inHunt = new Set(state.hunt.map(({ name }) => name));
 
-    return creatures
-      .filter(
-        (creature) =>
-          fold(creature.name).includes(term) && !inHunt.has(creature.name),
-      )
-      .slice(0, MAX_SEARCH_RESULTS);
-  }, [search, state.hunt]);
+    return creatures.filter((creature) => !inHunt.has(creature.name));
+  }, [state.hunt]);
 
-  const addCreature = (creature: Creature) => {
+  const addCreature = (creature: Creature) =>
     update({ hunt: [...state.hunt, { name: creature.name, kills: 1 }] });
-    setSearch('');
-    setIsSearchOpen(false);
-  };
 
   const setKills = (name: string, kills: number) =>
     update({
@@ -198,7 +274,7 @@ export default function CharmOptimizer() {
     );
     update({ hunt: known });
     setIsPasting(false);
-    setChosenPlace('');
+    setChosenPlace(null);
     setLog('');
   };
 
@@ -218,24 +294,28 @@ export default function CharmOptimizer() {
     }
   };
 
-  const applyPlace = (placeName: string) => {
-    const place = huntPlaces.find(({ name }) => name === placeName);
+  const applyPlace = (place: Hunt) => {
+    const creaturesInPlace = new Map<string, number>();
 
-    if (!place) {
-      return;
-    }
-
-    const names = place.creatureNames.flatMap((name) => {
+    place.creatureNames.forEach((name, index) => {
       const creature = findCreature(name);
 
-      return creature ? [creature.name] : [];
+      if (creature) {
+        creaturesInPlace.set(creature.name, place.creatureSpawns[index] ?? 0);
+      }
     });
 
     setUnknownNames([]);
     update({
-      hunt: [...new Set(names)].map((name) => ({ name, kills: 1 })),
+      hunt: [...creaturesInPlace].map(([name, spawns]) => ({
+        name,
+        kills: Math.max(spawns, 1),
+      })),
     });
-    setChosenPlace(place.name);
+    setChosenPlace({
+      name: place.name,
+      hasSpawns: [...creaturesInPlace.values()].some((spawns) => spawns > 0),
+    });
     setIsChoosingPlace(false);
   };
 
@@ -412,24 +492,20 @@ export default function CharmOptimizer() {
         </div>
 
         {isChoosingPlace && (
-          <label className={styles.field}>
-            Hunting place
-            <select
-              className={styles.input}
-              value=""
-              disabled={huntPlaces.length === 0}
-              onChange={(event) => applyPlace(event.target.value)}
-            >
-              <option value="">
-                {huntPlaces.length === 0 ? 'Carregando…' : 'Escolha um lugar'}
-              </option>
-              {huntPlaces.map(({ name }) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SearchPicker
+            label="Hunting place"
+            placeholder="Digite o lugar ou veja a lista"
+            items={huntPlaces}
+            getName={getPlaceName}
+            renderItem={({ name, city }) => (
+              <>
+                <span>{name}</span>
+                <span className={styles.resultHitPoints}>{city}</span>
+              </>
+            )}
+            onPick={applyPlace}
+            autoFocus
+          />
         )}
 
         {isPasting && (
@@ -450,61 +526,32 @@ export default function CharmOptimizer() {
           </div>
         )}
 
-        <div className={styles.search} ref={searchRef}>
-          <label className={styles.field}>
-            Buscar criatura
-            <input
-              className={styles.input}
-              type="search"
-              autoComplete="off"
-              placeholder="Digite o nome ou veja a lista"
-              value={search}
-              aria-expanded={isSearchOpen}
-              onFocus={() => {
-                setIsSearchOpen(true);
-
-                // Keeps the list above the phone keyboard.
-                if (window.matchMedia('(pointer: coarse)').matches) {
-                  searchRef.current?.scrollIntoView({ block: 'start' });
-                }
-              }}
-              onClick={() => setIsSearchOpen(true)}
-              onBlur={() => setIsSearchOpen(false)}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setIsSearchOpen(true);
-              }}
-            />
-          </label>
-
-          {isSearchOpen && searchResults.length > 0 && (
-            <ul className={styles.results}>
-              {searchResults.map((creature) => (
-                <li key={creature.name}>
-                  <button
-                    className={styles.result}
-                    type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => addCreature(creature)}
-                  >
-                    <span className={styles.resultName}>
-                      <CreatureIcon name={creature.name} size={32} />
-                      {creature.name}
-                    </span>
-                    <span className={styles.resultHitPoints}>
-                      {formatNumber(creature.hitPoints)} HP
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+        <SearchPicker
+          label="Buscar criatura"
+          placeholder="Digite o nome ou veja a lista"
+          items={availableCreatures}
+          getName={getCreatureName}
+          renderItem={(creature) => (
+            <>
+              <span className={styles.resultName}>
+                <CreatureIcon name={creature.name} size={32} />
+                {creature.name}
+              </span>
+              <span className={styles.resultHitPoints}>
+                {formatNumber(creature.hitPoints)} HP
+              </span>
+            </>
           )}
-        </div>
+          onPick={addCreature}
+        />
 
         {chosenPlace && hunt.length > 0 && (
           <p className={styles.notice}>
-            {chosenPlace}: ajuste as mortes, porque a quantidade de cada
-            criatura muda o melhor charm.
+            {chosenPlace.name}:{' '}
+            {chosenPlace.hasSpawns
+              ? 'mortes estimadas pela quantidade de spawns de cada criatura.'
+              : 'não temos a quantidade de spawns deste lugar. Ajuste as mortes.'}{' '}
+            Com o Hunt Analyzer, o resultado fica mais preciso.
           </p>
         )}
 
@@ -634,7 +681,12 @@ export default function CharmOptimizer() {
           resistência. Overpower causa 5% da sua vida e Overflux 2,5% da sua
           mana, ambos limitados a 8% do HP da criatura. Valores do Tibia Global,
           conferidos em{' '}
-          {dataDate.split('-').reverse().join('/')}.
+          {dataDate.split('-').reverse().join('/')}. Spawns estimados com dados
+          do{' '}
+          <a href="https://github.com/opentibiabr/canary" rel="noopener">
+            Canary
+          </a>
+          .
         </p>
       </section>
     </div>
