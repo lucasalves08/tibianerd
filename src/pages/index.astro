@@ -9,7 +9,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 >
   <section class="hero">
     <h1>Deixa que o nerd faz a conta.</h1>
-    <p>Ferramentas para Tibia. Abra e use, sem cadastro.</p>
+    <p>Ferramentas para Tibia, sem cadastro.</p>
   </section>
 
   <ToolSearch client:load />
@@ -21,12 +21,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   h1 {
-    font-size: clamp(2rem, 7vw, 3.25rem);
+    max-inline-size: 14ch;
+    font-size: clamp(2.75rem, 11vw, 5rem);
   }
 
   p {
-    margin-block-start: var(--space-2);
-    color: var(--color-muted);
+    margin-block-start: var(--space-4);
     font-size: 1.125rem;
   }
 </style>

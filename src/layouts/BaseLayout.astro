@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import '../styles/global.css';
@@ -19,6 +20,8 @@ const { title, description } = Astro.props;
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-body" preload />
     <title>{title}</title>
   </head>
   <body>
@@ -46,8 +49,7 @@ const { title, description } = Astro.props;
     inset-inline-start: var(--space-2);
     z-index: 1;
     padding: var(--space-2) var(--space-4);
-    background: var(--color-surface);
-    border-radius: var(--radius);
+    background: var(--color-paper);
     transform: translateY(-200%);
   }
 

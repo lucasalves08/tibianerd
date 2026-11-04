@@ -7,10 +7,10 @@ export interface Tool {
 
 export const tools: Tool[] = [
   {
-    id: 'exercise',
-    name: 'Calculadora de exercise',
-    description: 'Armas, custo e tempo até a skill desejada.',
-    keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
+    id: 'charms',
+    name: 'Charms',
+    description: 'O que usar em cada monstro e o que comprar com seus pontos.',
+    keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
   },
   {
     id: 'monsters',
@@ -25,10 +25,10 @@ export const tools: Tool[] = [
     keywords: ['bestiário', 'charm points', 'pontos', 'kills'],
   },
   {
-    id: 'charms',
-    name: 'Charms',
-    description: 'O que usar em cada monstro e o que comprar com seus pontos.',
-    keywords: ['charm', 'planner', 'optimizer', 'otimizador', 'dano'],
+    id: 'exercise',
+    name: 'Calculadora de exercise',
+    description: 'Armas, custo e tempo até a skill desejada.',
+    keywords: ['exercise', 'weapons', 'skill', 'treino', 'dummy'],
   },
   {
     id: 'imbuements',

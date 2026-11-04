@@ -1,7 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { tools } from '../data/tools';
-import { searchTools } from '../domain/searchTools';
+import { highlightMatches, searchTools } from '../domain/searchTools';
 import styles from './ToolSearch.module.css';
+
+function Highlighted({ text, query }: { text: string; query: string }) {
+  return highlightMatches(text, query).map((part, index) =>
+    part.match ? <mark key={index}>{part.text}</mark> : part.text,
+  );
+}
 
 export default function ToolSearch() {
   const inputId = useId();
@@ -33,7 +39,7 @@ export default function ToolSearch() {
         id={inputId}
         className={styles.input}
         type="search"
-        placeholder="Ex.: charm, exercise, monstro"
+        placeholder="charm, exercise, monstro"
         autoComplete="off"
         enterKeyHint="search"
         value={query}
@@ -43,19 +49,29 @@ export default function ToolSearch() {
         {countLabel}
       </p>
 
-      {results.length > 0 ? (
-        <ul className={styles.grid}>
-          {results.map((tool) => (
-            <li key={tool.id} className={styles.card}>
-              <h2 className={styles.name}>{tool.name}</h2>
-              <p className={styles.description}>{tool.description}</p>
-              <span className={styles.badge}>Em breve</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className={styles.empty}>Nenhuma ferramenta encontrada.</p>
-      )}
+      <div className={styles.sheet}>
+        {results.length > 0 ? (
+          <ul className={styles.list}>
+            {results.map((tool) => (
+              <li key={tool.id} className={styles.row}>
+                <h2 className={styles.name}>
+                  <Highlighted text={tool.name} query={query} />
+                </h2>
+                <p className={styles.description}>
+                  <Highlighted text={tool.description} query={query} />
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.empty}>
+            Nenhuma ferramenta encontrada. Tente charm, monstro ou exercise.
+          </p>
+        )}
+        <p className={styles.note}>
+          Estas ferramentas ainda estão em construção.
+        </p>
+      </div>
     </section>
   );
 }

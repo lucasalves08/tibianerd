@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Tool } from '../data/tools';
-import { searchTools } from './searchTools';
+import { highlightMatches, searchTools } from './searchTools';
 
 const tools: Tool[] = [
   {
@@ -45,5 +45,36 @@ describe('searchTools', () => {
 
   it('returns an empty list when nothing matches', () => {
     expect(ids('rashid')).toEqual([]);
+  });
+});
+
+describe('highlightMatches', () => {
+  it('returns the whole text unmarked for an empty query', () => {
+    expect(highlightMatches('Charms', ' ')).toEqual([
+      { text: 'Charms', match: false },
+    ]);
+  });
+
+  it('marks matches and keeps the original text', () => {
+    expect(highlightMatches('Melhor charm', 'CHARM')).toEqual([
+      { text: 'Melhor ', match: false },
+      { text: 'charm', match: true },
+    ]);
+  });
+
+  it('keeps accents when the query has none', () => {
+    expect(highlightMatches('Resistências', 'resistencias')).toEqual([
+      { text: 'Resistências', match: true },
+    ]);
+  });
+
+  it('marks every term and every occurrence', () => {
+    expect(highlightMatches('hp e hp e mana', 'hp mana')).toEqual([
+      { text: 'hp', match: true },
+      { text: ' e ', match: false },
+      { text: 'hp', match: true },
+      { text: ' e ', match: false },
+      { text: 'mana', match: true },
+    ]);
   });
 });

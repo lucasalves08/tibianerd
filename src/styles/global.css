@@ -27,14 +27,13 @@
   :root {
     color-scheme: light dark;
 
-    --color-bg: light-dark(oklch(98% 0.005 160), oklch(18% 0.015 200));
-    --color-surface: light-dark(oklch(100% 0 0), oklch(23% 0.018 200));
-    --color-text: light-dark(oklch(25% 0.02 200), oklch(95% 0.01 160));
-    --color-muted: light-dark(oklch(45% 0.02 200), oklch(75% 0.015 180));
-    --color-border: light-dark(oklch(88% 0.01 180), oklch(34% 0.02 200));
-    --color-accent: light-dark(oklch(45% 0.13 160), oklch(82% 0.16 155));
-
-    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --color-paper: light-dark(#f6f7f1, #12304f);
+    --color-grid: light-dark(#dbe4ea, #1c4163);
+    --color-ink: light-dark(#16324f, #eaf3fa);
+    --color-muted: light-dark(#4a6178, #b4c8d9);
+    --color-pen: light-dark(#c8321e, #ff9c8a);
+    --color-marker: #ffe14d;
+    --color-on-marker: #16324f;
 
     --space-1: 0.25rem;
     --space-2: 0.5rem;
@@ -44,10 +43,11 @@
     --space-8: 2rem;
     --space-12: 3rem;
 
-    --radius: 0.75rem;
-    --page-max: 72rem;
+    --grid-size: 1.5rem;
+    --page-max: 60rem;
     --page-gutter: clamp(1rem, 4vw, 2rem);
     --tap-target: 2.75rem;
+    --pixel: 4px;
   }
 }
 
@@ -61,25 +61,35 @@
     min-block-size: 100dvh;
     display: flex;
     flex-direction: column;
-    background: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    background-image:
+      linear-gradient(var(--color-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+    background-size: var(--grid-size) var(--grid-size);
+    color: var(--color-ink);
+    font-family: var(--font-body);
     line-height: 1.5;
   }
 
   h1,
-  h2,
-  h3 {
-    line-height: 1.15;
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.1;
     text-wrap: balance;
   }
 
   a {
-    color: var(--color-accent);
+    color: var(--color-pen);
+  }
+
+  mark {
+    background: var(--color-marker);
+    color: var(--color-on-marker);
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-accent);
+    outline: 3px solid var(--color-pen);
     outline-offset: 2px;
   }
 

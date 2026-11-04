@@ -33,6 +33,13 @@ test('filters tools while ignoring accents', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Imbuements' })).toBeHidden();
 });
 
+test('highlights the search term in the results', async ({ page }) => {
+  await page.getByLabel('Buscar ferramenta').fill('gold token');
+
+  await expect(page.getByRole('status')).toHaveText('1 ferramenta encontrada');
+  await expect(page.locator('mark')).toHaveText(['gold', 'token']);
+});
+
 test('applies a search typed before hydration', async ({ page }) => {
   await page.route('**/_astro/**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));

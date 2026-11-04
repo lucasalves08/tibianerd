@@ -1,64 +1,91 @@
 .label {
   display: block;
-  margin-block-end: var(--space-2);
-  font-weight: 600;
+  margin-block-end: var(--space-3);
+  font-weight: 700;
 }
 
 .input {
-  inline-size: 100%;
-  min-block-size: var(--tap-target);
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: 1rem;
+  display: block;
+  inline-size: calc(100% - 2 * var(--pixel));
+  min-block-size: 3.5rem;
+  margin-inline: var(--pixel);
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: 0;
+  background: var(--color-paper);
+  /* Stepped corners, like a window from an old game. */
+  box-shadow:
+    0 calc(-1 * var(--pixel)) 0 var(--color-ink),
+    0 var(--pixel) 0 var(--color-ink),
+    calc(-1 * var(--pixel)) 0 0 var(--color-ink),
+    var(--pixel) 0 0 var(--color-ink);
+  color: var(--color-ink);
+  font-size: 1.25rem;
+}
+
+.input::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--color-pen);
+  outline-offset: calc(var(--pixel) + 2px);
 }
 
 .status {
-  margin-block: var(--space-3) var(--space-4);
+  margin-block: var(--space-4) var(--space-3);
   color: var(--color-muted);
   font-size: 0.875rem;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-  gap: var(--space-4);
+.sheet {
+  container-type: inline-size;
+  background: var(--color-paper);
+  border-inline-start: 2px solid var(--color-pen);
+}
+
+.list {
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
+.row {
+  display: grid;
+  gap: var(--space-1);
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
+  border-block-end: 1px solid var(--color-grid);
 }
 
 .name {
-  font-size: 1.125rem;
+  font-size: 1.375rem;
 }
 
 .description {
-  flex: 1;
   color: var(--color-muted);
 }
 
-.badge {
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  color: var(--color-muted);
-  font-size: 0.75rem;
+.description mark,
+.name mark {
+  padding-inline: 1px;
 }
 
 .empty {
-  padding-block: var(--space-8);
+  padding: var(--space-6) var(--space-4);
+  border-block-end: 1px solid var(--color-grid);
+}
+
+.note {
+  padding: var(--space-3) var(--space-4);
   color: var(--color-muted);
-  text-align: center;
+  font-size: 0.875rem;
+}
+
+@container (min-width: 40rem) {
+  .row {
+    grid-template-columns: 17rem 1fr;
+    gap: var(--space-6);
+    align-items: baseline;
+  }
 }
