@@ -52,7 +52,15 @@ const { pathname } = Astro.url;
 
   nav {
     min-inline-size: 0;
+    max-inline-size: 100%;
     overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  @media (max-width: 40rem) {
+    header {
+      position: static;
+    }
   }
 
   ul {

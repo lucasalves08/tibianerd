@@ -29,7 +29,7 @@ function CreatureDetails({ creature }: { creature: Creature }) {
       <p className={styles.hitPoints}>
         {formatNumber(creature.hitPoints)} HP
       </p>
-      <CreatureResistances creature={creature} />
+      <CreatureResistances creature={creature} showNames />
       <div className={styles.pick}>
         <h3 className={styles.pickTitle}>Melhor charm elemental</h3>
         <p>
