@@ -3,7 +3,8 @@ import { betterAuth } from 'better-auth';
 
 // Discord only needs to tell us who the player is. Asking for "identify" alone
 // keeps the e-mail out of our database, so the required field gets a stand-in.
-export const auth = betterAuth({
+// Workers cannot share open I/O between requests, so each one gets its own auth.
+export const createAuth = () => betterAuth({
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: env.DB,
