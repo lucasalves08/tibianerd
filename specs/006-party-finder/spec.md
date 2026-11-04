@@ -27,9 +27,13 @@ A player reports an abusive ad, and the maintainer can remove it.
 **Acceptance Scenarios**:
 
 1. **Given** a visitor without login, **When** they open the finder, **Then** they can read the ads but not publish.
-2. **Given** a level 967 Paladin on Solarian, **When** the list appears, **Then** it shows only Solarian ads from levels 645 to 1450.
+2. **Given** a level 967 Paladin on Solarian in RubinOT, **When** the list appears, **Then** it shows only ads from that server and world, from levels 645 to 1450.
 3. **Given** an ad past its time, **When** the list appears, **Then** the ad is gone.
 4. **Given** a player deletes their account, **When** the deletion ends, **Then** their characters and ads are gone.
+
+### User Story 5 - Find help for a boss (Priority: P2)
+
+A player publishes an ad for a boss, and anyone on the same world sees it at any level.
 
 ## Requirements
 
@@ -40,6 +44,7 @@ A player reports an abusive ad, and the maintainer can remove it.
 - **FR-005**: The list MUST filter by world, level and vocation.
 - **FR-006**: Users MUST be able to report an ad, and each user MUST have an ad limit.
 - **FR-007**: Users MUST be able to delete their account and data.
+- **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST name the boss.
 - **FR-008**: The site MUST publish a privacy page before login goes live.
 
 ## Success Criteria
@@ -49,8 +54,9 @@ A player reports an abusive ad, and the maintainer can remove it.
 
 ## Assumptions
 
-- RubinOT comes first, with its 16 worlds listed on rubinot.com.br on 2026-11-04.
-- The launch focuses on Vesperia, the maintainer's world, so the list does not start empty.
+- Boss names come from TibiaWiki, and players can type others, since RubinOT can differ.
+
+- Every world of Tibia and RubinOT is open, and data from each stays apart. The maintainer plays on Vesperia, so that list is seeded first.
 - Ads last 6 hours, a product choice that can change with real use.
 - Characters are not verified in the first version, but they must exist: the server fetches them by name.
 - Character data comes from TibiaData for Tibia and from the public character search of RubinOT, only when a signed-in player asks.

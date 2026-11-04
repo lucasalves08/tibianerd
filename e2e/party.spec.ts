@@ -2,6 +2,9 @@ import { expect, test } from '@playwright/test';
 
 const makeAd = (id: string, level: number, isMine = false) => ({
   id,
+  purpose: 'hunt',
+  boss: null,
+  server: 'rubinot',
   world: 'Vesperia',
   vocation: 'druid',
   level,
@@ -53,6 +56,31 @@ test('shows only ads that share experience with the character', async ({
 
   await expect(page.getByRole('heading', { name: 'Player near' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Player far' })).toBeHidden();
+});
+
+test('shows boss ads from the same world at any level', async ({ page }) => {
+  await page.route('**/api/party-ads', (route) =>
+    route.fulfill({
+      json: [{ ...makeAd('boss', 200), purpose: 'boss', boss: 'Ferumbras' }],
+    }),
+  );
+  await page.route('**/api/characters', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 'c1',
+          server: 'rubinot',
+          name: 'Lucas',
+          world: 'Vesperia',
+          vocation: 'paladin',
+          level: 967,
+        },
+      ],
+    }),
+  );
+  await page.goto('/tools/party/');
+
+  await expect(page.getByText('Boss: Ferumbras')).toBeVisible();
 });
 
 test('says when nobody is looking', async ({ page }) => {
