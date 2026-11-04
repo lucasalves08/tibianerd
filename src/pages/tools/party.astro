@@ -1,0 +1,31 @@
+---
+import PartyFinder from '../../components/PartyFinder';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Party finder do RubinOT | TibiaNerd"
+  description="Encontre jogadores de Vesperia no RubinOT que dividem experiência com você."
+>
+  <section class="intro">
+    <h1>Party finder</h1>
+    <p>Encontre quem divide XP com você em Vesperia, no RubinOT.</p>
+  </section>
+
+  <PartyFinder client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: var(--text-title);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: var(--text-lg);
+  }
+</style>

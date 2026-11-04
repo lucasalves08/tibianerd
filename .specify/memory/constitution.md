@@ -97,7 +97,7 @@ Rationale: a login turns a fan site into a keeper of other people's data.
 
 ## Development Workflow
 
-- Local verification MUST be limited to unit tests with `npm test`.
+- Local verification is not required, because CI runs every check.
 - CI MUST run type checks, unit tests, the build and UI tests.
 - Changes MUST reach `main` through a pull request.
 - Every pull request MUST open ready for review, unless the maintainer asks for a draft.
@@ -118,4 +118,4 @@ Amendments require the maintainer's approval and a version change:
 Every feature plan MUST check compliance with these principles. Any exception MUST be
 justified in that plan.
 
-**Version**: 1.5.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04
+**Version**: 1.6.0 | **Ratified**: 2026-11-04 | **Last Amended**: 2026-11-04

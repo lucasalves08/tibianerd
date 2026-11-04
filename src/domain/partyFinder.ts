@@ -11,6 +11,13 @@ export interface PartyAd {
   expiresAt: number;
 }
 
+export interface PartyAdView extends PartyAd {
+  characterName: string;
+  discord: string;
+  note: string;
+  isMine: boolean;
+}
+
 export interface PartySeeker {
   world: RubinotWorld;
   level: number;
@@ -18,21 +25,28 @@ export interface PartySeeker {
 
 const HOUR_IN_MS = 60 * 60 * 1000;
 
+export const MAX_NOTE_LENGTH = 140;
+
 /** Product choice, not a game rule: a hunt plan rarely lasts longer. */
 export const AD_LIFETIME_MS = 6 * HOUR_IN_MS;
 
 export const getAdExpiry = (createdAt: number): number =>
   createdAt + AD_LIFETIME_MS;
 
+export const cleanAdNote = (note: unknown): string =>
+  typeof note === 'string'
+    ? note.replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE_LENGTH)
+    : '';
+
 export const isAdActive = ({ expiresAt }: PartyAd, now: number): boolean =>
   expiresAt > now;
 
 // Newest first, since a recent ad is more likely to get an answer.
-export const findCompatibleAds = (
-  ads: PartyAd[],
+export const findCompatibleAds = <Ad extends PartyAd>(
+  ads: Ad[],
   { world, level }: PartySeeker,
   now: number,
-): PartyAd[] => {
+): Ad[] => {
   const { lowest, highest } = getShareRange(level);
 
   return ads

@@ -1,16 +1,5 @@
-import { env } from 'cloudflare:workers';
 import type { Character, CharacterInput } from '../domain/characters';
-
-interface D1Statement {
-  bind(...values: unknown[]): D1Statement;
-  all<Row>(): Promise<{ results: Row[] }>;
-  first<Row>(): Promise<Row | null>;
-  run(): Promise<{ meta: { changes: number } }>;
-}
-
-const db = env.DB as unknown as {
-  prepare(query: string): D1Statement;
-};
+import { db } from './db';
 
 // Every query filters by the owner, so nobody reaches another player's data.
 export const listCharacters = async (userId: string): Promise<Character[]> => {

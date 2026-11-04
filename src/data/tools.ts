@@ -26,6 +26,14 @@ export const tools: Tool[] = [
     href: '/tools/charms/',
   },
   {
+    id: 'party',
+    category: 'hunt',
+    name: 'Party finder',
+    shortName: 'Party',
+    description: 'Encontre quem divide XP com você em Vesperia, no RubinOT.',
+    href: '/tools/party/',
+  },
+  {
     id: 'monsters',
     category: 'reference',
     name: 'Consulta de monstros',
