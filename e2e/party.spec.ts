@@ -353,6 +353,42 @@ test('shows changes from other players without a reload', async ({ page }) => {
   await expect(page.getByText('2 jogadores')).toBeVisible();
 });
 
+test('stays on the page when the bot already moved the player', async ({ page }) => {
+  await page.route('**/api/party-groups/g1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'g1',
+        ownerName: 'Lucas',
+        purpose: 'hunt',
+        server: 'rubinot',
+        world: 'Vesperia',
+        note: '',
+        memberCount: 0,
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        isLeader: false,
+        members: [],
+        hunts: [],
+      },
+    }),
+  );
+  await page.route('**/api/party-groups/g1/room', (route) =>
+    route.fulfill({
+      json: {
+        url: 'https://discord.com/channels/1/2',
+        inviteUrl: null,
+        isConnected: true,
+        missing: [],
+      },
+    }),
+  );
+  await page.goto('/tools/party/group/g1/');
+
+  await page.getByRole('button', { name: 'Entrar na sala' }).click();
+
+  await expect(page.getByRole('status')).toHaveText('Você já está na sala.');
+  await expect(page.getByRole('link', { name: 'Abrir no app' })).toBeHidden();
+});
+
 test('explains a pasted text it cannot read', async ({ page }) => {
   await page.route('**/api/party-groups/g1', (route) =>
     route.fulfill({

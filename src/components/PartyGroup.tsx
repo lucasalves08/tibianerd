@@ -43,6 +43,7 @@ const serverName = (id: string) =>
 function RoomButton({ groupId }: { groupId: string }) {
   const [isOpening, setIsOpening] = useState(false);
   const [message, setMessage] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
   const [room, setRoom] = useState<{ url: string; inviteUrl?: string } | null>(
     null,
   );
@@ -124,6 +125,7 @@ function RoomButton({ groupId }: { groupId: string }) {
     setIsOpening(true);
     setMessage('');
     setRoom(null);
+    setIsConnected(false);
 
     try {
       const response = await fetch(`/api/party-groups/${groupId}/room`, {
@@ -132,6 +134,7 @@ function RoomButton({ groupId }: { groupId: string }) {
       const data = (await response.json()) as {
         url?: string;
         inviteUrl?: string | null;
+        isConnected?: boolean;
         missing?: string[];
         error?: string;
       };
@@ -146,9 +149,13 @@ function RoomButton({ groupId }: { groupId: string }) {
         return;
       }
 
-      // The app takes over and this page stays open behind it.
-      setRoom({ url: data.url, inviteUrl: data.inviteUrl ?? undefined });
-      window.location.assign(getDiscordAppUrl(data.inviteUrl ?? data.url));
+      if (data.isConnected) {
+        setIsConnected(true);
+      } else {
+        // The app takes over and this page stays open behind it.
+        setRoom({ url: data.url, inviteUrl: data.inviteUrl ?? undefined });
+        window.location.assign(getDiscordAppUrl(data.inviteUrl ?? data.url));
+      }
 
       if (data.missing?.length) {
         setMessage(
@@ -203,7 +210,11 @@ function RoomButton({ groupId }: { groupId: string }) {
             ? 'Abrindo…'
             : 'Entrar na sala'}
       </button>
-      <p className={finder.muted}>O bot chama quem ainda não entrou.</p>
+      <p className={finder.muted}>
+        Quem estiver em Procurando party, no Discord, cai direto na sala. O bot
+        chama os outros.
+      </p>
+      {isConnected && <p role="status">Você já está na sala.</p>}
       {room && (
         <p className={styles.roomLinks}>
           <span className={finder.muted}>Sala pronta. Não abriu?</span>
