@@ -6,6 +6,7 @@ import {
 import {
   adPurposes,
   findCompatibleAds,
+  MAX_ADS_PER_ACCOUNT,
   MAX_NOTE_LENGTH,
   type AdPurpose,
   type IncomingRequest,
@@ -15,7 +16,7 @@ import {
 } from '../domain/partyFinder';
 import { getShareRange } from '../domain/partyShare';
 import PlayerCard from './PlayerCard';
-import PartyRequests from './PartyRequests';
+import { AdRequests, OutgoingRequests } from './PartyRequests';
 import Segmented from './Segmented';
 import styles from './PartyFinder.module.css';
 
@@ -23,6 +24,7 @@ const ADS_URL = '/api/party-ads';
 const REQUESTS_URL = '/api/party-requests';
 const MINUTE_IN_MS = 60 * 1000;
 const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
+const LIMIT_ERROR = `Você já tem ${MAX_ADS_PER_ACCOUNT} anúncios. Remova um para publicar outro.`;
 
 const adGoal = ({ purpose }: Pick<PartyAdView, 'purpose'>) =>
   purpose === 'boss' ? 'Boss' : 'Hunt';
@@ -130,6 +132,11 @@ export default function PartyFinder() {
 
     try {
       const response = await fetch(url, options);
+
+      if (response.status === 409) {
+        setError(LIMIT_ERROR);
+        return false;
+      }
 
       if (!response.ok) {
         throw new Error('Request failed');
@@ -280,34 +287,41 @@ export default function PartyFinder() {
             </button>
             <p className={styles.muted}>
               O anúncio mostra seu personagem e sai do ar em 12 horas. Seu Discord
-              só aparece para quem você aceitar.
+              só aparece para quem você aceitar. Cada personagem pode ter um
+              anúncio de hunt e um de boss, com até {MAX_ADS_PER_ACCOUNT} por conta.
             </p>
           </>
         )}
 
         {myAds.map((ad) => (
           <div key={ad.id} className={styles.mine}>
-            <p>
-              <strong>Seu anúncio:</strong> {ad.characterName},{' '}
-              {formatLevel(ad.level)} · {adGoal(ad)}
-              {ad.note && ` · ${ad.note}`}
-            </p>
-            <p className={styles.muted}>{formatRemaining(ad.expiresAt)}</p>
-            <button
-              className={styles.textButton}
-              type="button"
-              onClick={() => remove(ad.id)}
-            >
-              Remover anúncio
-            </button>
+            <div className={styles.adFooter}>
+              <h3 className={styles.mineTitle}>{ad.characterName}</h3>
+              <span className={styles.goal} data-purpose={ad.purpose}>
+                {adGoal(ad)}
+              </span>
+            </div>
+            {ad.note && <p className={styles.note}>{ad.note}</p>}
+            <div className={styles.adFooter}>
+              <span className={styles.muted}>
+                {formatRemaining(ad.expiresAt)}
+              </span>
+              <button
+                className={styles.textButton}
+                type="button"
+                onClick={() => remove(ad.id)}
+              >
+                Remover anúncio
+              </button>
+            </div>
+            <AdRequests
+              requests={incoming.filter(({ adId }) => adId === ad.id)}
+              onDecide={decide}
+            />
           </div>
         ))}
 
-        <PartyRequests
-          incoming={incoming}
-          outgoing={outgoing}
-          onDecide={decide}
-        />
+        <OutgoingRequests requests={outgoing} />
 
         {error && (
           <p className={styles.error} role="alert">

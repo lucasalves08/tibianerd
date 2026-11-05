@@ -385,7 +385,7 @@ export default function CharacterManager() {
 
       <p className={styles.muted}>
         Quer conversar com a comunidade?{' '}
-        <a href={DISCORD_INVITE_URL} rel="noopener">
+        <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
           Entrar no Discord
         </a>
       </p>

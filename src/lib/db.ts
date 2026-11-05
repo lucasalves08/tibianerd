@@ -9,4 +9,5 @@ export interface D1Statement {
 
 export const db = env.DB as unknown as {
   prepare(query: string): D1Statement;
+  batch(statements: D1Statement[]): Promise<unknown>;
 };

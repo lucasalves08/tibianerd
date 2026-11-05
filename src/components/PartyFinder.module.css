@@ -139,11 +139,6 @@
   text-transform: uppercase;
 }
 
-.contact {
-  display: grid;
-  gap: var(--space-2);
-}
-
 .decisions {
   display: flex;
   flex-wrap: wrap;
@@ -159,12 +154,78 @@
 
 .mine {
   display: grid;
-  gap: var(--space-1);
-  justify-items: start;
+  gap: var(--space-2);
   padding: var(--space-3);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-small);
   background: color-mix(in srgb, var(--color-accent) 12%, var(--color-background));
+  overflow-wrap: anywhere;
+}
+
+.section {
+  display: grid;
+  gap: var(--space-2);
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--color-line);
+}
+
+.members {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  overflow-wrap: anywhere;
+}
+
+.member > p {
+  display: grid;
+}
+
+.request {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+}
+
+.status {
+  padding: 0.125rem var(--space-2);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.status[data-status='accepted'] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.status[data-status='declined'] {
+  border-color: var(--color-danger);
+  color: var(--color-danger-strong);
+}
+
+.room {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.mineTitle {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
   overflow-wrap: anywhere;
 }
 
