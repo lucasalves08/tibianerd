@@ -200,6 +200,47 @@ test('shows the group with its members and the loot split', async ({ page }) => 
   await expect(page.getByText('1.000', { exact: true })).toBeVisible();
 });
 
+test('opens the room in the app without a new tab', async ({ page }) => {
+  await page.route('**/api/party-groups/g1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'g1',
+        ownerName: 'Lucas',
+        purpose: 'hunt',
+        server: 'rubinot',
+        world: 'Vesperia',
+        note: '',
+        memberCount: 0,
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        isLeader: false,
+        members: [],
+        hunts: [],
+      },
+    }),
+  );
+  await page.route('**/api/party-groups/g1/room', (route) =>
+    route.fulfill({
+      json: { url: 'https://discord.com/channels/1/2', missing: [] },
+    }),
+  );
+  await page.goto('/tools/party/group/g1/');
+
+  let openedTab = false;
+  page.on('popup', () => {
+    openedTab = true;
+  });
+  await page.getByRole('button', { name: 'Abrir sala no Discord' }).click();
+
+  await expect(page.getByRole('link', { name: 'Abrir no app' })).toHaveAttribute(
+    'href',
+    'discord://discord.com/channels/1/2',
+  );
+  await expect(
+    page.getByRole('link', { name: 'Abrir no navegador' }),
+  ).toHaveAttribute('href', 'https://discord.com/channels/1/2');
+  expect(openedTab).toBe(false);
+});
+
 test('explains a pasted text it cannot read', async ({ page }) => {
   await page.route('**/api/party-groups/g1', (route) =>
     route.fulfill({

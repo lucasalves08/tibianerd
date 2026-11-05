@@ -1,8 +1,10 @@
-import { env } from 'cloudflare:workers';
+import { env, waitUntil } from 'cloudflare:workers';
 import {
   getDiscordIdTime,
   getNextRoomCheck,
+  getRoomCall,
   getRoomMessage,
+  isRoomCallDue,
   MAX_ROOMS,
   ROOM_IDLE_MS,
   type RoomCharacter,
@@ -221,6 +223,49 @@ const createRoom = async (
   return ((await response.json()) as { id: string }).id;
 };
 
+// Only the mentioned players get a ping, whatever the note of the group says.
+const callMembers = (channelId: string, discordIds: string[], message: string) =>
+  discord(`/channels/${channelId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({
+      content: getRoomCall(discordIds, message),
+      allowed_mentions: { parse: [], users: discordIds },
+    }),
+  }).catch(() => {});
+
+const findMembersAway = async (channelId: string, discordIds: string[]) => {
+  const presence = await Promise.all(
+    discordIds.map((id) => isInChannel(id, channelId)),
+  );
+
+  return discordIds.filter((_, index) => !presence[index]);
+};
+
+const callMembersAway = async (
+  channelId: string,
+  discordIds: string[],
+  message: string,
+) => {
+  const response = await discord(`/channels/${channelId}`);
+
+  if (!response.ok) {
+    return;
+  }
+
+  const { last_message_id: lastMessageId } =
+    (await response.json()) as DiscordChannel;
+
+  if (!isRoomCallDue(lastMessageId ?? null, Date.now())) {
+    return;
+  }
+
+  const away = await findMembersAway(channelId, discordIds);
+
+  if (away.length > 0) {
+    await callMembers(channelId, away, message);
+  }
+};
+
 const addToRoom = async (channelId: string, userId: string) => {
   const response = await discord(`/channels/${channelId}/permissions/${userId}`, {
     method: 'PUT',
@@ -300,14 +345,32 @@ export const openRoom = async (
     return { status: 'not-in-server' };
   }
 
-  // Only a proven character changes a name in the server.
-  for (const { isVerified, discordId, roles, ...character } of present) {
-    if (isVerified === 1) {
-      await syncMember(discordId, roles!, character).catch(() => false);
-    }
-  }
+  // Only a proven character changes a name in the server. This takes many
+  // Discord calls, so the room does not wait for it.
+  waitUntil(
+    (async () => {
+      for (const { isVerified, discordId, roles, ...character } of present) {
+        if (isVerified === 1) {
+          await syncMember(discordId, roles!, character).catch(() => false);
+        }
+      }
+    })(),
+  );
 
   const discordIds = [...new Set(present.map(({ discordId }) => discordId))];
+  const others = [
+    ...new Set(
+      present
+        .filter((member) => member.userId !== userId)
+        .map(({ discordId }) => discordId),
+    ),
+  ];
+  const message = getRoomMessage({
+    purpose: group.purpose,
+    note: group.note,
+    world: group.world,
+    vocations: present.map(({ vocation }) => vocation),
+  });
   const room = await findRoom(groupId);
   let channelId = room?.channelId ?? null;
 
@@ -320,6 +383,8 @@ export const openRoom = async (
     if (added.includes(false)) {
       return { status: 'unavailable' };
     }
+
+    await callMembersAway(roomId, others, message);
   } else {
     if (!(await hasFreeRoom())) {
       return { status: 'full' };
@@ -337,17 +402,7 @@ export const openRoom = async (
       )
       .bind(groupId, channelId, Date.now() + ROOM_IDLE_MS)
       .run();
-    await discord(`/channels/${channelId}/messages`, {
-      method: 'POST',
-      body: JSON.stringify({
-        content: getRoomMessage({
-          purpose: group.purpose,
-          note: group.note,
-          world: group.world,
-          vocations: present.map(({ vocation }) => vocation),
-        }),
-      }),
-    }).catch(() => {});
+    await callMembers(channelId, others, message);
   }
 
   return {

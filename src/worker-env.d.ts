@@ -10,4 +10,6 @@ declare module 'cloudflare:workers' {
     DISCORD_CLIENT_SECRET: string;
     DISCORD_GUILD_ID: string;
   };
+
+  export const waitUntil: (promise: Promise<unknown>) => void;
 }
