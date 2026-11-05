@@ -293,6 +293,39 @@ export const closeRoom = async (groupId: string) => {
   }
 };
 
+// Null means Discord gave no clear answer, so the page does not turn anyone away.
+export const isMemberInServer = async (
+  userId: string,
+  groupId: string,
+): Promise<boolean | null> => {
+  if (!env.DISCORD_BOT_TOKEN) {
+    return null;
+  }
+
+  const member = await db
+    .prepare(
+      `SELECT x.accountId AS discordId
+      FROM party_group_members m
+      JOIN characters c ON c.id = m.character_id
+      JOIN account x ON x.userId = c.user_id AND x.providerId = 'discord'
+      WHERE m.group_id = ? AND c.user_id = ?`,
+    )
+    .bind(groupId, userId)
+    .first<{ discordId: string }>();
+
+  if (!member) {
+    return null;
+  }
+
+  const response = await discord(`${guildPath}/members/${member.discordId}`);
+
+  if (response.status === 404) {
+    return false;
+  }
+
+  return response.ok ? true : null;
+};
+
 // Any member opens the room for everyone. Who is outside the server stays out
 // and comes in the next time someone opens it.
 export const openRoom = async (

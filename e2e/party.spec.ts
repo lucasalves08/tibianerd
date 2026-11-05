@@ -241,6 +241,49 @@ test('opens the room in the app without a new tab', async ({ page }) => {
   expect(openedTab).toBe(false);
 });
 
+test('offers the server first, then the room', async ({ page }) => {
+  let inServer = false;
+
+  await page.route('**/api/party-groups/g1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'g1',
+        ownerName: 'Lucas',
+        purpose: 'hunt',
+        server: 'rubinot',
+        world: 'Vesperia',
+        note: '',
+        memberCount: 0,
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        isLeader: false,
+        members: [],
+        hunts: [],
+      },
+    }),
+  );
+  await page.route('**/api/party-groups/g1/room', (route) =>
+    route.fulfill({ json: { inServer } }),
+  );
+  await page.goto('/tools/party/group/g1/');
+
+  await expect(
+    page.getByRole('link', { name: 'Entrar no servidor do Discord' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Abrir sala no Discord' }),
+  ).toBeHidden();
+
+  inServer = true;
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+
+  await expect(
+    page.getByRole('button', { name: 'Abrir sala no Discord' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Entrar no servidor do Discord' }),
+  ).toBeHidden();
+});
+
 test('explains a pasted text it cannot read', async ({ page }) => {
   await page.route('**/api/party-groups/g1', (route) =>
     route.fulfill({
