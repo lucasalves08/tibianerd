@@ -1,15 +1,12 @@
 import {
   canJoinAd,
+  type AdPurpose,
   type IncomingRequest,
   type JoinDecision,
   type OutgoingRequest,
 } from '../domain/partyFinder';
 import { db } from './db';
-
-// Discord details only leave the database once a request is accepted.
-const DISCORD_COLUMNS = `
-  CASE WHEN r.status = 'accepted' THEN u.name END AS discord,
-  CASE WHEN r.status = 'accepted' THEN x.accountId END AS discordId`;
+import { getJoinStatements, getLeaveStatement } from './partyGroups';
 
 export const listRequests = async (userId: string) => {
   const now = Date.now();
@@ -17,14 +14,11 @@ export const listRequests = async (userId: string) => {
     db
       .prepare(
         `SELECT r.id, r.status, c.name AS characterName, c.vocation, c.level,
-          r.ad_id AS adId,
-          ${DISCORD_COLUMNS}
+          r.ad_id AS adId
         FROM party_join_requests r
         JOIN party_ads a ON a.id = r.ad_id
         JOIN characters owner ON owner.id = a.character_id
         JOIN characters c ON c.id = r.character_id
-        JOIN "user" u ON u.id = c.user_id
-        LEFT JOIN account x ON x.userId = u.id AND x.providerId = 'discord'
         WHERE owner.user_id = ? AND a.expires_at > ? AND r.status <> 'declined'
         ORDER BY r.created_at`,
       )
@@ -32,14 +26,11 @@ export const listRequests = async (userId: string) => {
       .all<IncomingRequest>(),
     db
       .prepare(
-        `SELECT r.id, r.ad_id AS adId, r.status,
-          owner.name AS characterName, ${DISCORD_COLUMNS}
+        `SELECT r.id, r.ad_id AS adId, r.status, owner.name AS characterName
         FROM party_join_requests r
         JOIN party_ads a ON a.id = r.ad_id
         JOIN characters c ON c.id = r.character_id
         JOIN characters owner ON owner.id = a.character_id
-        JOIN "user" u ON u.id = owner.user_id
-        LEFT JOIN account x ON x.userId = u.id AND x.providerId = 'discord'
         WHERE c.user_id = ? AND a.expires_at > ?
         ORDER BY r.created_at DESC`,
       )
@@ -101,17 +92,40 @@ export const decideRequest = async (
   id: string,
   status: JoinDecision,
 ): Promise<boolean> => {
-  const { meta } = await db
+  const request = await db
     .prepare(
-      `UPDATE party_join_requests SET status = ?
-      WHERE id = ? AND ad_id IN (
-        SELECT a.id FROM party_ads a
-        JOIN characters c ON c.id = a.character_id
-        WHERE c.user_id = ?
-      )`,
+      `SELECT r.character_id AS characterId, a.id AS adId,
+        a.character_id AS ownerCharacterId, owner.name AS ownerName,
+        owner.server, a.world, a.purpose, a.note
+      FROM party_join_requests r
+      JOIN party_ads a ON a.id = r.ad_id
+      JOIN characters owner ON owner.id = a.character_id
+      WHERE r.id = ? AND owner.user_id = ?`,
     )
-    .bind(status, id, userId)
-    .run();
+    .bind(id, userId)
+    .first<{
+      characterId: string;
+      adId: string;
+      ownerCharacterId: string;
+      ownerName: string;
+      server: string;
+      world: string;
+      purpose: AdPurpose;
+      note: string;
+    }>();
 
-  return meta.changes > 0;
+  if (!request) {
+    return false;
+  }
+
+  await db.batch([
+    db
+      .prepare('UPDATE party_join_requests SET status = ? WHERE id = ?')
+      .bind(status, id),
+    ...(status === 'accepted'
+      ? getJoinStatements(request, request.characterId)
+      : [getLeaveStatement(request.adId, request.characterId)]),
+  ]);
+
+  return true;
 };

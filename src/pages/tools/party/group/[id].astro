@@ -1,0 +1,16 @@
+---
+import PartyGroup from '../../../../components/PartyGroup';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+---
+
+<BaseLayout
+  title="Grupo | TibiaNerd"
+  description="Integrantes, sala e divisão de loot do seu grupo."
+  noindex
+>
+  <PartyGroup client:load groupId={id!} />
+</BaseLayout>

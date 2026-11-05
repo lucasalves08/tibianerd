@@ -14,6 +14,7 @@ import {
   type OutgoingRequest,
   type PartyAdView,
 } from '../domain/partyFinder';
+import type { GroupSummary } from '../domain/partyGroups';
 import { getShareRange } from '../domain/partyShare';
 import PlayerCard from './PlayerCard';
 import { AdRequests, OutgoingRequests } from './PartyRequests';
@@ -22,6 +23,7 @@ import styles from './PartyFinder.module.css';
 
 const ADS_URL = '/api/party-ads';
 const REQUESTS_URL = '/api/party-requests';
+const GROUPS_URL = '/api/party-groups';
 const MINUTE_IN_MS = 60 * 1000;
 const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 const LIMIT_ERROR = `Você já tem ${MAX_ADS_PER_ACCOUNT} anúncios. Remova um para publicar outro.`;
@@ -30,6 +32,11 @@ const adGoal = ({ purpose }: Pick<PartyAdView, 'purpose'>) =>
   purpose === 'boss' ? 'Boss' : 'Hunt';
 
 const purposeFilters = [{ id: 'all', name: 'Todos' }, ...adPurposes] as const;
+
+const requestLabels = {
+  pending: 'Pedido enviado',
+  declined: 'Pedido recusado',
+};
 
 const formatLevel = (level: number) => level.toLocaleString('pt-BR');
 
@@ -46,6 +53,7 @@ export default function PartyFinder() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [incoming, setIncoming] = useState<IncomingRequest[]>([]);
   const [outgoing, setOutgoing] = useState<OutgoingRequest[]>([]);
+  const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [characterId, setCharacterId] = useState('');
@@ -82,6 +90,14 @@ export default function PartyFinder() {
     }
   };
 
+  const loadGroups = async () => {
+    const response = await fetch(GROUPS_URL);
+
+    if (response.ok) {
+      setGroups((await response.json()) as GroupSummary[]);
+    }
+  };
+
   useEffect(() => {
     // Each request stands alone, so a failure in the ads keeps the login state.
     const loadCharacters = async () => {
@@ -110,6 +126,9 @@ export default function PartyFinder() {
         ),
         loadRequests().catch(() =>
           setError('Não conseguimos carregar os pedidos.'),
+        ),
+        loadGroups().catch(() =>
+          setError('Não conseguimos carregar seus grupos.'),
         ),
       ]).finally(() => setIsLoading(false));
     };
@@ -142,7 +161,7 @@ export default function PartyFinder() {
         throw new Error('Request failed');
       }
 
-      await Promise.all([loadAds(), loadRequests()]);
+      await Promise.all([loadAds(), loadRequests(), loadGroups()]);
       return true;
     } catch {
       setError(SAVE_ERROR);
@@ -185,6 +204,34 @@ export default function PartyFinder() {
     }
   };
 
+  const renderJoinAction = (ad: PartyAdView) => {
+    const request = outgoing.find(({ adId }) => adId === ad.id);
+
+    if (request?.status === 'accepted') {
+      return (
+        <a
+          className={styles.linkButton}
+          href={`/tools/party/group/${ad.id}/`}
+          data-astro-prefetch="false"
+        >
+          Ver grupo
+        </a>
+      );
+    }
+
+    return (
+      <button
+        className={styles.button}
+        type="button"
+        disabled={Boolean(request)}
+        aria-label={`Pedir para entrar no grupo de ${ad.characterName}`}
+        onClick={() => requestToJoin(ad.id)}
+      >
+        {request ? requestLabels[request.status] : 'Pedir para entrar'}
+      </button>
+    );
+  };
+
   const character = characters.find(({ id }) => id === characterId);
   const myAds = ads.filter(({ isMine }) => isMine);
   const otherAds = ads.filter(({ isMine }) => !isMine);
@@ -208,6 +255,36 @@ export default function PartyFinder() {
 
   return (
     <div className={styles.layout}>
+      {groups.length > 0 && (
+        <section className={styles.groups} aria-labelledby="groups-title">
+          <h2 id="groups-title" className={styles.panelTitle}>
+            Seus grupos
+          </h2>
+          <ul className={styles.groupList}>
+            {groups.map((group) => (
+              <li key={group.id}>
+                <a
+                  className={styles.group}
+                  href={`/tools/party/group/${group.id}/`}
+                  data-astro-prefetch="false"
+                >
+                  <span>
+                    <strong>Grupo de {group.ownerName}</strong>
+                    <span className={styles.muted}>
+                      {group.world} · {group.memberCount}{' '}
+                      {group.memberCount === 1 ? 'jogador' : 'jogadores'}
+                    </span>
+                  </span>
+                  <span className={styles.goal} data-purpose={group.purpose}>
+                    {adGoal(group)}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className={styles.panel} aria-labelledby="publish-title">
         <h2 id="publish-title" className={styles.panelTitle}>
           Publicar anúncio
@@ -315,6 +392,7 @@ export default function PartyFinder() {
               </button>
             </div>
             <AdRequests
+              adId={ad.id}
               requests={incoming.filter(({ adId }) => adId === ad.id)}
               onDecide={decide}
             />
@@ -427,19 +505,7 @@ export default function PartyFinder() {
                       </>
                     )}
                   </span>
-                  {character && (
-                    <button
-                      className={styles.button}
-                      type="button"
-                      disabled={outgoing.some(({ adId }) => adId === ad.id)}
-                      aria-label={`Pedir para entrar no grupo de ${ad.characterName}`}
-                      onClick={() => requestToJoin(ad.id)}
-                    >
-                      {outgoing.some(({ adId }) => adId === ad.id)
-                        ? 'Pedido enviado'
-                        : 'Pedir para entrar'}
-                    </button>
-                  )}
+                  {character && renderJoinAction(ad)}
                 </div>
               </PlayerCard>
             </li>
