@@ -10,6 +10,7 @@ import {
   type GroupMember,
 } from '../domain/partyGroups';
 import { formatHuntStart, getLootSplit } from '../domain/partyHunt';
+import { getDiscordAppUrl } from '../domain/partyRooms';
 import PlayerCard from './PlayerCard';
 import finder from './PartyFinder.module.css';
 import styles from './PartyGroup.module.css';
@@ -46,13 +47,6 @@ function RoomButton({ groupId }: { groupId: string }) {
     setMessage('');
     setRoomUrl('');
 
-    // Browsers only allow a new tab during the click, before any waiting.
-    const tab = window.open('about:blank', '_blank');
-
-    if (tab) {
-      tab.opener = null;
-    }
-
     try {
       const response = await fetch(`/api/party-groups/${groupId}/room`, {
         method: 'POST',
@@ -64,17 +58,13 @@ function RoomButton({ groupId }: { groupId: string }) {
       };
 
       if (!data.url) {
-        tab?.close();
         setMessage(roomErrors[data.error ?? ''] ?? ROOM_ERROR);
         return;
       }
 
-      // A blocked tab leaves a link, so our page always stays open.
-      if (tab) {
-        tab.location.href = data.url;
-      } else {
-        setRoomUrl(data.url);
-      }
+      // The app takes over and this page stays open behind it.
+      setRoomUrl(data.url);
+      window.location.assign(getDiscordAppUrl(data.url));
 
       if (data.missing?.length) {
         setMessage(
@@ -82,7 +72,6 @@ function RoomButton({ groupId }: { groupId: string }) {
         );
       }
     } catch {
-      tab?.close();
       setMessage(ROOM_ERROR);
     } finally {
       setIsOpening(false);
@@ -104,11 +93,16 @@ function RoomButton({ groupId }: { groupId: string }) {
         <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
           servidor do TibiaNerd
         </a>
+        . O bot chama quem ainda não entrou.
       </p>
       {roomUrl && (
-        <a href={roomUrl} target="_blank" rel="noopener noreferrer">
-          Abrir a sala no Discord
-        </a>
+        <p className={styles.roomLinks}>
+          <span className={finder.muted}>Sala pronta. Não abriu?</span>
+          <a href={getDiscordAppUrl(roomUrl)}>Abrir no app</a>
+          <a href={roomUrl} target="_blank" rel="noopener noreferrer">
+            Abrir no navegador
+          </a>
+        </p>
       )}
       {message && (
         <p className={finder.error} role="alert">

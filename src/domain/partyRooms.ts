@@ -9,6 +9,8 @@ const MAX_NICKNAME_LENGTH = 32;
 /** Product choices: how long a room can stay unused, and how many can exist. */
 export const ROOM_IDLE_MS = 7 * 24 * HOUR_IN_MS;
 export const MAX_ROOMS = 50;
+/** Product choice: a new call in the room waits this long after the last message. */
+export const ROOM_CALL_COOLDOWN_MS = 5 * 60 * 1000;
 
 const vocationRoles: Record<VocationId, string> = {
   knight: 'EK',
@@ -74,6 +76,20 @@ export const getRoomMessage = ({
 /** Discord ids carry the moment they were created. */
 export const getDiscordIdTime = (id: string): number =>
   Number((BigInt(id) >> TIMESTAMP_SHIFT) + DISCORD_EPOCH_MS);
+
+/** Discord cannot pull anyone into voice, so the bot mentions who is away. */
+export const getRoomCall = (discordIds: string[], message: string): string =>
+  discordIds.length > 0
+    ? `${discordIds.map((id) => `<@${id}>`).join(' ')} a sala do grupo está aberta. Entrem no canal de voz.\n${message}`
+    : message;
+
+export const isRoomCallDue = (lastMessageId: string | null, now: number) =>
+  !lastMessageId ||
+  now - getDiscordIdTime(lastMessageId) >= ROOM_CALL_COOLDOWN_MS;
+
+/** The same room, in the installed Discord app instead of the browser. */
+export const getDiscordAppUrl = (url: string) =>
+  url.replace('https://', 'discord://');
 
 /** The next time to look at a room, or null when it can be deleted. */
 export const getNextRoomCheck = ({

@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   fixedRoles,
+  getDiscordAppUrl,
   getDiscordIdTime,
   getDiscordProfile,
   getNextRoomCheck,
+  getRoomCall,
   getRoomMessage,
+  isRoomCallDue,
+  ROOM_CALL_COOLDOWN_MS,
   ROOM_IDLE_MS,
 } from './partyRooms';
 
@@ -15,6 +19,41 @@ const MESSAGE_TIME = 1462015105796;
 describe('getDiscordIdTime', () => {
   it('reads the time inside a Discord id', () => {
     expect(getDiscordIdTime(MESSAGE_ID)).toBe(MESSAGE_TIME);
+  });
+});
+
+describe('getRoomCall', () => {
+  it('mentions who is away, above the summary', () => {
+    expect(getRoomCall(['1', '2'], 'Hunt · Vesperia')).toBe(
+      '<@1> <@2> a sala do grupo está aberta. Entrem no canal de voz.\nHunt · Vesperia',
+    );
+  });
+
+  it('keeps only the summary when nobody is away', () => {
+    expect(getRoomCall([], 'Hunt · Vesperia')).toBe('Hunt · Vesperia');
+  });
+});
+
+describe('isRoomCallDue', () => {
+  it('calls in a room with no messages', () => {
+    expect(isRoomCallDue(null, MESSAGE_TIME)).toBe(true);
+  });
+
+  it('waits after the last message', () => {
+    expect(
+      isRoomCallDue(MESSAGE_ID, MESSAGE_TIME + ROOM_CALL_COOLDOWN_MS - 1),
+    ).toBe(false);
+    expect(isRoomCallDue(MESSAGE_ID, MESSAGE_TIME + ROOM_CALL_COOLDOWN_MS)).toBe(
+      true,
+    );
+  });
+});
+
+describe('getDiscordAppUrl', () => {
+  it('points the room link at the app', () => {
+    expect(getDiscordAppUrl('https://discord.com/channels/1/2')).toBe(
+      'discord://discord.com/channels/1/2',
+    );
   });
 });
 
