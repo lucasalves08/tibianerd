@@ -15,6 +15,7 @@ import { discord, getMemberRoles, guildPath, syncMember } from './discord';
 const CATEGORY_CHANNEL = 4;
 const VOICE_CHANNEL = 2;
 const CATEGORY_NAME = 'Parties';
+const LOBBY_NAME = 'Procurando party';
 const ROLE_OVERWRITE = 0;
 const MEMBER_OVERWRITE = 1;
 const VIEW_CHANNEL = 1024;
@@ -25,7 +26,13 @@ const MAX_ROOMS_COMPARED = 10;
 const ROOM_INVITE_AGE_SECONDS = 60 * 60;
 
 export type RoomResult =
-  | { status: 'ready'; url: string; inviteUrl: string | null; missing: string[] }
+  | {
+      status: 'ready';
+      url: string;
+      inviteUrl: string | null;
+      isConnected: boolean;
+      missing: string[];
+    }
   | { status: 'not-in-server' }
   | { status: 'full' }
   | { status: 'unavailable' }
@@ -45,18 +52,21 @@ const memberOverwrite = (id: string) => ({
   allow: MEMBER_PERMISSIONS,
 });
 
-// Discord answers with an error for someone outside voice, so only a match counts.
-const isInChannel = async (userId: string, channelId: string) => {
+// Discord answers with an error for someone outside voice.
+const getVoiceChannelId = async (userId: string) => {
   const response = await discord(`${guildPath}/voice-states/${userId}`);
 
   if (!response.ok) {
-    return false;
+    return null;
   }
 
   const state = (await response.json()) as { channel_id?: string | null };
 
-  return state.channel_id === channelId;
+  return state.channel_id ?? null;
 };
+
+const isInChannel = async (userId: string, channelId: string) =>
+  (await getVoiceChannelId(userId)) === channelId;
 
 const findRoom = (groupId: string) =>
   db
@@ -170,7 +180,10 @@ const hasFreeRoom = async (): Promise<boolean> => {
   return (row?.total ?? 0) < MAX_ROOMS || freeRoom();
 };
 
-const getCategoryId = async (): Promise<string | null> => {
+const findOrCreateChannel = async (
+  name: string,
+  type: number,
+): Promise<string | null> => {
   const response = await discord(`${guildPath}/channels`);
 
   if (!response.ok) {
@@ -178,17 +191,17 @@ const getCategoryId = async (): Promise<string | null> => {
   }
 
   const channels = (await response.json()) as DiscordChannel[];
-  const category = channels.find(
-    ({ name, type }) => type === CATEGORY_CHANNEL && name === CATEGORY_NAME,
+  const channel = channels.find(
+    (candidate) => candidate.type === type && candidate.name === name,
   );
 
-  if (category) {
-    return category.id;
+  if (channel) {
+    return channel.id;
   }
 
   const created = await discord(`${guildPath}/channels`, {
     method: 'POST',
-    body: JSON.stringify({ name: CATEGORY_NAME, type: CATEGORY_CHANNEL }),
+    body: JSON.stringify({ name, type }),
   });
 
   return created.ok ? ((await created.json()) as { id: string }).id : null;
@@ -204,7 +217,7 @@ const createRoom = async (
     body: JSON.stringify({
       name: `party-${name}-${purpose}`.slice(0, 100),
       type: VOICE_CHANNEL,
-      parent_id: await getCategoryId(),
+      parent_id: await findOrCreateChannel(CATEGORY_NAME, CATEGORY_CHANNEL),
       permission_overwrites: [
         {
           id: env.DISCORD_GUILD_ID,
@@ -234,14 +247,6 @@ const callMembers = (channelId: string, discordIds: string[], message: string) =
     }),
   }).catch(() => {});
 
-const findMembersAway = async (channelId: string, discordIds: string[]) => {
-  const presence = await Promise.all(
-    discordIds.map((id) => isInChannel(id, channelId)),
-  );
-
-  return discordIds.filter((_, index) => !presence[index]);
-};
-
 const callMembersAway = async (
   channelId: string,
   discordIds: string[],
@@ -256,15 +261,36 @@ const callMembersAway = async (
   const { last_message_id: lastMessageId } =
     (await response.json()) as DiscordChannel;
 
-  if (!isRoomCallDue(lastMessageId ?? null, Date.now())) {
-    return;
+  if (isRoomCallDue(lastMessageId ?? null, Date.now())) {
+    await callMembers(channelId, discordIds, message);
   }
+};
 
-  const away = await findMembersAway(channelId, discordIds);
+const moveToRoom = async (discordId: string, channelId: string) => {
+  const response = await discord(`${guildPath}/members/${discordId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ channel_id: channelId }),
+  });
 
-  if (away.length > 0) {
-    await callMembers(channelId, away, message);
-  }
+  return response.ok;
+};
+
+// Discord only moves people who are in voice, so the lobby is where players
+// wait. Nobody is taken out of any other conversation.
+const gatherFromLobby = async (channelId: string, discordIds: string[]) => {
+  const lobbyId = await findOrCreateChannel(LOBBY_NAME, VOICE_CHANNEL);
+  const inRoom = await Promise.all(
+    discordIds.map(async (id) => {
+      const current = await getVoiceChannelId(id);
+
+      return (
+        current === channelId ||
+        (current !== null && current === lobbyId && moveToRoom(id, channelId))
+      );
+    }),
+  );
+
+  return new Set(discordIds.filter((_, index) => inRoom[index]));
 };
 
 // An invite to a voice channel is the closest thing to joining it from a site.
@@ -423,6 +449,7 @@ export const openRoom = async (
     vocations: present.map(({ vocation }) => vocation),
   });
   const room = await findRoom(groupId);
+  const isNewRoom = !room;
   let channelId = room?.channelId ?? null;
 
   if (channelId) {
@@ -434,8 +461,6 @@ export const openRoom = async (
     if (added.includes(false)) {
       return { status: 'unavailable' };
     }
-
-    await callMembersAway(roomId, others, message);
   } else {
     if (!(await hasFreeRoom())) {
       return { status: 'full' };
@@ -453,13 +478,30 @@ export const openRoom = async (
       )
       .bind(groupId, channelId, Date.now() + ROOM_IDLE_MS)
       .run();
-    await callMembers(channelId, others, message);
   }
+
+  const inRoom = await gatherFromLobby(channelId, discordIds).catch(
+    () => new Set<string>(),
+  );
+  const away = others.filter((id) => !inRoom.has(id));
+
+  if (isNewRoom) {
+    await callMembers(channelId, away, message);
+  } else if (away.length > 0) {
+    await callMembersAway(channelId, away, message);
+  }
+
+  const isConnected = present.some(
+    (member) => member.userId === userId && inRoom.has(member.discordId),
+  );
 
   return {
     status: 'ready',
     url: `https://discord.com/channels/${env.DISCORD_GUILD_ID}/${channelId}`,
-    inviteUrl: await createRoomInvite(channelId).catch(() => null),
+    inviteUrl: isConnected
+      ? null
+      : await createRoomInvite(channelId).catch(() => null),
+    isConnected,
     missing: members.filter(({ roles }) => !roles).map(({ name }) => name),
   };
 };
