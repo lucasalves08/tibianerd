@@ -22,9 +22,10 @@ const VIEW_CHANNEL = 1024;
 const MEMBER_PERMISSIONS = '3214336';
 const MAX_ROOMS_CLEANED = 5;
 const MAX_ROOMS_COMPARED = 10;
+const ROOM_INVITE_AGE_SECONDS = 60 * 60;
 
 export type RoomResult =
-  | { status: 'ready'; url: string; missing: string[] }
+  | { status: 'ready'; url: string; inviteUrl: string | null; missing: string[] }
   | { status: 'not-in-server' }
   | { status: 'full' }
   | { status: 'unavailable' }
@@ -266,6 +267,23 @@ const callMembersAway = async (
   }
 };
 
+// An invite to a voice channel is the closest thing to joining it from a site.
+// Without one, the link to the channel still works.
+const createRoomInvite = async (channelId: string) => {
+  const response = await discord(`/channels/${channelId}/invites`, {
+    method: 'POST',
+    body: JSON.stringify({ max_age: ROOM_INVITE_AGE_SECONDS }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const { code } = (await response.json()) as { code: string };
+
+  return `https://discord.com/invite/${code}`;
+};
+
 const addToRoom = async (channelId: string, userId: string) => {
   const response = await discord(`/channels/${channelId}/permissions/${userId}`, {
     method: 'PUT',
@@ -441,6 +459,7 @@ export const openRoom = async (
   return {
     status: 'ready',
     url: `https://discord.com/channels/${env.DISCORD_GUILD_ID}/${channelId}`,
+    inviteUrl: await createRoomInvite(channelId).catch(() => null),
     missing: members.filter(({ roles }) => !roles).map(({ name }) => name),
   };
 };

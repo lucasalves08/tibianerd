@@ -35,6 +35,10 @@ export const POST: APIRoute = async ({ params, request }) => {
   );
 
   return result.status === 'ready'
-    ? Response.json({ url: result.url, missing: result.missing })
+    ? Response.json({
+        url: result.url,
+        inviteUrl: result.inviteUrl,
+        missing: result.missing,
+      })
     : errorResponse(result.status, statusCodes[result.status]);
 };

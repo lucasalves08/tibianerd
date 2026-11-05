@@ -13,6 +13,7 @@ const MEMBER_OVERWRITE = 1;
 const VIEW_CHANNEL = 1024;
 const SEND_MESSAGES = 2048;
 const WELCOME_STEP = 'welcome-channel';
+const JOIN_SCOPE = 'guilds.join';
 
 export const guildPath = `/guilds/${env.DISCORD_GUILD_ID}`;
 
@@ -35,6 +36,43 @@ export const getMemberRoles = async (
   }
 
   return ((await response.json()) as { roles: string[] }).roles;
+};
+
+export type JoinResult = 'joined' | 'not-authorized' | 'unavailable';
+
+// The permission is used once and forgotten, so nothing can add this player to
+// a server later.
+export const joinServer = async (userId: string): Promise<JoinResult> => {
+  if (!env.DISCORD_BOT_TOKEN) {
+    return 'unavailable';
+  }
+
+  const account = await db
+    .prepare(
+      `SELECT accountId AS discordId, accessToken, scope FROM account
+      WHERE userId = ? AND providerId = 'discord'`,
+    )
+    .bind(userId)
+    .first<{ discordId: string; accessToken: string | null; scope: string | null }>();
+
+  if (!account?.accessToken || !account.scope?.split(',').includes(JOIN_SCOPE)) {
+    return 'not-authorized';
+  }
+
+  const response = await discord(`${guildPath}/members/${account.discordId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ access_token: account.accessToken }),
+  });
+
+  await db
+    .prepare(
+      `UPDATE account SET accessToken = NULL, refreshToken = NULL, scope = NULL
+      WHERE userId = ? AND providerId = 'discord'`,
+    )
+    .bind(userId)
+    .run();
+
+  return response.ok ? 'joined' : 'unavailable';
 };
 
 const getRoleId = async (name: string, color = 0): Promise<string | null> => {

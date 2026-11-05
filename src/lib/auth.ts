@@ -20,5 +20,7 @@ export const createAuth = () => betterAuth({
       }),
     },
   },
+  // Asking for a new permission counts as linking the same Discord account again.
+  account: { accountLinking: { trustedProviders: ['discord'] } },
   user: { deleteUser: { enabled: true } },
 });
