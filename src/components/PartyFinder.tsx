@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLiveRefresh } from './useLiveRefresh';
 import {
   gameServers,
   type Character,
@@ -145,6 +146,11 @@ export default function PartyFinder() {
 
     return () => window.removeEventListener('pageshow', reloadRestored);
   }, []);
+
+  // A failed refresh keeps what is on screen, and the next one tries again.
+  useLiveRefresh(() => {
+    void Promise.all([loadAds(), loadRequests(), loadGroups()]).catch(() => {});
+  });
 
   const send = async (url: string, options: RequestInit) => {
     setError('');
