@@ -22,7 +22,7 @@ const MAX_ROOMS_CLEANED = 5;
 const MAX_ROOMS_COMPARED = 10;
 
 export type RoomResult =
-  | { status: 'ready'; url: string }
+  | { status: 'ready'; url: string; missing: string[] }
   | { status: 'not-in-server' }
   | { status: 'full' }
   | { status: 'unavailable' }
@@ -55,14 +55,20 @@ const isInChannel = async (userId: string, channelId: string) => {
   return state.channel_id === channelId;
 };
 
-const forgetRoom = (adId: string) =>
-  db.prepare('DELETE FROM party_rooms WHERE ad_id = ?').bind(adId).run();
+const findRoom = (groupId: string) =>
+  db
+    .prepare('SELECT channel_id AS channelId FROM party_rooms WHERE group_id = ?')
+    .bind(groupId)
+    .first<{ channelId: string }>();
 
-const deleteRoom = async (adId: string, channelId: string) => {
+const forgetRoom = (groupId: string) =>
+  db.prepare('DELETE FROM party_rooms WHERE group_id = ?').bind(groupId).run();
+
+const deleteRoom = async (groupId: string, channelId: string) => {
   const response = await discord(`/channels/${channelId}`, { method: 'DELETE' });
 
   if (response.ok || response.status === 404) {
-    await forgetRoom(adId);
+    await forgetRoom(groupId);
     return true;
   }
 
@@ -98,16 +104,16 @@ const reviewExpiredRooms = async () => {
   const now = Date.now();
   const { results } = await db
     .prepare(
-      'SELECT ad_id AS adId, channel_id AS channelId FROM party_rooms WHERE expires_at <= ? LIMIT ?',
+      'SELECT group_id AS groupId, channel_id AS channelId FROM party_rooms WHERE expires_at <= ? LIMIT ?',
     )
     .bind(now, MAX_ROOMS_CLEANED)
-    .all<{ adId: string; channelId: string }>();
+    .all<{ groupId: string; channelId: string }>();
 
-  for (const { adId, channelId } of results) {
+  for (const { groupId, channelId } of results) {
     const room = await readRoom(channelId);
 
     if (!room) {
-      await forgetRoom(adId);
+      await forgetRoom(groupId);
       continue;
     }
 
@@ -115,11 +121,11 @@ const reviewExpiredRooms = async () => {
 
     if (nextCheck) {
       await db
-        .prepare('UPDATE party_rooms SET expires_at = ? WHERE ad_id = ?')
-        .bind(nextCheck, adId)
+        .prepare('UPDATE party_rooms SET expires_at = ? WHERE group_id = ?')
+        .bind(nextCheck, groupId)
         .run();
     } else {
-      await deleteRoom(adId, channelId);
+      await deleteRoom(groupId, channelId);
     }
   }
 };
@@ -128,10 +134,10 @@ const reviewExpiredRooms = async () => {
 const freeRoom = async (): Promise<boolean> => {
   const { results } = await db
     .prepare(
-      'SELECT ad_id AS adId, channel_id AS channelId FROM party_rooms ORDER BY expires_at LIMIT ?',
+      'SELECT group_id AS groupId, channel_id AS channelId FROM party_rooms ORDER BY expires_at LIMIT ?',
     )
     .bind(MAX_ROOMS_COMPARED)
-    .all<{ adId: string; channelId: string }>();
+    .all<{ groupId: string; channelId: string }>();
   const rooms = await Promise.all(
     results.map(async (row) => ({ ...row, state: await readRoom(row.channelId) })),
   );
@@ -148,7 +154,7 @@ const freeRoom = async (): Promise<boolean> => {
     );
   const oldest = candidates[0];
 
-  return oldest ? deleteRoom(oldest.adId, oldest.channelId) : false;
+  return oldest ? deleteRoom(oldest.groupId, oldest.channelId) : false;
 };
 
 const hasFreeRoom = async (): Promise<boolean> => {
@@ -224,98 +230,94 @@ const addToRoom = async (channelId: string, userId: string) => {
   return response.ok;
 };
 
+export const removeFromRoom = async (groupId: string, userId: string) => {
+  const room = await findRoom(groupId);
+
+  if (room) {
+    await discord(`/channels/${room.channelId}/permissions/${userId}`, {
+      method: 'DELETE',
+    });
+  }
+};
+
+export const closeRoom = async (groupId: string) => {
+  const room = await findRoom(groupId);
+
+  if (room) {
+    await deleteRoom(groupId, room.channelId);
+  }
+};
+
+// Any member opens the room for everyone. Who is outside the server stays out
+// and comes in the next time someone opens it.
 export const openRoom = async (
   userId: string,
-  requestId: string,
+  groupId: string,
 ): Promise<RoomResult> => {
   if (!env.DISCORD_BOT_TOKEN) {
     return { status: 'unavailable' };
   }
 
-  // Only the two sides of an accepted request reach the room.
-  const request = await db
+  const group = await db
     .prepare(
-      `SELECT r.ad_id AS adId, a.purpose, a.note,
-        owner.server AS ownerServer, owner.name AS ownerName,
-        owner.world AS ownerWorld, owner.vocation AS ownerVocation,
-        owner.verified_at IS NOT NULL AS ownerVerified,
-        member.server AS memberServer, member.name AS memberName,
-        member.world AS memberWorld, member.vocation AS memberVocation,
-        member.verified_at IS NOT NULL AS memberVerified,
-        ownerAccount.accountId AS ownerDiscordId,
-        memberAccount.accountId AS memberDiscordId
-      FROM party_join_requests r
-      JOIN party_ads a ON a.id = r.ad_id
-      JOIN characters owner ON owner.id = a.character_id
-      JOIN characters member ON member.id = r.character_id
-      JOIN account ownerAccount
-        ON ownerAccount.userId = owner.user_id AND ownerAccount.providerId = 'discord'
-      JOIN account memberAccount
-        ON memberAccount.userId = member.user_id AND memberAccount.providerId = 'discord'
-      WHERE r.id = ?1 AND r.status = 'accepted'
-        AND (owner.user_id = ?2 OR member.user_id = ?2)`,
+      `SELECT owner_name AS ownerName, purpose, note, world
+      FROM party_groups WHERE id = ? AND expires_at > ?`,
     )
-    .bind(requestId, userId)
+    .bind(groupId, Date.now())
     .first<{
-      adId: string;
+      ownerName: string;
       purpose: 'hunt' | 'boss';
       note: string;
-      ownerServer: RoomCharacter['server'];
-      ownerName: string;
-      ownerWorld: string;
-      ownerVocation: RoomCharacter['vocation'];
-      ownerVerified: number;
-      memberServer: RoomCharacter['server'];
-      memberName: string;
-      memberWorld: string;
-      memberVocation: RoomCharacter['vocation'];
-      memberVerified: number;
-      ownerDiscordId: string;
-      memberDiscordId: string;
+      world: string;
     }>();
+  const { results } = await db
+    .prepare(
+      `SELECT c.user_id AS userId, c.server, c.name, c.world, c.vocation,
+        c.verified_at IS NOT NULL AS isVerified, x.accountId AS discordId
+      FROM party_group_members m
+      JOIN characters c ON c.id = m.character_id
+      JOIN account x ON x.userId = c.user_id AND x.providerId = 'discord'
+      WHERE m.group_id = ?`,
+    )
+    .bind(groupId)
+    .all<
+      RoomCharacter & { userId: string; isVerified: number; discordId: string }
+    >();
 
-  if (!request) {
+  if (!group || !results.some((member) => member.userId === userId)) {
     return { status: 'not-found' };
   }
 
-  const { adId, ownerName, ownerDiscordId, memberDiscordId } = request;
-  const [ownerRoles, memberRoles] = await Promise.all([
-    getMemberRoles(ownerDiscordId),
-    getMemberRoles(memberDiscordId),
-  ]);
+  const members = await Promise.all(
+    results.map(async (member) => ({
+      ...member,
+      roles: await getMemberRoles(member.discordId),
+    })),
+  );
+  const present = members.filter(({ roles }) => roles);
 
-  if (!ownerRoles || !memberRoles) {
+  if (!present.some((member) => member.userId === userId)) {
     return { status: 'not-in-server' };
   }
 
   // Only a proven character changes a name in the server.
-  if (request.ownerVerified === 1) {
-    await syncMember(ownerDiscordId, ownerRoles, {
-      server: request.ownerServer,
-      name: ownerName,
-      world: request.ownerWorld,
-      vocation: request.ownerVocation,
-    }).catch(() => false);
+  for (const { isVerified, discordId, roles, ...character } of present) {
+    if (isVerified === 1) {
+      await syncMember(discordId, roles!, character).catch(() => false);
+    }
   }
 
-  if (request.memberVerified === 1) {
-    await syncMember(memberDiscordId, memberRoles, {
-      server: request.memberServer,
-      name: request.memberName,
-      world: request.memberWorld,
-      vocation: request.memberVocation,
-    }).catch(() => false);
-  }
-
-  const room = await db
-    .prepare('SELECT channel_id AS channelId FROM party_rooms WHERE ad_id = ?')
-    .bind(adId)
-    .first<{ channelId: string }>();
-
+  const discordIds = [...new Set(present.map(({ discordId }) => discordId))];
+  const room = await findRoom(groupId);
   let channelId = room?.channelId ?? null;
 
   if (channelId) {
-    if (!(await addToRoom(channelId, memberDiscordId))) {
+    const roomId = channelId;
+    const added = await Promise.all(
+      discordIds.map((id) => addToRoom(roomId, id)),
+    );
+
+    if (added.includes(false)) {
       return { status: 'unavailable' };
     }
   } else {
@@ -323,10 +325,7 @@ export const openRoom = async (
       return { status: 'full' };
     }
 
-    channelId = await createRoom(ownerName, request.purpose, [
-      ownerDiscordId,
-      memberDiscordId,
-    ]);
+    channelId = await createRoom(group.ownerName, group.purpose, discordIds);
 
     if (!channelId) {
       return { status: 'unavailable' };
@@ -334,18 +333,18 @@ export const openRoom = async (
 
     await db
       .prepare(
-        'INSERT INTO party_rooms (ad_id, channel_id, expires_at) VALUES (?, ?, ?)',
+        'INSERT INTO party_rooms (group_id, channel_id, expires_at) VALUES (?, ?, ?)',
       )
-      .bind(adId, channelId, Date.now() + ROOM_IDLE_MS)
+      .bind(groupId, channelId, Date.now() + ROOM_IDLE_MS)
       .run();
     await discord(`/channels/${channelId}/messages`, {
       method: 'POST',
       body: JSON.stringify({
         content: getRoomMessage({
-          purpose: request.purpose,
-          note: request.note,
-          world: request.ownerWorld,
-          vocations: [request.ownerVocation, request.memberVocation],
+          purpose: group.purpose,
+          note: group.note,
+          world: group.world,
+          vocations: present.map(({ vocation }) => vocation),
         }),
       }),
     }).catch(() => {});
@@ -354,5 +353,6 @@ export const openRoom = async (
   return {
     status: 'ready',
     url: `https://discord.com/channels/${env.DISCORD_GUILD_ID}/${channelId}`,
+    missing: members.filter(({ roles }) => !roles).map(({ name }) => name),
   };
 };

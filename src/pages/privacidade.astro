@@ -21,7 +21,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         Sua sessão: um cookie para manter você conectado, com endereço IP e
         navegador.
       </li>
-      <li>Os personagens, anúncios e pedidos de grupo que você fizer.</li>
+      <li>Os personagens, anúncios, pedidos e grupos que você fizer.</li>
+      <li>
+        Das hunts coladas em um grupo, guardamos a data, a duração e o nome e o
+        saldo de cada jogador. O texto colado não é guardado.
+      </li>
       <li>A data em que você verificou um personagem.</li>
       <li>As denúncias que você fizer.</li>
     </ul>
@@ -38,7 +42,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p>
       Ao publicar um anúncio, seu personagem fica visível para qualquer visitante
       até o anúncio expirar ou você removê-lo. Seu nome e seu perfil no Discord
-      só aparecem para as pessoas envolvidas em um pedido aceito. Salas de grupo
+      só aparecem para os integrantes do mesmo grupo, que também veem as hunts
+      coladas nele. Um grupo é apagado 7 dias depois da última hunt, ou antes,
+      se o líder encerrá-lo. Salas de grupo
       são criadas no servidor do TibiaNerd e usam seu ID do Discord para liberar
       o acesso. Ao abrir uma sala, seu apelido e seus cargos no servidor passam a
       mostrar o nome, o servidor, a vocação e o mundo do personagem.

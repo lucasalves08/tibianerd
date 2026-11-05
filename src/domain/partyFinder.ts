@@ -38,8 +38,6 @@ interface JoinRequest {
   id: string;
   status: JoinStatus;
   characterName: string;
-  discord: string | null;
-  discordId: string | null;
 }
 
 export interface IncomingRequest extends JoinRequest {
