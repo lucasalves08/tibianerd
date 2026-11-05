@@ -46,7 +46,7 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **FR-007**: Users MUST be able to delete their account and data.
 - **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST carry a message, since players name bosses and rotations in their own words.
 - **FR-010**: Players MUST ask to join an ad, and the Discord of each side MUST stay hidden until the owner accepts.
-- **FR-011**: Any group member MUST be able to open a private Discord room for the group. Members outside the TibiaNerd server stay out until the room is opened again. Opening it MUST take the member to the Discord app, with a browser link as a fallback, and MUST mention the members who are not in the room, at most once every 5 minutes.
+- **FR-011**: Any group member MUST be able to open a private Discord room for the group. Members outside the TibiaNerd server stay out until the room is opened again. Opening it MUST take the member to the Discord app, with a browser link as a fallback, and MUST mention the members who are not in the room, at most once every 5 minutes. A member outside the server MUST see the invite instead of the room, and the page MUST look again when they come back to it.
 - **FR-012**: The first accepted request MUST create a group with its own page, shared by all members, that outlives the ad and goes away 7 days after its last hunt.
 - **FR-013**: Any group member MUST be able to paste a Party Hunt Analyser and see who pays whom. Only the member who pasted a hunt or the leader can remove it.
 - **FR-014**: Only group members MUST see the Discord of each member and the hunts. Members can leave, and the leader can remove members or close the group.

@@ -20,7 +20,6 @@ const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 const ROOM_ERROR = 'Não conseguimos abrir a sala agora. Tente de novo.';
 
 const roomErrors: Record<string, string> = {
-  'not-in-server': 'Entre no servidor do TibiaNerd para abrir a sala.',
   full: 'Todas as salas estão ocupadas agora. Tente de novo mais tarde.',
 };
 
@@ -41,6 +40,34 @@ function RoomButton({ groupId }: { groupId: string }) {
   const [isOpening, setIsOpening] = useState(false);
   const [message, setMessage] = useState('');
   const [roomUrl, setRoomUrl] = useState('');
+  const [inServer, setInServer] = useState<boolean | null>();
+
+  // The site is not told when someone joins, so it looks again on their return.
+  useEffect(() => {
+    const check = async () => {
+      if (document.visibilityState !== 'visible') {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/party-groups/${groupId}/room`);
+        const data = (await response.json()) as { inServer?: boolean | null };
+
+        setInServer(data.inServer ?? null);
+      } catch {
+        setInServer(null);
+      }
+    };
+
+    void check();
+    window.addEventListener('focus', check);
+    document.addEventListener('visibilitychange', check);
+
+    return () => {
+      window.removeEventListener('focus', check);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [groupId]);
 
   const openRoom = async () => {
     setIsOpening(true);
@@ -56,6 +83,11 @@ function RoomButton({ groupId }: { groupId: string }) {
         missing?: string[];
         error?: string;
       };
+
+      if (data.error === 'not-in-server') {
+        setInServer(false);
+        return;
+      }
 
       if (!data.url) {
         setMessage(roomErrors[data.error ?? ''] ?? ROOM_ERROR);
@@ -78,23 +110,40 @@ function RoomButton({ groupId }: { groupId: string }) {
     }
   };
 
+  if (inServer === false) {
+    return (
+      <div className={styles.room}>
+        <a
+          className={finder.linkButton}
+          href={DISCORD_INVITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Entrar no servidor do Discord
+        </a>
+        <p className={finder.muted}>
+          Você precisa estar no servidor do TibiaNerd. Depois de entrar, a sala
+          aparece aqui.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.room}>
       <button
         className={finder.button}
         type="button"
-        disabled={isOpening}
+        disabled={isOpening || inServer === undefined}
         onClick={() => void openRoom()}
       >
-        {isOpening ? 'Abrindo…' : 'Abrir sala no Discord'}
+        {inServer === undefined
+          ? 'Verificando…'
+          : isOpening
+            ? 'Abrindo…'
+            : 'Abrir sala no Discord'}
       </button>
-      <p className={finder.muted}>
-        Precisa estar no{' '}
-        <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
-          servidor do TibiaNerd
-        </a>
-        . O bot chama quem ainda não entrou.
-      </p>
+      <p className={finder.muted}>O bot chama quem ainda não entrou.</p>
       {roomUrl && (
         <p className={styles.roomLinks}>
           <span className={finder.muted}>Sala pronta. Não abriu?</span>

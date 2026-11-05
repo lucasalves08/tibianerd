@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { openRoom } from '../../../../lib/partyRooms';
+import { isMemberInServer, openRoom } from '../../../../lib/partyRooms';
 import { errorResponse, getUserId } from '../../../../lib/session';
 
 export const prerender = false;
@@ -9,6 +9,18 @@ const statusCodes = {
   full: 503,
   unavailable: 503,
   'not-found': 404,
+};
+
+export const GET: APIRoute = async ({ params, request }) => {
+  const userId = await getUserId(request);
+
+  if (!userId) {
+    return errorResponse('unauthorized', 401);
+  }
+
+  const inServer = await isMemberInServer(userId, params.id!).catch(() => null);
+
+  return Response.json({ inServer });
 };
 
 export const POST: APIRoute = async ({ params, request }) => {
