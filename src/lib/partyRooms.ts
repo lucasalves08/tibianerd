@@ -187,12 +187,13 @@ const getCategoryId = async (): Promise<string | null> => {
 
 const createRoom = async (
   name: string,
+  purpose: 'hunt' | 'boss',
   memberIds: string[],
 ): Promise<string | null> => {
   const response = await discord(`${guildPath}/channels`, {
     method: 'POST',
     body: JSON.stringify({
-      name: `party-${name}`.slice(0, 100),
+      name: `party-${name}-${purpose}`.slice(0, 100),
       type: VOICE_CHANNEL,
       parent_id: await getCategoryId(),
       permission_overwrites: [
@@ -322,7 +323,10 @@ export const openRoom = async (
       return { status: 'full' };
     }
 
-    channelId = await createRoom(ownerName, [ownerDiscordId, memberDiscordId]);
+    channelId = await createRoom(ownerName, request.purpose, [
+      ownerDiscordId,
+      memberDiscordId,
+    ]);
 
     if (!channelId) {
       return { status: 'unavailable' };

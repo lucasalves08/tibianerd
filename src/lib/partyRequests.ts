@@ -17,6 +17,7 @@ export const listRequests = async (userId: string) => {
     db
       .prepare(
         `SELECT r.id, r.status, c.name AS characterName, c.vocation, c.level,
+          r.ad_id AS adId,
           ${DISCORD_COLUMNS}
         FROM party_join_requests r
         JOIN party_ads a ON a.id = r.ad_id

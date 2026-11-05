@@ -42,7 +42,7 @@ A player publishes an ad for a boss, and anyone on the same world sees it at any
 - **FR-003**: Ads MUST expire on their own.
 - **FR-004**: The list MUST show only real ads and MUST NOT imply activity that does not exist.
 - **FR-005**: The list MUST filter by world, level and vocation.
-- **FR-006**: Users MUST be able to report an ad, and each user MUST have an ad limit.
+- **FR-006**: Users MUST be able to report an ad, and each character MUST have at most one ad of each kind, with at most 4 ads per account.
 - **FR-007**: Users MUST be able to delete their account and data.
 - **FR-009**: An ad MUST say if it looks for a hunt or a boss, and a boss ad MUST carry a message, since players name bosses and rotations in their own words.
 - **FR-010**: Players MUST ask to join an ad, and the Discord of each side MUST stay hidden until the owner accepts.

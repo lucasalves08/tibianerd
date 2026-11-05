@@ -1,5 +1,6 @@
 import {
   getAdExpiry,
+  MAX_ADS_PER_ACCOUNT,
   type AdPurpose,
   type PartyAdView,
 } from '../domain/partyFinder';
@@ -39,7 +40,10 @@ export const listAds = async (userId: string | null): Promise<PartyAdView[]> => 
   }));
 };
 
-// One ad per player keeps the list honest: a new ad replaces the old one.
+export type PublishResult = 'published' | 'not-found' | 'limit';
+
+// One ad of each kind per character keeps the list honest: a new ad replaces
+// the old one, and the account limit stops one player from filling a world.
 export const publishAd = async (
   userId: string,
   {
@@ -51,41 +55,53 @@ export const publishAd = async (
     note: string;
     purpose: AdPurpose;
   },
-): Promise<boolean> => {
+): Promise<PublishResult> => {
   const character = await db
     .prepare('SELECT world, level FROM characters WHERE id = ? AND user_id = ?')
     .bind(characterId, userId)
     .first<{ world: string; level: number }>();
 
   if (!character) {
-    return false;
+    return 'not-found';
   }
 
   const now = Date.now();
-
-  await db
+  const otherAds = await db
     .prepare(
-      'DELETE FROM party_ads WHERE character_id IN (SELECT id FROM characters WHERE user_id = ?)',
+      `SELECT count(*) AS total
+      FROM party_ads a
+      JOIN characters c ON c.id = a.character_id
+      WHERE c.user_id = ? AND a.expires_at > ?
+        AND NOT (a.character_id = ? AND a.purpose = ?)`,
     )
-    .bind(userId)
-    .run();
-  await db
-    .prepare(
-      'INSERT INTO party_ads (id, character_id, world, level, note, purpose, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    )
-    .bind(
-      crypto.randomUUID(),
-      characterId,
-      character.world,
-      character.level,
-      note,
-      purpose,
-      now,
-      getAdExpiry(now),
-    )
-    .run();
+    .bind(userId, now, characterId, purpose)
+    .first<{ total: number }>();
 
-  return true;
+  if ((otherAds?.total ?? 0) >= MAX_ADS_PER_ACCOUNT) {
+    return 'limit';
+  }
+
+  await db.batch([
+    db
+      .prepare('DELETE FROM party_ads WHERE character_id = ? AND purpose = ?')
+      .bind(characterId, purpose),
+    db
+      .prepare(
+        'INSERT INTO party_ads (id, character_id, world, level, note, purpose, created_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      )
+      .bind(
+        crypto.randomUUID(),
+        characterId,
+        character.world,
+        character.level,
+        note,
+        purpose,
+        now,
+        getAdExpiry(now),
+      ),
+  ]);
+
+  return 'published';
 };
 
 export const removeAd = async (userId: string, id: string): Promise<boolean> => {

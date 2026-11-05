@@ -137,3 +137,31 @@ test('says when nobody is looking', async ({ page }) => {
 
   await expect(page.getByText('Ninguém procurando agora')).toBeVisible();
 });
+
+test('explains the ad limit', async ({ page }) => {
+  await page.route('**/api/party-ads', (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({ status: 409, json: { error: 'limit' } })
+      : route.fulfill({ json: [makeAd('mine', 900, true)] }),
+  );
+  await page.route('**/api/characters', (route) =>
+    route.fulfill({
+      json: [
+        {
+          id: 'c1',
+          server: 'rubinot',
+          name: 'Lucas',
+          world: 'Vesperia',
+          vocation: 'paladin',
+          level: 967,
+        },
+      ],
+    }),
+  );
+  await page.goto('/tools/party/');
+
+  await expect(page.getByRole('heading', { name: 'Player mine' })).toBeVisible();
+  await page.getByRole('button', { name: 'Publicar anúncio' }).click();
+
+  await expect(page.getByRole('alert')).toContainText('Você já tem 4 anúncios');
+});

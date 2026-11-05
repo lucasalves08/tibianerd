@@ -31,13 +31,17 @@ export const POST: APIRoute = async ({ request }) => {
     return errorResponse('invalid', 400);
   }
 
-  const isPublished = await publishAd(userId, {
+  const result = await publishAd(userId, {
     characterId: body.characterId,
     note,
     purpose,
   });
 
-  return isPublished
+  if (result === 'limit') {
+    return errorResponse('limit', 409);
+  }
+
+  return result === 'published'
     ? new Response(null, { status: 201 })
     : errorResponse('not-found', 404);
 };

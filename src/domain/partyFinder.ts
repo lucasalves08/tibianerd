@@ -44,6 +44,7 @@ interface JoinRequest {
 
 export interface IncomingRequest extends JoinRequest {
   vocation: VocationId;
+  adId: string;
   level: number;
 }
 
@@ -63,6 +64,9 @@ export const MAX_NOTE_LENGTH = 140;
 
 /** Product choice, not a game rule: a hunt plan rarely lasts longer. */
 export const AD_LIFETIME_MS = 12 * HOUR_IN_MS;
+
+/** Product choice: enough for a main and a maker with one ad of each kind. */
+export const MAX_ADS_PER_ACCOUNT = 4;
 
 export const getAdExpiry = (createdAt: number): number =>
   createdAt + AD_LIFETIME_MS;
