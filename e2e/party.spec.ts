@@ -323,6 +323,36 @@ test('finishes joining the server after Discord authorizes it', async ({ page })
   await expect(page).toHaveURL(/\/tools\/party\/group\/g1\/$/);
 });
 
+test('shows changes from other players without a reload', async ({ page }) => {
+  let memberCount = 1;
+
+  await page.clock.install();
+  await page.route('**/api/party-groups/g1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'g1',
+        ownerName: 'Lucas',
+        purpose: 'hunt',
+        server: 'rubinot',
+        world: 'Vesperia',
+        note: '',
+        memberCount,
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        isLeader: false,
+        members: [],
+        hunts: [],
+      },
+    }),
+  );
+  await page.goto('/tools/party/group/g1/');
+  await expect(page.getByText('1 jogador')).toBeVisible();
+
+  memberCount = 2;
+  await page.clock.fastForward(15_000);
+
+  await expect(page.getByText('2 jogadores')).toBeVisible();
+});
+
 test('explains a pasted text it cannot read', async ({ page }) => {
   await page.route('**/api/party-groups/g1', (route) =>
     route.fulfill({

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLiveRefresh } from './useLiveRefresh';
 import { DISCORD_INVITE_URL } from '../data/discord';
 import { gameServers } from '../domain/characters';
 import {
@@ -47,23 +48,18 @@ function RoomButton({ groupId }: { groupId: string }) {
   );
   const [inServer, setInServer] = useState<boolean | null>();
 
-  // The site is not told when someone joins, so it looks again on their return.
+  const checkServer = async () => {
+    try {
+      const response = await fetch(`/api/party-groups/${groupId}/room`);
+      const data = (await response.json()) as { inServer?: boolean | null };
+
+      setInServer(data.inServer ?? null);
+    } catch {
+      setInServer(null);
+    }
+  };
+
   useEffect(() => {
-    const check = async () => {
-      if (document.visibilityState !== 'visible') {
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/party-groups/${groupId}/room`);
-        const data = (await response.json()) as { inServer?: boolean | null };
-
-        setInServer(data.inServer ?? null);
-      } catch {
-        setInServer(null);
-      }
-    };
-
     const finishJoin = async () => {
       const result = new URLSearchParams(window.location.search).get('server');
 
@@ -83,15 +79,17 @@ function RoomButton({ groupId }: { groupId: string }) {
       }
     };
 
-    void finishJoin().then(check);
-    window.addEventListener('focus', check);
-    document.addEventListener('visibilitychange', check);
+    void finishJoin().then(checkServer);
+    // The id never changes while the page is open.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return () => {
-      window.removeEventListener('focus', check);
-      document.removeEventListener('visibilitychange', check);
-    };
-  }, [groupId]);
+  // The site is not told when someone joins, so it keeps looking until they do.
+  useLiveRefresh(() => {
+    if (inServer === false) {
+      void checkServer();
+    }
+  });
 
   // Discord asks for the player's consent before anyone is added to a server.
   const askToJoin = async () => {
@@ -348,8 +346,10 @@ export default function PartyGroup({ groupId }: { groupId: string }) {
 
     if (response.status === 401) {
       setStatus('signed-out');
-    } else if (!response.ok) {
+    } else if (response.status === 404) {
       setStatus('missing');
+    } else if (!response.ok) {
+      setStatus((current) => (current === 'ready' ? current : 'missing'));
     } else {
       setGroup((await response.json()) as GroupDetails);
       setStatus('ready');
@@ -361,6 +361,10 @@ export default function PartyGroup({ groupId }: { groupId: string }) {
     // The id never changes while the page is open.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useLiveRefresh(() => {
+    load().catch(() => {});
+  });
 
   const remove = async (path: string) => {
     setError('');
