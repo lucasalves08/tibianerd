@@ -18,6 +18,9 @@ import styles from './PartyGroup.module.css';
 const DISCORD_USER_URL = 'https://discord.com/users/';
 const SAVE_ERROR = 'Não conseguimos concluir agora. Tente de novo.';
 const ROOM_ERROR = 'Não conseguimos abrir a sala agora. Tente de novo.';
+const JOIN_ERROR =
+  'Não conseguimos colocar você no servidor. Tente de novo ou use o convite.';
+const JOIN_SCOPE = 'guilds.join';
 
 const roomErrors: Record<string, string> = {
   full: 'Todas as salas estão ocupadas agora. Tente de novo mais tarde.',
@@ -39,7 +42,9 @@ const serverName = (id: string) =>
 function RoomButton({ groupId }: { groupId: string }) {
   const [isOpening, setIsOpening] = useState(false);
   const [message, setMessage] = useState('');
-  const [roomUrl, setRoomUrl] = useState('');
+  const [room, setRoom] = useState<{ url: string; inviteUrl?: string } | null>(
+    null,
+  );
   const [inServer, setInServer] = useState<boolean | null>();
 
   // The site is not told when someone joins, so it looks again on their return.
@@ -59,7 +64,26 @@ function RoomButton({ groupId }: { groupId: string }) {
       }
     };
 
-    void check();
+    const finishJoin = async () => {
+      const result = new URLSearchParams(window.location.search).get('server');
+
+      if (!result) {
+        return;
+      }
+
+      window.history.replaceState(null, '', window.location.pathname);
+
+      const response =
+        result === 'authorized'
+          ? await fetch('/api/discord/join', { method: 'POST' }).catch(() => null)
+          : null;
+
+      if (!response?.ok) {
+        setMessage(JOIN_ERROR);
+      }
+    };
+
+    void finishJoin().then(check);
     window.addEventListener('focus', check);
     document.addEventListener('visibilitychange', check);
 
@@ -69,10 +93,39 @@ function RoomButton({ groupId }: { groupId: string }) {
     };
   }, [groupId]);
 
+  // Discord asks for the player's consent before anyone is added to a server.
+  const askToJoin = async () => {
+    const page = window.location.pathname;
+
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/auth/link-social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'discord',
+          scopes: [JOIN_SCOPE],
+          callbackURL: `${page}?server=authorized`,
+          errorCallbackURL: `${page}?server=denied`,
+        }),
+      });
+      const { url } = (await response.json()) as { url?: string };
+
+      if (url) {
+        window.location.assign(url);
+      } else {
+        setMessage(JOIN_ERROR);
+      }
+    } catch {
+      setMessage(JOIN_ERROR);
+    }
+  };
+
   const openRoom = async () => {
     setIsOpening(true);
     setMessage('');
-    setRoomUrl('');
+    setRoom(null);
 
     try {
       const response = await fetch(`/api/party-groups/${groupId}/room`, {
@@ -80,6 +133,7 @@ function RoomButton({ groupId }: { groupId: string }) {
       });
       const data = (await response.json()) as {
         url?: string;
+        inviteUrl?: string | null;
         missing?: string[];
         error?: string;
       };
@@ -95,8 +149,8 @@ function RoomButton({ groupId }: { groupId: string }) {
       }
 
       // The app takes over and this page stays open behind it.
-      setRoomUrl(data.url);
-      window.location.assign(getDiscordAppUrl(data.url));
+      setRoom({ url: data.url, inviteUrl: data.inviteUrl ?? undefined });
+      window.location.assign(getDiscordAppUrl(data.inviteUrl ?? data.url));
 
       if (data.missing?.length) {
         setMessage(
@@ -113,18 +167,26 @@ function RoomButton({ groupId }: { groupId: string }) {
   if (inServer === false) {
     return (
       <div className={styles.room}>
-        <a
-          className={finder.linkButton}
-          href={DISCORD_INVITE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          className={finder.button}
+          type="button"
+          onClick={() => void askToJoin()}
         >
           Entrar no servidor do Discord
-        </a>
+        </button>
         <p className={finder.muted}>
-          Você precisa estar no servidor do TibiaNerd. Depois de entrar, a sala
-          aparece aqui.
+          O Discord vai pedir sua autorização, e ela é usada só uma vez. Se
+          preferir,{' '}
+          <a href={DISCORD_INVITE_URL} target="_blank" rel="noopener noreferrer">
+            entre pelo convite
+          </a>
+          .
         </p>
+        {message && (
+          <p className={finder.error} role="alert">
+            {message}
+          </p>
+        )}
       </div>
     );
   }
@@ -141,14 +203,18 @@ function RoomButton({ groupId }: { groupId: string }) {
           ? 'Verificando…'
           : isOpening
             ? 'Abrindo…'
-            : 'Abrir sala no Discord'}
+            : 'Entrar na sala'}
       </button>
       <p className={finder.muted}>O bot chama quem ainda não entrou.</p>
-      {roomUrl && (
+      {room && (
         <p className={styles.roomLinks}>
           <span className={finder.muted}>Sala pronta. Não abriu?</span>
-          <a href={getDiscordAppUrl(roomUrl)}>Abrir no app</a>
-          <a href={roomUrl} target="_blank" rel="noopener noreferrer">
+          <a href={getDiscordAppUrl(room.url)}>Abrir no app</a>
+          <a
+            href={room.inviteUrl ?? room.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Abrir no navegador
           </a>
         </p>

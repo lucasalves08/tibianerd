@@ -220,7 +220,11 @@ test('opens the room in the app without a new tab', async ({ page }) => {
   );
   await page.route('**/api/party-groups/g1/room', (route) =>
     route.fulfill({
-      json: { url: 'https://discord.com/channels/1/2', missing: [] },
+      json: {
+        url: 'https://discord.com/channels/1/2',
+        inviteUrl: 'https://discord.com/invite/abc',
+        missing: [],
+      },
     }),
   );
   await page.goto('/tools/party/group/g1/');
@@ -229,7 +233,7 @@ test('opens the room in the app without a new tab', async ({ page }) => {
   page.on('popup', () => {
     openedTab = true;
   });
-  await page.getByRole('button', { name: 'Abrir sala no Discord' }).click();
+  await page.getByRole('button', { name: 'Entrar na sala' }).click();
 
   await expect(page.getByRole('link', { name: 'Abrir no app' })).toHaveAttribute(
     'href',
@@ -237,7 +241,7 @@ test('opens the room in the app without a new tab', async ({ page }) => {
   );
   await expect(
     page.getByRole('link', { name: 'Abrir no navegador' }),
-  ).toHaveAttribute('href', 'https://discord.com/channels/1/2');
+  ).toHaveAttribute('href', 'https://discord.com/invite/abc');
   expect(openedTab).toBe(false);
 });
 
@@ -267,21 +271,56 @@ test('offers the server first, then the room', async ({ page }) => {
   await page.goto('/tools/party/group/g1/');
 
   await expect(
-    page.getByRole('link', { name: 'Entrar no servidor do Discord' }),
+    page.getByRole('button', { name: 'Entrar no servidor do Discord' }),
   ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'entre pelo convite' })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Abrir sala no Discord' }),
+    page.getByRole('button', { name: 'Entrar na sala' }),
   ).toBeHidden();
 
   inServer = true;
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
 
   await expect(
-    page.getByRole('button', { name: 'Abrir sala no Discord' }),
+    page.getByRole('button', { name: 'Entrar na sala' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Entrar no servidor do Discord' }),
+    page.getByRole('button', { name: 'Entrar no servidor do Discord' }),
   ).toBeHidden();
+});
+
+test('finishes joining the server after Discord authorizes it', async ({ page }) => {
+  let joined = false;
+
+  await page.route('**/api/party-groups/g1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'g1',
+        ownerName: 'Lucas',
+        purpose: 'hunt',
+        server: 'rubinot',
+        world: 'Vesperia',
+        note: '',
+        memberCount: 0,
+        expiresAt: Date.now() + 60 * 60 * 1000,
+        isLeader: false,
+        members: [],
+        hunts: [],
+      },
+    }),
+  );
+  await page.route('**/api/party-groups/g1/room', (route) =>
+    route.fulfill({ json: { inServer: joined } }),
+  );
+  await page.route('**/api/discord/join', (route) => {
+    joined = true;
+
+    return route.fulfill({ status: 204 });
+  });
+  await page.goto('/tools/party/group/g1/?server=authorized');
+
+  await expect(page.getByRole('button', { name: 'Entrar na sala' })).toBeVisible();
+  await expect(page).toHaveURL(/\/tools\/party\/group\/g1\/$/);
 });
 
 test('explains a pasted text it cannot read', async ({ page }) => {
