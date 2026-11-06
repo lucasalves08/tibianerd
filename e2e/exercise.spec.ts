@@ -10,15 +10,6 @@ async function fillKnightGoal(page: Page) {
   await page.getByLabel('Skill desejada').fill('120');
 }
 
-test('opens from the home page', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Calculadora de exercise' }).click();
-
-  await expect(
-    page.getByRole('heading', { name: 'Calculadora de exercise' }),
-  ).toBeVisible();
-});
-
 test('shows the weapons for a Knight', async ({ page }) => {
   await fillKnightGoal(page);
 

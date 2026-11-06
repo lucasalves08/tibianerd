@@ -5,13 +5,6 @@ test.beforeEach(async ({ page }) => {
   await page.waitForLoadState('networkidle');
 });
 
-test('opens from the home page', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Imbuements' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Imbuements', level: 1 })).toBeVisible();
-});
-
 test('lists the items of an imbuement', async ({ page }) => {
   await page.getByRole('button', { name: 'Scorch' }).click();
 

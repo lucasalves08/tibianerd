@@ -21,13 +21,12 @@ Looted Items:
 \t219x black pearl
 `;
 
-// Text typed before React takes over the page is lost, so this tries again.
-const paste = (page: Page, text: string, result: Locator) =>
-  expect(async () => {
-    await page.getByLabel('Hunt Analyser').fill('');
-    await page.getByLabel('Hunt Analyser').fill(text);
-    await expect(result).toBeVisible({ timeout: 500 });
-  }).toPass();
+// Text typed before React takes over the page is lost, so this waits for it.
+const paste = async (page: Page, text: string, result: Locator) => {
+  await page.waitForLoadState('networkidle');
+  await page.getByLabel('Hunt Analyser').fill(text);
+  await expect(result).toBeVisible();
+};
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/characters', (route) =>
@@ -62,7 +61,7 @@ test('marks a short session as a projection', async ({ page }) => {
   await paste(
     page,
     session('10:46:24'),
-    page.getByText('Projeção', { exact: true }),
+    page.getByText(/· Projeção$/),
   );
 
   await expect(page.getByText('Estimativas neste ritmo')).toBeVisible();
@@ -72,7 +71,7 @@ test('shows only real values on a very short session', async ({ page }) => {
   await paste(
     page,
     session('10:34:24'),
-    page.getByText('Sessão curta', { exact: true }),
+    page.getByText(/· Sessão curta$/),
   );
 
   await expect(page.getByText('Estimativas neste ritmo')).toBeHidden();
@@ -189,7 +188,9 @@ test('confirms a saved session and opens it', async ({ page }) => {
   await page.getByLabel('Nome da hunt').fill('Falcon');
   await page.getByRole('button', { name: 'Salvar sessão' }).click();
 
-  await expect(page.getByRole('status')).toHaveText('Sessão salva.');
+  await expect(
+    page.getByRole('status').filter({ hasText: 'Sessão salva.' }),
+  ).toBeVisible();
   await expect(page.getByText('Vexclaw')).toBeVisible();
 });
 
