@@ -55,6 +55,27 @@ export const toolArt: Record<string, PixelArt> = {
       '................',
     ],
   },
+  hunts: {
+    palette: { a: '#5cc8ff', g: '#ffe14d', s: '#a9b6c2' },
+    rows: [
+      '................',
+      '............gg..',
+      '............gg..',
+      '............gg..',
+      '........aa..gg..',
+      '........aa..gg..',
+      '........aa..gg..',
+      '....aa..aa..gg..',
+      '....aa..aa..gg..',
+      '....aa..aa..gg..',
+      '.s..aa..aa..gg..',
+      '.s..aa..aa..gg..',
+      '.s..aa..aa..gg..',
+      '.ssssssssssssss.',
+      '................',
+      '................',
+    ],
+  },
   monsters: {
     palette: { w: '#eef2f5', s: '#a9b6c2', k: '#131a24' },
     rows: [

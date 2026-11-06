@@ -1,0 +1,238 @@
+.page {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.result {
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.resultTitle {
+  font-size: var(--text-xl);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-3);
+}
+
+.tile {
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  min-inline-size: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+}
+
+.value {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.details dt {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-3);
+}
+
+.block {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+}
+
+.blockTitle {
+  font-size: var(--text-md);
+}
+
+.monsters,
+.drops,
+.itemList,
+.averages,
+.sessions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.monsters {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.monster {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.monsterText {
+  flex: 1;
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.monsterName {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.track {
+  display: block;
+  block-size: 0.375rem;
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+}
+
+.bar {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--radius-small);
+  background: var(--color-accent);
+}
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.slider input {
+  flex: 1;
+  min-inline-size: 0;
+  accent-color: var(--color-accent);
+}
+
+.slider output {
+  min-inline-size: 1.5rem;
+  color: var(--color-text);
+}
+
+.drops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.drop {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-small);
+  background: var(--color-raised);
+  font-size: var(--text-sm);
+}
+
+.items summary,
+.session summary {
+  cursor: pointer;
+}
+
+.itemList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin-block-start: var(--space-2);
+}
+
+.itemList li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.saveFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: var(--space-3);
+}
+
+.character {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.averages,
+.sessions {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.average,
+.session summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+
+.average {
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-line);
+}
+
+.averageRates {
+  display: grid;
+  justify-items: end;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.session {
+  padding: var(--space-3);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-small);
+}
+
+.session summary > span:first-child {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.session[open] {
+  display: grid;
+  gap: var(--space-3);
+}

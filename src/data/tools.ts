@@ -37,6 +37,15 @@ export const tools: Tool[] = [
     usesAccount: true,
   },
   {
+    id: 'hunts',
+    category: 'hunt',
+    name: 'Minhas hunts',
+    shortName: 'Hunts',
+    description: 'Cole sua sessão e veja XP, lucro e monstros por hora.',
+    href: '/tools/hunts/',
+    usesAccount: true,
+  },
+  {
     id: 'monsters',
     category: 'reference',
     name: 'Consulta de monstros',

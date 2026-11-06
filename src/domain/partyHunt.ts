@@ -24,7 +24,7 @@ export interface LootSplit {
 
 const MIN_PLAYERS = 2;
 
-const parseAmount = (value: string): number | null =>
+export const parseAmount = (value: string): number | null =>
   /^-?[\d.,]+$/.test(value) ? Number(value.replace(/[.,]/g, '')) : null;
 
 // Reads the text copied from the Party Hunt Analyser. Player names sit on their
