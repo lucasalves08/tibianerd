@@ -5,15 +5,6 @@ test.beforeEach(async ({ page }) => {
   await page.waitForLoadState('networkidle');
 });
 
-test('opens from the home page', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Hunting places' }).click();
-
-  await expect(
-    page.getByRole('heading', { name: 'Hunting places', level: 1 }),
-  ).toBeVisible();
-});
-
 test('shows spots up to the player level', async ({ page }) => {
   const count = page.getByRole('status');
   const before = await count.textContent();

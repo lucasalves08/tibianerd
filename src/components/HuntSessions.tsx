@@ -1,4 +1,12 @@
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import type { Character } from '../domain/characters';
 import {
   formations,
@@ -79,21 +87,22 @@ function Tile({
   hourly,
   total,
   isShort,
-  children,
+  isLoss = false,
 }: {
   label: string;
   hourly: string;
   total: string;
   isShort: boolean;
-  children?: ReactNode;
+  isLoss?: boolean;
 }) {
   return (
     <div className={styles.tile}>
-      {children}
       <p className={finder.muted}>
         {label} {isShort ? 'na sessão' : 'por hora'}
       </p>
-      <p className={styles.value}>{isShort ? total : hourly}</p>
+      <p className={styles.value} data-loss={isLoss || undefined}>
+        {isShort ? total : hourly}
+      </p>
       {!isShort && <p className={finder.muted}>{total} nesta sessão</p>}
     </div>
   );
@@ -179,11 +188,15 @@ function SessionResult({
   level,
   xpMode,
   onXpMode,
+  actions,
+  titleRef,
 }: {
   session: HuntSession;
   level: number | null;
   xpMode: XpMode;
   onXpMode: (mode: XpMode) => void;
+  actions?: ReactNode;
+  titleRef?: Ref<HTMLHeadingElement>;
 }) {
   const name = useId();
   const kind = getSessionKind(session.seconds);
@@ -198,18 +211,29 @@ function SessionResult({
   return (
     <div className={styles.result}>
       <header className={styles.resultHeader}>
-        <div>
-          <h3 className={styles.resultTitle}>
+        <div className={styles.resultHeading}>
+          <h3 ref={titleRef} className={styles.resultTitle} tabIndex={-1}>
             Sessão de {formatDuration(session.seconds)}
           </h3>
-          {session.start && (
-            <p className={finder.muted}>{formatHuntStart(session.start)}</p>
-          )}
+          <p className={finder.muted}>
+            {session.start && `${formatHuntStart(session.start)} · `}
+            {kindLabels[kind]}
+          </p>
         </div>
-        <span className={finder.status}>{kindLabels[kind]}</span>
+        {actions && <div className={styles.actions}>{actions}</div>}
       </header>
 
       {kindNotes[kind] && <p className={finder.muted}>{kindNotes[kind]}</p>}
+
+      <div className={styles.xpSwitch}>
+        <Segmented
+          label="Tipo de XP"
+          name={name}
+          options={xpModes}
+          value={xpMode}
+          onChange={onXpMode}
+        />
+      </div>
 
       <div className={styles.tiles}>
         <Tile
@@ -217,30 +241,21 @@ function SessionResult({
           hourly={formatCompact(xpRate)}
           total={formatCompact(xpValue)}
           isShort={isShort}
-        >
-          <Segmented
-            label="Tipo de XP"
-            name={name}
-            options={xpModes}
-            value={xpMode}
-            onChange={onXpMode}
-          />
-        </Tile>
+        />
         <Tile
           label="Lucro"
           hourly={formatCompact(rates.balance)}
           total={formatCompact(session.balance)}
           isShort={isShort}
-        />
-        <Tile
-          label="Monstros"
-          hourly={formatCompact(rates.kills)}
-          total={formatCompact(kills)}
-          isShort={isShort}
+          isLoss={session.balance < 0}
         />
       </div>
 
       <dl className={styles.details}>
+        <div>
+          <dt>{isShort ? 'Monstros' : 'Monstros/h'}</dt>
+          <dd>{formatCompact(isShort ? kills : rates.kills)}</dd>
+        </div>
         <div>
           <dt>Loot</dt>
           <dd>{formatCompact(session.loot)}</dd>
@@ -417,11 +432,13 @@ function SaveForm({
 
 function SavedSessions({
   saved,
+  openId,
   xpMode,
   onXpMode,
   onRemove,
 }: {
   saved: SavedHuntSession[];
+  openId: string;
   xpMode: XpMode;
   onXpMode: (mode: XpMode) => void;
   onRemove: (id: string) => void;
@@ -470,7 +487,7 @@ function SavedSessions({
 
             return (
               <li key={id}>
-                <details className={styles.session}>
+                <details className={styles.session} open={id === openId}>
                   <summary>
                     <span>
                       <strong>{huntName}</strong>
@@ -521,6 +538,12 @@ export default function HuntSessions() {
   const [characterId, setCharacterId] = useState('');
   const [saved, setSaved] = useState<SavedHuntSession[]>([]);
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [openId, setOpenId] = useState('');
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const boxRef = useRef<HTMLTextAreaElement>(null);
+  const wantsBoxFocus = useRef(false);
 
   const session = useMemo(() => parseHuntSession(text), [text]);
   const huntNames = useMemo(
@@ -531,9 +554,15 @@ export default function HuntSessions() {
   const loadSaved = async () => {
     const response = await fetch(SESSIONS_URL);
 
-    if (response.ok) {
-      setSaved((await response.json()) as SavedHuntSession[]);
+    if (!response.ok) {
+      return [];
     }
+
+    const list = (await response.json()) as SavedHuntSession[];
+
+    setSaved(list);
+
+    return list;
   };
 
   useEffect(() => {
@@ -555,6 +584,32 @@ export default function HuntSessions() {
       setError('Não conseguimos carregar suas sessões.'),
     );
   }, []);
+
+  // The box leaves the page once it is read, and focus must not leave with it.
+  useEffect(() => {
+    if (session) {
+      titleRef.current?.focus();
+    } else if (wantsBoxFocus.current) {
+      wantsBoxFocus.current = false;
+      boxRef.current?.focus();
+    }
+  }, [session]);
+
+  const pasteAnother = () => {
+    wantsBoxFocus.current = true;
+    setText('');
+    setIsSaving(false);
+    setNotice('');
+  };
+
+  const finishSaving = async () => {
+    const list = await loadSaved();
+
+    setText('');
+    setIsSaving(false);
+    setNotice('Sessão salva.');
+    setOpenId(list[0]?.id ?? '');
+  };
 
   const changeXpMode = (mode: XpMode) => {
     setXpMode(mode);
@@ -580,29 +635,46 @@ export default function HuntSessions() {
   };
 
   const level = characters.find(({ id }) => id === characterId)?.level ?? null;
+  const canSave = isSignedIn && characters.length > 0;
 
   return (
     <div className={styles.page}>
-      <section className={finder.panel} aria-labelledby="paste-title">
-        <h2 id="paste-title" className={finder.panelTitle}>
-          Colar sessão
-        </h2>
-        <label className={finder.field}>
-          Hunt Analyser
-          <textarea
-            className={finder.textarea}
-            rows={5}
-            maxLength={MAX_SESSION_TEXT_LENGTH}
-            placeholder="No jogo, copie a sessão do Hunt Analyser e cole aqui"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-          />
-        </label>
-        {text.trim() && !session && (
-          <p className={finder.error} role="alert">
-            Não reconhecemos esse texto. Copie a sessão inteira do Hunt Analyser
-            no jogo e cole aqui.
-          </p>
+      <section
+        className={finder.panel}
+        aria-labelledby={session ? undefined : 'paste-title'}
+        aria-label={session ? 'Sessão colada' : undefined}
+      >
+        <div className={styles.notice} role="status">
+          {notice && <p>{notice}</p>}
+        </div>
+
+        {!session && (
+          <>
+            <h2 id="paste-title" className={finder.panelTitle}>
+              Colar sessão
+            </h2>
+            <label className={finder.field}>
+              Hunt Analyser
+              <textarea
+                ref={boxRef}
+                className={finder.textarea}
+                rows={5}
+                maxLength={MAX_SESSION_TEXT_LENGTH}
+                placeholder="No jogo, copie a sessão do Hunt Analyser e cole aqui"
+                value={text}
+                onChange={(event) => {
+                  setText(event.target.value);
+                  setNotice('');
+                }}
+              />
+            </label>
+            {text.trim() && (
+              <p className={finder.error} role="alert">
+                Não reconhecemos esse texto. Copie a sessão inteira do Hunt
+                Analyser no jogo e cole aqui.
+              </p>
+            )}
+          </>
         )}
 
         {session && (
@@ -612,18 +684,37 @@ export default function HuntSessions() {
               level={level}
               xpMode={xpMode}
               onXpMode={changeXpMode}
+              titleRef={titleRef}
+              actions={
+                <>
+                  {canSave && (
+                    <button
+                      className={finder.button}
+                      type="button"
+                      aria-expanded={isSaving}
+                      onClick={() => setIsSaving(!isSaving)}
+                    >
+                      Salvar
+                    </button>
+                  )}
+                  <button
+                    className={finder.textButton}
+                    type="button"
+                    onClick={pasteAnother}
+                  >
+                    Colar outra
+                  </button>
+                </>
+              }
             />
-            {isSignedIn && characters.length > 0 && (
+            {isSaving && (
               <SaveForm
                 text={text}
                 characters={characters}
                 characterId={characterId}
                 huntNames={huntNames}
                 onCharacter={setCharacterId}
-                onSaved={async () => {
-                  setText('');
-                  await loadSaved();
-                }}
+                onSaved={finishSaving}
               />
             )}
             {isSignedIn && characters.length === 0 && (
@@ -655,6 +746,7 @@ export default function HuntSessions() {
       {saved.length > 0 && (
         <SavedSessions
           saved={saved}
+          openId={openId}
           xpMode={xpMode}
           onXpMode={changeXpMode}
           onRemove={(id) => void remove(id)}

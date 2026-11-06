@@ -30,6 +30,7 @@ A signed-in player saves sessions with a character, a hunt name and a formation,
 - **FR-003**: Durations MUST come from the start and end of the session, because the session length is cut to the minute.
 - **FR-004**: Players MUST be able to switch between Raw XP and XP, starting on Raw. Time per level MUST always use XP.
 - **FR-004a**: A session MUST belong to a character: the only one the player has, or the one they choose. Estimates MUST use the level of that character.
+- **FR-004b**: Once a session is read, the paste box MUST give way to the result, with a way to paste another. Saving MUST confirm that it worked and open the saved session.
 - **FR-005**: Saved sessions MUST be private, and the pasted text MUST NOT be kept.
 - **FR-006**: The average of a hunt MUST divide totals by total time.
 - **FR-007**: Public sessions come in a later delivery, by the player's choice for each session.
