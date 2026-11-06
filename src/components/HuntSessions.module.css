@@ -186,6 +186,14 @@
   gap: var(--space-3);
 }
 
+.character {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
 .averages,
 .sessions {
   display: grid;

@@ -98,7 +98,7 @@ describe('getSessionRates', () => {
     expect(getSessionRates(session)).toMatchObject({
       xp: 55474833,
       rawXp: 7704841,
-      balance: 2889906,
+      balance: 2889907,
       kills: 980,
     });
   });

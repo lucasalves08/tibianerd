@@ -307,17 +307,20 @@ function SessionResult({
 function SaveForm({
   text,
   characters,
+  characterId,
   huntNames,
+  onCharacter,
   onSaved,
 }: {
   text: string;
   characters: Character[];
+  characterId: string;
   huntNames: string[];
+  onCharacter: (id: string) => void;
   onSaved: () => Promise<void>;
 }) {
   const formationName = useId();
   const listId = useId();
-  const [characterId, setCharacterId] = useState(characters[0]?.id ?? '');
   const [huntName, setHuntName] = useState('');
   const [formation, setFormation] = useState<FormationId>('solo');
   const [error, setError] = useState('');
@@ -349,20 +352,27 @@ function SaveForm({
     <section className={styles.block}>
       <h3 className={styles.blockTitle}>Salvar esta sessão</h3>
       <div className={styles.saveFields}>
-        <label className={finder.field}>
-          Personagem
-          <select
-            className={finder.input}
-            value={characterId}
-            onChange={(event) => setCharacterId(event.target.value)}
-          >
-            {characters.map(({ id, name, level }) => (
-              <option key={id} value={id}>
-                {name} ({level.toLocaleString('pt-BR')})
-              </option>
-            ))}
-          </select>
-        </label>
+        {characters.length > 1 ? (
+          <label className={finder.field}>
+            Personagem
+            <select
+              className={finder.input}
+              value={characterId}
+              onChange={(event) => onCharacter(event.target.value)}
+            >
+              {characters.map(({ id, name, level }) => (
+                <option key={id} value={id}>
+                  {name} ({level.toLocaleString('pt-BR')})
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <p className={styles.character}>
+            <span className={finder.muted}>Personagem</span>
+            <strong>{characters[0]?.name}</strong>
+          </p>
+        )}
         <label className={finder.field}>
           Nome da hunt
           <input
@@ -508,6 +518,7 @@ export default function HuntSessions() {
   const [xpMode, setXpMode] = useState<XpMode>('raw');
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [characterId, setCharacterId] = useState('');
   const [saved, setSaved] = useState<SavedHuntSession[]>([]);
   const [error, setError] = useState('');
 
@@ -532,8 +543,11 @@ export default function HuntSessions() {
       const response = await fetch('/api/characters');
 
       if (response.ok) {
+        const list = (await response.json()) as Character[];
+
         setIsSignedIn(true);
-        setCharacters((await response.json()) as Character[]);
+        setCharacters(list);
+        setCharacterId(list[0]?.id ?? '');
       }
     };
 
@@ -565,7 +579,7 @@ export default function HuntSessions() {
     }
   };
 
-  const level = characters[0]?.level ?? null;
+  const level = characters.find(({ id }) => id === characterId)?.level ?? null;
 
   return (
     <div className={styles.page}>
@@ -603,7 +617,9 @@ export default function HuntSessions() {
               <SaveForm
                 text={text}
                 characters={characters}
+                characterId={characterId}
                 huntNames={huntNames}
+                onCharacter={setCharacterId}
                 onSaved={async () => {
                   setText('');
                   await loadSaved();

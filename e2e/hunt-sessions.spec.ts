@@ -62,6 +62,46 @@ test('shows only real values on a very short session', async ({ page }) => {
   await expect(page.getByText('7,78kk', { exact: true })).toBeVisible();
 });
 
+const character = (id: string, name: string, level: number) => ({
+  id,
+  name,
+  level,
+  server: 'rubinot',
+  world: 'Vesperia',
+  vocation: 'paladin',
+  isVerified: true,
+});
+
+test('uses the only character without asking', async ({ page }) => {
+  await page.route('**/api/characters', (route) =>
+    route.fulfill({ json: [character('c1', 'Lucas', 973)] }),
+  );
+  await page.route('**/api/hunt-sessions', (route) => route.fulfill({ json: [] }));
+  await page.goto('/tools/hunts/');
+  await page.getByLabel('Hunt Analyser').fill(session('11:32:00'));
+
+  await expect(page.getByRole('heading', { name: 'Salvar esta sessão' })).toBeVisible();
+  await expect(page.getByText('Lucas', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Personagem')).toBeHidden();
+});
+
+test('asks which character when there are more', async ({ page }) => {
+  await page.route('**/api/characters', (route) =>
+    route.fulfill({
+      json: [character('c1', 'Lucas', 973), character('c2', 'Ana', 500)],
+    }),
+  );
+  await page.route('**/api/hunt-sessions', (route) => route.fulfill({ json: [] }));
+  await page.goto('/tools/hunts/');
+  await page.getByLabel('Hunt Analyser').fill(session('11:32:00'));
+
+  await expect(page.getByText('Um nível no 973')).toBeVisible();
+
+  await page.getByLabel('Personagem').selectOption('c2');
+
+  await expect(page.getByText('Um nível no 500')).toBeVisible();
+});
+
 test('explains a pasted text it cannot read', async ({ page }) => {
   await page.getByLabel('Hunt Analyser').fill('oi');
 
