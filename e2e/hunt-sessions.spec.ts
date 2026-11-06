@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const session = (end: string) => `Session data: From 2026-11-06, 10:31:24 to 2026-11-06, ${end}
 Session length: 01:00h
@@ -21,6 +21,14 @@ Looted Items:
 \t219x black pearl
 `;
 
+// Text typed before React takes over the page is lost, so this tries again.
+const paste = (page: Page, text: string, result: Locator) =>
+  expect(async () => {
+    await page.getByLabel('Hunt Analyser').fill('');
+    await page.getByLabel('Hunt Analyser').fill(text);
+    await expect(result).toBeVisible({ timeout: 500 });
+  }).toPass();
+
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/characters', (route) =>
     route.fulfill({ status: 401, json: { error: 'unauthorized' } }),
@@ -32,12 +40,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('shows a session and switches between Raw XP and XP', async ({ page }) => {
-  await page.getByLabel('Hunt Analyser').fill(session('11:32:00'));
+  await paste(page, session('11:32:00'), page.getByText('Média real'));
 
-  await expect(page.getByText('Média real')).toBeVisible();
   await expect(page.getByText('7,70kk', { exact: true })).toBeVisible();
-  await expect(page.getByText('Undead Dragon')).toBeVisible();
-  await expect(page.getByText('1x divine plate')).toBeVisible();
+  await expect(
+    page.getByRole('listitem').filter({ hasText: 'Undead Dragon' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('listitem').filter({ hasText: '1x divine plate' }),
+  ).toBeVisible();
 
   await page.getByRole('radio', { name: 'XP', exact: true }).check();
 
@@ -48,16 +59,22 @@ test('shows a session and switches between Raw XP and XP', async ({ page }) => {
 });
 
 test('marks a short session as a projection', async ({ page }) => {
-  await page.getByLabel('Hunt Analyser').fill(session('10:46:24'));
+  await paste(
+    page,
+    session('10:46:24'),
+    page.getByText('Projeção', { exact: true }),
+  );
 
-  await expect(page.getByText('Projeção', { exact: true })).toBeVisible();
   await expect(page.getByText('Estimativas neste ritmo')).toBeVisible();
 });
 
 test('shows only real values on a very short session', async ({ page }) => {
-  await page.getByLabel('Hunt Analyser').fill(session('10:34:24'));
+  await paste(
+    page,
+    session('10:34:24'),
+    page.getByText('Sessão curta', { exact: true }),
+  );
 
-  await expect(page.getByText('Sessão curta', { exact: true })).toBeVisible();
   await expect(page.getByText('Estimativas neste ritmo')).toBeHidden();
   await expect(page.getByText('7,78kk', { exact: true })).toBeVisible();
 });
@@ -78,9 +95,12 @@ test('uses the only character without asking', async ({ page }) => {
   );
   await page.route('**/api/hunt-sessions', (route) => route.fulfill({ json: [] }));
   await page.goto('/tools/hunts/');
-  await page.getByLabel('Hunt Analyser').fill(session('11:32:00'));
+  await paste(
+    page,
+    session('11:32:00'),
+    page.getByRole('heading', { name: 'Salvar esta sessão' }),
+  );
 
-  await expect(page.getByRole('heading', { name: 'Salvar esta sessão' })).toBeVisible();
   await expect(page.getByText('Lucas', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Personagem')).toBeHidden();
 });
@@ -93,9 +113,7 @@ test('asks which character when there are more', async ({ page }) => {
   );
   await page.route('**/api/hunt-sessions', (route) => route.fulfill({ json: [] }));
   await page.goto('/tools/hunts/');
-  await page.getByLabel('Hunt Analyser').fill(session('11:32:00'));
-
-  await expect(page.getByText('Um nível no 973')).toBeVisible();
+  await paste(page, session('11:32:00'), page.getByText('Um nível no 973'));
 
   await page.getByLabel('Personagem').selectOption('c2');
 
@@ -103,7 +121,7 @@ test('asks which character when there are more', async ({ page }) => {
 });
 
 test('explains a pasted text it cannot read', async ({ page }) => {
-  await page.getByLabel('Hunt Analyser').fill('oi');
+  await paste(page, 'oi', page.getByText('Não reconhecemos'));
 
   await expect(page.getByRole('alert')).toContainText('Não reconhecemos');
 });
