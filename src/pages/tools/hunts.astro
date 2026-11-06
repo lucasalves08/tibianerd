@@ -1,0 +1,31 @@
+---
+import HuntSessions from '../../components/HuntSessions';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Minhas hunts no Tibia e no RubinOT | TibiaNerd"
+  description="Cole a sessão do Hunt Analyser e veja XP, lucro e monstros por hora."
+>
+  <section class="intro">
+    <h1>Minhas hunts</h1>
+    <p>Cole sua sessão e veja o que você faz por hora.</p>
+  </section>
+
+  <HuntSessions client:load />
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-block-end: var(--space-6);
+  }
+
+  h1 {
+    font-size: var(--text-title);
+  }
+
+  p {
+    margin-block-start: var(--space-2);
+    font-size: var(--text-lg);
+  }
+</style>
