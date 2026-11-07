@@ -160,6 +160,7 @@ describe('formats', () => {
     expect(formatCompact(55474833)).toBe('55,47kk');
     expect(formatCompact(-918000)).toBe('-918k');
     expect(formatCompact(980)).toBe('980');
+    expect(formatCompact(1715)).toBe('1.715');
   });
 
   it('writes the duration', () => {

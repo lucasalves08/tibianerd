@@ -5,9 +5,9 @@ import {
   useRef,
   useState,
   type ReactNode,
-  type Ref,
 } from 'react';
 import type { Character } from '../domain/characters';
+import { getRareDrops, type DropRarity, type LootRarity } from '../domain/rareDrops';
 import {
   formations,
   formatCompact,
@@ -60,6 +60,13 @@ const kindNotes: Record<SessionKind, string> = {
 };
 
 const xpNames: Record<XpMode, string> = { raw: 'Raw XP', xp: 'XP' };
+
+const rarityNames: Record<DropRarity, string> = {
+  rare: 'raro',
+  'very-rare': 'muito raro',
+};
+
+const WIKI_URL = 'https://tibia.fandom.com';
 
 const formatPercent = (value: number) => `${Math.round(value)}%`;
 
@@ -183,57 +190,72 @@ function Estimates({
   );
 }
 
+function RareDrops({
+  session,
+  loot,
+}: {
+  session: HuntSession;
+  loot: LootRarity | null;
+}) {
+  const drops = useMemo(
+    () => (loot ? getRareDrops(session, loot) : []),
+    [session, loot],
+  );
+
+  if (drops.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className={styles.block}>
+      <h3 className={styles.blockTitle}>Drops raros</h3>
+      <ul className={styles.drops}>
+        {drops.map(({ name, count, rarity }) => (
+          <li key={name} className={styles.drop} data-rarity={rarity}>
+            <span>
+              {count.toLocaleString('pt-BR')}x {name}
+            </span>
+            <span className={styles.rarity}>{rarityNames[rarity]}</span>
+          </li>
+        ))}
+      </ul>
+      <p className={finder.muted}>
+        Raridade segundo o{' '}
+        <a href={WIKI_URL} target="_blank" rel="noreferrer">
+          TibiaWiki
+        </a>
+        , que segue o Tibia oficial.
+      </p>
+    </section>
+  );
+}
+
 function SessionResult({
   session,
   level,
   xpMode,
-  onXpMode,
-  actions,
-  titleRef,
+  loot,
+  heading,
 }: {
   session: HuntSession;
   level: number | null;
   xpMode: XpMode;
-  onXpMode: (mode: XpMode) => void;
-  actions?: ReactNode;
-  titleRef?: Ref<HTMLHeadingElement>;
+  loot: LootRarity | null;
+  heading?: ReactNode;
 }) {
-  const name = useId();
   const kind = getSessionKind(session.seconds);
   const isShort = kind === 'short';
   const rates = getSessionRates(session);
   const kills = getKillCount(session);
-  const uniqueDrops = session.items.filter(({ count }) => count === 1);
   const multiplier = session.rawXp > 0 ? session.xp / session.rawXp : 0;
   const xpValue = xpMode === 'raw' ? session.rawXp : session.xp;
   const xpRate = xpMode === 'raw' ? rates.rawXp : rates.xp;
 
   return (
     <div className={styles.result}>
-      <header className={styles.resultHeader}>
-        <div className={styles.resultHeading}>
-          <h3 ref={titleRef} className={styles.resultTitle} tabIndex={-1}>
-            Sessão de {formatDuration(session.seconds)}
-          </h3>
-          <p className={finder.muted}>
-            {session.start && `${formatHuntStart(session.start)} · `}
-            {kindLabels[kind]}
-          </p>
-        </div>
-        {actions && <div className={styles.actions}>{actions}</div>}
-      </header>
+      {heading}
 
       {kindNotes[kind] && <p className={finder.muted}>{kindNotes[kind]}</p>}
-
-      <div className={styles.xpSwitch}>
-        <Segmented
-          label="Tipo de XP"
-          name={name}
-          options={xpModes}
-          value={xpMode}
-          onChange={onXpMode}
-        />
-      </div>
 
       <div className={styles.tiles}>
         <Tile
@@ -287,18 +309,7 @@ function SessionResult({
         )}
       </div>
 
-      {uniqueDrops.length > 0 && (
-        <section className={styles.block}>
-          <h3 className={styles.blockTitle}>Drops de uma unidade</h3>
-          <ul className={styles.drops}>
-            {uniqueDrops.map(({ name: item }) => (
-              <li key={item} className={styles.drop}>
-                1x {item}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <RareDrops session={session} loot={loot} />
 
       {session.items.length > 0 && (
         <details className={styles.items}>
@@ -434,47 +445,52 @@ function SavedSessions({
   saved,
   openId,
   xpMode,
-  onXpMode,
+  loot,
   onRemove,
 }: {
   saved: SavedHuntSession[];
   openId: string;
   xpMode: XpMode;
-  onXpMode: (mode: XpMode) => void;
+  loot: LootRarity | null;
   onRemove: (id: string) => void;
 }) {
-  const averages = useMemo(() => getHuntAverages(saved), [saved]);
+  // One session is its own average, so only repeated hunts get one.
+  const averages = useMemo(
+    () => getHuntAverages(saved).filter(({ sessions }) => sessions > 1),
+    [saved],
+  );
 
   return (
     <>
-      <section className={finder.panel} aria-labelledby="averages-title">
-        <h2 id="averages-title" className={finder.panelTitle}>
-          Média por hunt
-        </h2>
-        <ul className={styles.averages}>
-          {averages.map((average) => (
-            <li key={average.key} className={styles.average}>
-              <div>
-                <strong>{average.huntName}</strong>
-                <p className={finder.muted}>
-                  {average.characterName} · {average.sessions}{' '}
-                  {average.sessions === 1 ? 'sessão' : 'sessões'} ·{' '}
-                  {formatDuration(average.seconds)}
+      {averages.length > 0 && (
+        <section className={finder.panel} aria-labelledby="averages-title">
+          <h2 id="averages-title" className={finder.panelTitle}>
+            Média por hunt
+          </h2>
+          <ul className={styles.averages}>
+            {averages.map((average) => (
+              <li key={average.key} className={styles.average}>
+                <div>
+                  <strong>{average.huntName}</strong>
+                  <p className={finder.muted}>
+                    {average.characterName} · {average.sessions} sessões ·{' '}
+                    {formatDuration(average.seconds)}
+                  </p>
+                </div>
+                <p className={styles.averageRates}>
+                  <span>
+                    {formatCompact(
+                      xpMode === 'raw' ? average.rawXpPerHour : average.xpPerHour,
+                    )}{' '}
+                    {xpNames[xpMode]}/h
+                  </span>
+                  <span>{formatCompact(average.balancePerHour)} lucro/h</span>
                 </p>
-              </div>
-              <p className={styles.averageRates}>
-                <span>
-                  {formatCompact(
-                    xpMode === 'raw' ? average.rawXpPerHour : average.xpPerHour,
-                  )}{' '}
-                  {xpNames[xpMode]}/h
-                </span>
-                <span>{formatCompact(average.balancePerHour)} lucro/h</span>
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className={finder.panel} aria-labelledby="sessions-title">
         <h2 id="sessions-title" className={finder.panelTitle}>
@@ -483,27 +499,32 @@ function SavedSessions({
         <ul className={styles.sessions}>
           {saved.map(({ id, huntName, characterName, level, formation, session }) => {
             const rates = getSessionRates(session);
-            const isShort = getSessionKind(session.seconds) === 'short';
+            const kind = getSessionKind(session.seconds);
+            const details = [
+              characterName,
+              formations.find((item) => item.id === formation)?.name,
+              formatDuration(session.seconds),
+              session.start && formatHuntStart(session.start),
+              kind !== 'real' && kindLabels[kind],
+            ].filter(Boolean);
 
             return (
               <li key={id}>
                 <details className={styles.session} open={id === openId}>
                   <summary>
-                    <span>
+                    <span className={styles.sessionName}>
                       <strong>{huntName}</strong>
-                      <span className={finder.muted}>
-                        {characterName} ·{' '}
-                        {formations.find((item) => item.id === formation)?.name} ·{' '}
-                        {formatDuration(session.seconds)}
-                      </span>
+                      <span className={finder.muted}>{details.join(' · ')}</span>
                     </span>
-                    {!isShort && (
-                      <span className={styles.averageRates}>
+                    {kind !== 'short' && (
+                      <span className={styles.summaryRates}>
                         <span>
                           {formatCompact(xpMode === 'raw' ? rates.rawXp : rates.xp)}{' '}
                           {xpNames[xpMode]}/h
                         </span>
-                        <span>{formatCompact(rates.balance)} lucro/h</span>
+                        <span data-loss={rates.balance < 0 || undefined}>
+                          {formatCompact(rates.balance)} lucro/h
+                        </span>
                       </span>
                     )}
                   </summary>
@@ -511,7 +532,7 @@ function SavedSessions({
                     session={session}
                     level={level}
                     xpMode={xpMode}
-                    onXpMode={onXpMode}
+                    loot={loot}
                   />
                   <button
                     className={finder.textButton}
@@ -541,6 +562,8 @@ export default function HuntSessions() {
   const [isSaving, setIsSaving] = useState(false);
   const [notice, setNotice] = useState('');
   const [openId, setOpenId] = useState('');
+  const [loot, setLoot] = useState<LootRarity | null>(null);
+  const xpName = useId();
   const titleRef = useRef<HTMLHeadingElement>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
   const wantsBoxFocus = useRef(false);
@@ -584,6 +607,19 @@ export default function HuntSessions() {
       setError('Não conseguimos carregar suas sessões.'),
     );
   }, []);
+
+  // The rarity data is large, so it only loads once there is loot to read.
+  useEffect(() => {
+    if (loot || (!session && saved.length === 0)) {
+      return;
+    }
+
+    import('../data/lootRarity')
+      .then((data) => setLoot(data.lootRarity))
+      .catch(() => {
+        // Without the data the rare drops just stay hidden.
+      });
+  }, [loot, session, saved.length]);
 
   // The box leaves the page once it is read, and focus must not leave with it.
   useEffect(() => {
@@ -639,6 +675,18 @@ export default function HuntSessions() {
 
   return (
     <div className={styles.page}>
+      {(session || saved.length > 0) && (
+        <div className={styles.xpSwitch}>
+          <Segmented
+            label="Tipo de XP"
+            name={xpName}
+            options={xpModes}
+            value={xpMode}
+            onChange={changeXpMode}
+          />
+        </div>
+      )}
+
       <section
         className={finder.panel}
         aria-labelledby={session ? undefined : 'paste-title'}
@@ -683,28 +731,42 @@ export default function HuntSessions() {
               session={session}
               level={level}
               xpMode={xpMode}
-              onXpMode={changeXpMode}
-              titleRef={titleRef}
-              actions={
-                <>
-                  {canSave && (
-                    <button
-                      className={finder.button}
-                      type="button"
-                      aria-expanded={isSaving}
-                      onClick={() => setIsSaving(!isSaving)}
+              loot={loot}
+              heading={
+                <header className={styles.resultHeader}>
+                  <div className={styles.resultHeading}>
+                    <h2
+                      ref={titleRef}
+                      className={styles.resultTitle}
+                      tabIndex={-1}
                     >
-                      Salvar
+                      Sessão de {formatDuration(session.seconds)}
+                    </h2>
+                    <p className={finder.muted}>
+                      {session.start && `${formatHuntStart(session.start)} · `}
+                      {kindLabels[getSessionKind(session.seconds)]}
+                    </p>
+                  </div>
+                  <div className={styles.actions}>
+                    {canSave && (
+                      <button
+                        className={finder.button}
+                        type="button"
+                        aria-expanded={isSaving}
+                        onClick={() => setIsSaving(!isSaving)}
+                      >
+                        Salvar
+                      </button>
+                    )}
+                    <button
+                      className={finder.textButton}
+                      type="button"
+                      onClick={pasteAnother}
+                    >
+                      Colar outra
                     </button>
-                  )}
-                  <button
-                    className={finder.textButton}
-                    type="button"
-                    onClick={pasteAnother}
-                  >
-                    Colar outra
-                  </button>
-                </>
+                  </div>
+                </header>
               }
             />
             {isSaving && (
@@ -748,7 +810,7 @@ export default function HuntSessions() {
           saved={saved}
           openId={openId}
           xpMode={xpMode}
-          onXpMode={changeXpMode}
+          loot={loot}
           onRemove={(id) => void remove(id)}
         />
       )}

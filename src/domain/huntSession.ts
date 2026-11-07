@@ -233,7 +233,8 @@ export const formatCompact = (value: number): string => {
     })}kk`;
   }
 
-  return size >= 1_000
+  // Below 10 thousand a rounded k hides too much, as 1.715 becoming 2k.
+  return size >= 10_000
     ? `${Math.round(value / 1_000).toLocaleString(LOCALE)}k`
     : value.toLocaleString(LOCALE);
 };
