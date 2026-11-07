@@ -47,7 +47,10 @@ test('shows a session and switches between Raw XP and XP', async ({ page }) => {
   ).toBeVisible();
   await expect(
     page.getByRole('listitem').filter({ hasText: '1x divine plate' }),
-  ).toBeVisible();
+  ).toContainText('raro');
+  await expect(
+    page.getByRole('listitem').filter({ hasText: '219x black pearl' }),
+  ).toBeHidden();
 
   await page.getByRole('radio', { name: 'XP', exact: true }).check();
 
@@ -192,6 +195,12 @@ test('confirms a saved session and opens it', async ({ page }) => {
     page.getByRole('status').filter({ hasText: 'Sessão salva.' }),
   ).toBeVisible();
   await expect(page.getByText('Vexclaw')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Média por hunt' })).toBeHidden();
+
+  await page.getByText('Falcon', { exact: true }).click();
+
+  await expect(page.getByText('Vexclaw')).toBeHidden();
+  await expect(page.getByText('7,70kk Raw XP/h')).toBeVisible();
 });
 
 test('explains a pasted text it cannot read', async ({ page }) => {

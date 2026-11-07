@@ -31,6 +31,8 @@ A signed-in player saves sessions with a character, a hunt name and a formation,
 - **FR-004**: Players MUST be able to switch between Raw XP and XP, starting on Raw. Time per level MUST always use XP.
 - **FR-004a**: A session MUST belong to a character: the only one the player has, or the one they choose. Estimates MUST use the level of that character.
 - **FR-004b**: Once a session is read, the paste box MUST give way to the result, with a way to paste another. Saving MUST confirm that it worked and open the saved session.
+- **FR-004c**: Saved sessions MUST start closed in a row with their rates, and open and close on a click. The Raw and XP choice MUST apply to the whole page.
+- **FR-004d**: Rare drops MUST come from the loot rarity of TibiaWiki, counting an item only when no creature killed in the session drops it more often.
 - **FR-005**: Saved sessions MUST be private, and the pasted text MUST NOT be kept.
-- **FR-006**: The average of a hunt MUST divide totals by total time.
+- **FR-006**: The average of a hunt MUST divide totals by total time, and appear only for a hunt with more than one session.
 - **FR-007**: Public sessions come in a later delivery, by the player's choice for each session.
